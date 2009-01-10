@@ -305,7 +305,7 @@ mkdir -p $tmpdir/initrd.hacks
     gunzip -c $tmptargetisodir/boot/initrd.gz|cpio -i
 
     echo "Hacks in initramfs"
-    cp ./60-persistent-storage.rules $tmpdir/initrd.hacks/etc/udev/rules.d/20-persistent-storage.rules
+    cp ./60-persistent-storage.rules $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
     ln -s /lib lib64
     cp $tmptargetsquashdir/sbin/losetup $tmpdir/initrd.hacks/sbin
     cp -R $tmptargetsquashdir/lib/modules/$kernelversion/* $tmpdir/initrd.hacks/lib/modules/$kernelversion
