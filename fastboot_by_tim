@@ -12,24 +12,6 @@ home_persistence="home-rw"
 root_snapshot_label="casper-sn"
 home_snapshot_label="home-sn"
 
-USERNAME=casper
-USERFULLNAME="Live session user"
-HOST=live
-BUILD_SYSTEM=Custom
-
-mkdir -p $mountpoint
-
-[ -f /etc/casper.conf ] && . /etc/casper.conf
-export USERNAME USERFULLNAME HOST BUILD_SYSTEM
-
-if [ "${BUILD_SYSTEM}" = "Ubuntu" ]; then
-    MP_QUIET="-Q"
-elif [ "${BUILD_SYSTEM}" = "Debian" ]; then
-    MP_QUIET="-q"
-else
-    MP_QUIET=""
-fi
-
 if [ ! -x "/bin/fstype" ]; then
     # klibc not in path -> not in initramfs
     export PATH="${PATH}:/usr/lib/klibc/bin"
@@ -75,7 +57,7 @@ parse_cmdline() {
 setup_loop() {
     local fspath=$1
 
-    modprobe ${MP_QUIET} -b loop
+    modprobe -b loop
     udevadm settle
 
     dev="$(losetup -f)"
@@ -137,7 +119,7 @@ copy_live_to() {
 do_netmount() {
     rc=1
 
-    modprobe "${MP_QUIET}" af_packet # For DHCP
+    modprobe af_packet # For DHCP
 
     /sbin/udevadm trigger
     /sbin/udevadm settle
@@ -164,7 +146,7 @@ do_netmount() {
 
 do_nfsmount() {
     rc=1
-    modprobe "${MP_QUIET}" nfs
+    modprobe nfs
     if [ -z "${NFSOPTS}" ]; then
         NFSOPTS=""
     fi
@@ -190,7 +172,7 @@ do_cifsmount() {
         fi
 
         [ "$quiet" != "y" ] && log_begin_msg "Trying mount.cifs ${NFSROOT} ${mountpoint} ${CIFSOPTS}"
-        modprobe "${MP_QUIET}" cifs
+        modprobe cifs
 
         if mount.cifs "${NFSROOT}" "${mountpoint}" "${CIFSOPTS}" ; then
             rc=0
@@ -204,7 +186,7 @@ setup_unionfs() {
     image_directory="$1"
     rootmnt="$2"
 
-    modprobe "${MP_QUIET}" -b ${UNIONFS}
+    modprobe -b ${UNIONFS}
 
     # run-init can't deal with images in a subdir, but we're going to
     # move all of these away before it runs anyway.  No, we're not,

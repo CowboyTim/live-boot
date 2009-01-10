@@ -10,6 +10,8 @@ isotarget="/var/tmp/test_live_cd.iso"
 isoname="TIMUBUNTU"
 kernelversion="2.6.24-16-generic"
 nvidia_driver_file=~/NVIDIA-Linux-x86_64-180.16-pkg2.run
+user_id=$(id -u)
+user_name=$(id -nu)
 
 tmpdir=$(mktemp -d -p /var/tmp live_cd_build_XXXXXX)
 tmptargetsquashdir="$tmpdir/squashfs"
@@ -138,6 +140,8 @@ fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
         dmsetup \
         usplash \
         brltty
+
+    update-rc.d -f gdm remove
 "
 
 cp $nvidia_driver_file $tmptargetsquashdir
@@ -178,10 +182,14 @@ for i in `find $tmptargetsquashdir/${NV%.run} -name 'lib*.so*'|grep -v X11R6`; d
     b=$(basename $i)
     d=$(dirname $i)
     f=${d#$tmptargetsquashdir/${NV%.run}}
+    echo rm -f $f/${b%.180.16} $f/${b%.180.16}.1
     echo ln -s $f/$b $f/${b%.180.16}
     echo ln -s $f/$b $f/${b%.180.16}.1
-    fakeroot fakechroot chroot $tmptargetsquashdir ln -s $f/$b $f/${b%.180.16}
-    fakeroot fakechroot chroot $tmptargetsquashdir ln -s $f/$b $f/${b%.180.16}.1
+    fakeroot fakechroot chroot $tmptargetsquashdir "
+        rm -f $f/${b%.180.16} $f/${b%.180.16}.1
+        ln -s $f/$b $f/${b%.180.16}
+        ln -s $f/$b $f/${b%.180.16}.1
+"
 done
 rm -rf $tmptargetsquashdir/${NV%.run}
 
@@ -201,6 +209,14 @@ if [ -d $tmptargetsquashdir/usr/share/gconf/schemas ]; then
             --outdir $tmptargetsquashdir/var/lib/gconf/debian.defaults
     fi
 fi
+
+fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
+    update-rc.d -f gdm remove
+    update-rc.d -f cupsd remove
+    update-rc.d -f readahead remove
+    adduser --uid $user_id $user_name
+"
+cp ./tty7 $tmptargetsquashdir/etc/event.d
 
 
 echo "Removing all the dpkg-divert's"
