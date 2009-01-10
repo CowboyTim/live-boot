@@ -256,8 +256,8 @@ EOfst
 
 echo "Creating squashfs file in $tmptargetsquashfs"
 rm -rf $tmptargetsquashdir/tmp
-rm -f $tmptargetsquashfs/{vmlinuz,initrd.img,cdrom,dev,proc}
-mkdir -p $tmptargetsquashfs/{proc,dev,tmp}
+rm -f $tmptargetsquashdir/{vmlinuz,initrd.img,cdrom,dev,proc}
+mkdir -p $tmptargetsquashdir/{proc,dev,tmp}
 tmptargetsquashfs="$tmpdir.squashfs"
 fakechroot fakeroot mksquashfs $tmptargetsquashdir $tmptargetsquashfs  \
     -noappend \
@@ -336,7 +336,7 @@ mkdir -p $tmpdir/initrd.hacks
 cp ./60-persistent-storage.rules $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
 cp $tmptargetsquashdir/sbin/losetup $tmpdir/initrd.hacks/sbin
 cp -R $tmptargetsquashdir/lib/modules/$kernelversion/* $tmpdir/initrd.hacks/lib/modules/$kernelversion
-depmod  -b $tmptargetsquashdir/lib/modules/$kernelversion -a
+depmod  -b $tmptargetsquashdir $kernelversion -a
 (
     cd $tmpdir/initrd.hacks
     echo "Creating $tmptargetisodir/boot/initrd.gz"
