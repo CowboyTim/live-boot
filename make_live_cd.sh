@@ -227,7 +227,7 @@ rm -f $tmptargetsquashdir/usr/bin/ucfr
 mv $tmptargetsquashdir/usr/bin/ucfr.REAL $tmptargetsquashdir/usr/bin/ucfr
 
 cat >> $tmptargetsquashdir/etc/fstab <<EOfst
-/dev/shm	/tmp	tmpfs rw,exec,noatime,nodiratime,size=512M	0	0
+/dev/shm	/tmp	tmpfs rw,exec,noatime,nodiratime	0	0
 EOfst
 
 echo "Creating squashfs file in $tmptargetsquashfs"
@@ -299,17 +299,19 @@ fakeroot fakechroot chroot $tmptargetsquashdir \
         -o /tmp/n.gz \
         $kernelversion
 mv $tmptargetsquashdir/tmp/n.gz $tmptargetisodir/boot/initrd.gz
+
 mkdir -p $tmpdir/initrd.hacks
 (
     cd $tmpdir/initrd.hacks
     gunzip -c $tmptargetisodir/boot/initrd.gz|cpio -i
-
     echo "Hacks in initramfs"
-    cp ./60-persistent-storage.rules $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
     ln -s /lib lib64
-    cp $tmptargetsquashdir/sbin/losetup $tmpdir/initrd.hacks/sbin
-    cp -R $tmptargetsquashdir/lib/modules/$kernelversion/* $tmpdir/initrd.hacks/lib/modules/$kernelversion
-
+)
+cp ./60-persistent-storage.rules $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
+cp $tmptargetsquashdir/sbin/losetup $tmpdir/initrd.hacks/sbin
+cp -R $tmptargetsquashdir/lib/modules/$kernelversion/* $tmpdir/initrd.hacks/lib/modules/$kernelversion
+(
+    cd $tmpdir/initrd.hacks
     echo "Creating $tmptargetisodir/boot/initrd.gz"
     find . |cpio -ov -H newc|gzip > $tmptargetisodir/boot/initrd.gz
 )
