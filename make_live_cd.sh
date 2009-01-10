@@ -149,11 +149,23 @@ fakechroot chroot $tmptargetsquashdir bash -c "
     make SYSSRC=/usr/src/linux-headers-$kernelversion module
 	install -m 0664 -o root -g root nvidia.ko /lib/modules/$kernelversion/kernel/drivers/video
     cd /
+    cp -fR ${NV%.run}/usr/X11R6/lib/modules/* /usr/lib/xorg/modules
+    cp -fR ${NV%.run}/usr/X11R6/lib/lib* /usr/lib
+    ln -s /usr/lib/libXvMCNVIDIA.so.180.16 /usr/lib/libXvMCNVIDIA_dynamic.so.1
+    ln -s /usr/lib/libXvMCNVIDIA_dynamic.so.1 /usr/lib/libXvMCNVIDIA_dynamic.so
+    ln -s /usr/lib/xorg/modules/libnvidia-wfb.so.180.16 /usr/lib/xorg/modules/libnvidia-wfb.so.1 
+    rm -f /usr/lib/xorg/modules/libwfb.so
+    ln -s /usr/lib/xorg/modules/libnvidia-wfb.so.1 /usr/lib/xorg/modules/libwfb.so
+    rm -rf ${NV%.run}/usr/X11R6
+    mkdir -p /usr/share/doc/NVIDIA_GLX-1.0
+    cp -fR ${NV%.run}/usr/share/doc/* /usr/share/doc/NVIDIA_GLX-1.0
+    rm -rf ${NV%.run}/usr/share/doc
     cp -fR ${NV%.run}/usr/* /usr
+    cp -fR ${NV%.run}/nvidia-installer /usr/bin
     nvidia-xconfig
 
 "
-for i in `find $tmptargetsquashdir/${NV%.run} -name 'lib*.so*'`; do 
+for i in `find $tmptargetsquashdir/${NV%.run} -name 'lib*.so*'|grep -v X11R6`; do 
     b=$(basename $i)
     d=$(dirname $i)
     f=${d#$tmptargetsquashdir/${NV%.run}}
