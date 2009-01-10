@@ -140,8 +140,6 @@ fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
         dmsetup \
         usplash \
         brltty
-
-    update-rc.d -f gdm remove
 "
 
 cp $nvidia_driver_file $tmptargetsquashdir
@@ -212,7 +210,7 @@ fi
 
 fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
     update-rc.d -f gdm remove
-    update-rc.d -f cupsd remove
+    update-rc.d -f cupsys remove
     update-rc.d -f readahead remove
     adduser --uid $user_id $user_name
 "
