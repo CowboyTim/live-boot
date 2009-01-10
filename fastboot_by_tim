@@ -1,0 +1,403 @@
+#!/bin/sh
+
+# set -e
+
+export PATH=/usr/bin:/usr/sbin:/bin:/sbin
+
+export BOOT
+mountpoint=/cdrom
+
+root_persistence="casper-rw"
+home_persistence="home-rw"
+root_snapshot_label="casper-sn"
+home_snapshot_label="home-sn"
+
+USERNAME=casper
+USERFULLNAME="Live session user"
+HOST=live
+BUILD_SYSTEM=Custom
+
+mkdir -p $mountpoint
+
+[ -f /etc/casper.conf ] && . /etc/casper.conf
+export USERNAME USERFULLNAME HOST BUILD_SYSTEM
+
+if [ "${BUILD_SYSTEM}" = "Ubuntu" ]; then
+    MP_QUIET="-Q"
+elif [ "${BUILD_SYSTEM}" = "Debian" ]; then
+    MP_QUIET="-q"
+else
+    MP_QUIET=""
+fi
+
+if [ ! -x "/bin/fstype" ]; then
+    # klibc not in path -> not in initramfs
+    export PATH="${PATH}:/usr/lib/klibc/bin"
+fi
+
+get_fstype() {
+    local FSTYPE
+    local FSSIZE
+    eval $(fstype < $1)
+    if [ "$FSTYPE" != "unknown" ]; then
+        echo $FSTYPE
+        return 0
+    fi
+    /lib/udev/vol_id -t $1 2>/dev/null
+}
+
+parse_cmdline() {
+    for x in $(cat /proc/cmdline); do
+        case $x in
+            persistent)
+                export PERSISTENT="Yes" ;;
+            nopersistent)
+                export PERSISTENT="" ;;
+            toram)
+                export TORAM="Yes" ;;
+            union=*)
+                export UNIONFS="${x#union=}";;
+            ip*)
+                STATICIP=${x#ip=}
+                if [ "${STATICIP}" = "" ]; then
+                    STATICIP="frommedia"
+                fi
+                export STATICIP ;;
+            ignore_uuid)
+                IGNORE_UUID="Yes" ;;
+        esac
+    done
+    if [ "${UNIONFS}" = "" ]; then
+        export UNIONFS="aufs"
+    fi
+}
+
+setup_loop() {
+    local fspath=$1
+
+    modprobe ${MP_QUIET} -b loop
+    udevadm settle
+
+    dev="$(losetup -f)"
+    if [ "$dev" ]; then
+        losetup "$dev" "$fspath"
+        echo "$dev"
+        return 0
+    else
+        panic "No loop devices available"
+    fi
+}
+
+
+match_files_in_dir() {
+    # Does any files match pattern $1 ?
+
+    local pattern="$1"
+    if [ "$(echo $pattern)" != "$pattern" ]; then
+        return 0
+    fi
+    return 1
+}
+
+mount_images_in_directory() {
+    directory="$1"
+    rootmnt="$2"
+    if match_files_in_dir "$directory/modules/*.squashfs" ||
+        match_files_in_dir "$directory/modules/*.ext2" ||
+        match_files_in_dir "$directory/modules/*.dir"; then
+        setup_unionfs "$directory/modules" "$rootmnt"
+    else
+        :
+    fi
+}
+
+copy_live_to() {
+    copyfrom="${1}"
+    copytodev="${2}"
+    copyto="${copyfrom}_swap"
+
+    size=1G
+
+    if [ "${copytodev}" = "ram" ]; then
+        # copying to ram:
+        mount_options="-o size=${size}"
+        free_string="memory"
+        fstype="tmpfs"
+        dev="/dev/shm"
+    fi
+
+    # begin copying..
+    mkdir "${copyto}"
+    echo "mount -t ${fstype} ${mount_options} ${dev} ${copyto}"
+    mount -t "${fstype}" ${mount_options} "${dev}" "${copyto}"
+    cp -a ${copyfrom}/* ${copyto} # "cp -a" from busybox also copies hidden files
+    umount ${copyfrom}
+    mount -r -o move ${copyto} ${copyfrom}
+    rmdir ${copyto}
+    return 0
+}
+
+do_netmount() {
+    rc=1
+
+    modprobe "${MP_QUIET}" af_packet # For DHCP
+
+    /sbin/udevadm trigger
+    /sbin/udevadm settle
+
+    ipconfig ${DEVICE} /tmp/net-${DEVICE}.conf | tee /netboot.config
+
+    if [ "${NFSROOT}" = "auto" ]; then
+        NFSROOT=${ROOTSERVER}:${ROOTPATH}
+    fi
+
+    [ "$quiet" != "y" ] && log_begin_msg "Trying netboot from ${NFSROOT}"
+
+    if [ "${NETBOOT}" != "nfs" ] && do_cifsmount ; then
+        rc=0
+    elif do_nfsmount ; then
+        NETBOOT="nfs"
+        export NETBOOT
+        rc=0
+    fi
+
+    [ "$quiet" != "y" ] && log_end_msg
+    return ${rc}
+}
+
+do_nfsmount() {
+    rc=1
+    modprobe "${MP_QUIET}" nfs
+    if [ -z "${NFSOPTS}" ]; then
+        NFSOPTS=""
+    fi
+
+    [ "$quiet" != "y" ] && log_begin_msg "Trying nfsmount -o nolock -o ro ${NFSOPTS} ${NFSROOT} ${mountpoint}"
+    # FIXME: This while loop is an ugly HACK round an nfs bug
+    i=0
+    while [ "$i" -lt 60 ]; do
+        nfsmount -o nolock -o ro ${NFSOPTS} "${NFSROOT}" "${mountpoint}" && rc=0 && break
+        sleep 1
+        i="$(($i + 1))"
+    done
+    return ${rc}
+}
+
+do_cifsmount() {
+    rc=1
+    if [ -x "/sbin/mount.cifs" ]; then
+        if [ -z "${NFSOPTS}" ]; then
+            CIFSOPTS="-ouser=root,password="
+        else
+            CIFSOPTS="${NFSOPTS}"
+        fi
+
+        [ "$quiet" != "y" ] && log_begin_msg "Trying mount.cifs ${NFSROOT} ${mountpoint} ${CIFSOPTS}"
+        modprobe "${MP_QUIET}" cifs
+
+        if mount.cifs "${NFSROOT}" "${mountpoint}" "${CIFSOPTS}" ; then
+            rc=0
+        fi
+    fi
+    return ${rc}
+}
+
+
+setup_unionfs() {
+    image_directory="$1"
+    rootmnt="$2"
+
+    modprobe "${MP_QUIET}" -b ${UNIONFS}
+
+    # run-init can't deal with images in a subdir, but we're going to
+    # move all of these away before it runs anyway.  No, we're not,
+    # put them in / since move-mounting them into / breaks mono and
+    # some other apps.
+
+    croot="/"
+
+    # Let's just mount the read-only file systems first
+    rofsstring=""
+    rofslist=""
+    if [ "${NETBOOT}" = "nfs" ] ; then
+        roopt="nfsro" # go aroung a bug in nfs-unionfs locking
+    elif [ "${UNIONFS}" = "aufs" ]; then
+        roopt="rr"
+    else
+        roopt="ro"
+    fi
+
+    mkdir -p "${croot}"
+    for image_type in "ext2" "squashfs" ; do
+        for image in "${image_directory}"/*."${image_type}"; do
+            if [ -f "${image}" ]; then
+                backdev=$(setup_loop "$image")
+                fstype=$(get_fstype "${backdev}")
+                if [ "${fstype}" = "unknown" ]; then
+                    panic "Unknown file system type on ${backdev} (${image})"
+                fi
+                imagename=$(basename "${image}")
+                mkdir -p "${croot}/${imagename}"
+                mount -t "${fstype}" -o ro,noatime "${backdev}" \
+                    "${croot}/${imagename}" \
+                    || panic "Can not mount $backdev ($image) on ${croot}/${imagename}"
+                rofsstring="${croot}/${imagename}=${roopt}:${rofsstring}"
+                rofslist="${croot}/${imagename} ${rofslist}"
+            fi
+        done
+    done
+    rofsstring=${rofsstring%:}
+
+    mkdir -p /cow
+    cowdevice="tmpfs"
+    cow_fstype="tmpfs"
+    cow_mountopt="rw,noatime,mode=755,size=256M,exec"
+
+    # Looking for "${root_persistence}" device or file
+    if [ -n "${PERSISTENT}" ]; then
+        cc="/dev/disk/by-label/${root_persistence}"
+        if [ -b "${cc}" ]; then
+            cowdevice="${cc}"
+            cow_fstype=$(get_fstype "${cowdevice}")
+	        cow_mountopt="rw,noatime,nodiratime,exec"
+        else
+            [ "$quiet" != "y" ] && log_warning_msg "Unable to find the persistent medium"
+        fi
+    fi
+
+    if [ -e /cow/etc/mtab ]; then
+        rm -f /cow/etc/mtab
+    fi
+
+    mount -t ${cow_fstype} -o ${cow_mountopt} ${cowdevice} /cow \
+        || panic "Can not mount $cowdevice on /cow"
+
+    mount -t ${UNIONFS} -o exec,noatime,nodiratime,dirs=/cow=rw:$rofsstring \
+        ${UNIONFS} "$rootmnt" || panic "${UNIONFS} mount failed"
+
+    # Adding other custom mounts
+    if [ -n "${PERSISTENT}" ]; then
+        # directly mount /home
+        # FIXME: add a custom mounts configurable system
+        homecow="/dev/disk/by-label/${home_persistence}"
+        if [ -b "${homecow}" ]; then
+            mount -t $(get_fstype "${homecow}") -o rw,noatime,nodiratime "${homecow}" "${rootmnt}/home"
+            export HOMEMOUNTED=1 # used to proper calculate free space in do_snap_copy()
+        else
+            [ "$quiet" != "y" ] && log_warning_msg "Unable to find the persistent home medium"
+        fi
+    fi
+
+    if [ -n "${SHOWMOUNTS}" ]; then
+        for d in ${rofslist}; do
+            mkdir -p "${rootmnt}/boot/${d##*/}"
+            case d in
+                *.dir) # do nothing # mount -o bind "${d}" "${rootmnt}/boot/${d##*/}"
+                    ;;
+                *) mount -o move "${d}" "${rootmnt}/boot/${d##*/}"
+                    ;;
+            esac
+        done
+        # shows cow fs on /cow for use by boot-snapshot
+        mkdir -p "${rootmnt}/cow"
+        mount -o bind /cow "${rootmnt}/cow"
+    fi
+
+    # move the first mount; no head in busybox-initramfs
+    for d in $(mount -t squashfs | cut -d\  -f 3); do
+        mkdir -p "${rootmnt}/rofs"
+        mount -o move "${d}" "${rootmnt}/rofs"
+        break
+    done
+}
+
+set_usplash_timeout() {
+    if [ -x /sbin/usplash_write ]; then
+        /sbin/usplash_write "TIMEOUT 120"
+    fi
+}
+
+mountroot() {
+    exec 6>&1
+    exec 7>&2
+    exec > casper.log
+    exec 2>&1
+
+    parse_cmdline
+
+    set_usplash_timeout
+
+    if [ ! -z "${NETBOOT}" ]; then
+        if do_netmount ; then
+            livefs_root="${mountpoint}"
+        else
+            panic "Unable to find a live file system on the network"
+        fi
+    else
+        if [ ! -z "$ROOT" ]; then
+            BOOT=$(basename $ROOT)
+            i=0
+            while [ "$i" -lt 10 ]; do
+                udevadm trigger
+                udevadm settle
+                if [ -b "$ROOT" ] ; then
+                    fstype=$(get_fstype $ROOT)
+                    mount -t $fstype $ROOT $mountpoint
+                    livefs_root=$mountpoint
+                    break
+                fi
+                sleep 1
+                i="$(($i + 1))"
+            done
+        fi
+        
+    fi
+
+    if [ -z "${livefs_root}" ]; then
+        panic "Unable to find a medium containing a live file system"
+    fi
+
+    if [ "${TORAM}" ]; then
+        live_dest="ram"
+    elif [ "${TODISK}" ]; then
+        live_dest="${TODISK}"
+    fi
+    if [ "${live_dest}" ]; then
+        log_begin_msg "Copying live_media to ${live_dest}"
+        copy_live_to "${livefs_root}" "${live_dest}"
+        log_end_msg
+    fi
+
+    udevadm trigger
+    udevadm settle
+
+    mount_images_in_directory "${livefs_root}" "${rootmnt}"
+
+    log_end_msg
+
+    ##maybe_break casper-bottom
+    ##[ "$quiet" != "y" ] && log_begin_msg "Running /scripts/casper-bottom"
+
+    ##run_scripts /scripts/casper-bottom
+    ##[ "$quiet" != "y" ] && log_end_msg
+
+    # mksquashfs or debootstrap did this..
+    rm -f "${rootmnt}/proc"
+    rm -f "${rootmnt}/dev"
+    mkdir -p "${rootmnt}/proc"
+    mkdir -p "${rootmnt}/dev"
+    mkdir -p /dev/pts
+    mkdir -p /dev/shm
+
+    mkdir -p /lib/modules/`uname -r`/
+
+    mkdir -p /tmp
+
+
+    #panic "Huh?!"
+
+
+    exec 1>&6 6>&-
+    exec 2>&7 7>&-
+    cp casper.log "${rootmnt}/var/log/"
+}
