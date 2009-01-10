@@ -156,13 +156,21 @@ fakechroot chroot $tmptargetsquashdir bash -c "
     ln -s /usr/lib/xorg/modules/libnvidia-wfb.so.180.16 /usr/lib/xorg/modules/libnvidia-wfb.so.1 
     rm -f /usr/lib/xorg/modules/libwfb.so
     ln -s /usr/lib/xorg/modules/libnvidia-wfb.so.1 /usr/lib/xorg/modules/libwfb.so
+    rm -f /usr/lib/xorg/modules/extensions/libglx.so
+    ln -s /usr/lib/xorg/modules/extensions/libglx.so.180.16 /usr/lib/xorg/modules/extensions/libglx.so
+    rm -f /usr/lib/xorg/modules/extensions/libGLcore.so
     rm -rf ${NV%.run}/usr/X11R6
     mkdir -p /usr/share/doc/NVIDIA_GLX-1.0
     cp -fR ${NV%.run}/usr/share/doc/* /usr/share/doc/NVIDIA_GLX-1.0
+    cp -fR ${NV%.run}/LICENSE /usr/share/doc/NVIDIA_GLX-1.0
+    mkdir -p /usr/share/doc/NVIDIA_GLX-1.0/include
+    cp -fR ${NV%.run}/usr/include/GL /usr/share/doc/NVIDIA_GLX-1.0/include
+    cp -fR ${NV%.run}/usr/share/pixmaps/nvidia-settings.png /usr/share/doc/NVIDIA_GLX-1.0
     rm -rf ${NV%.run}/usr/share/doc
     cp -fR ${NV%.run}/usr/* /usr
     cp -fR ${NV%.run}/nvidia-installer /usr/bin
-    nvidia-xconfig
+    ln -s ${NV%.run}/nvidia-installer /usr/bin/nvidia-uninstall
+    nvidia-xconfig --logo
 
 "
 for i in `find $tmptargetsquashdir/${NV%.run} -name 'lib*.so*'|grep -v X11R6`; do 
@@ -244,6 +252,8 @@ EOfst
 
 echo "Creating squashfs file in $tmptargetsquashfs"
 rm -rf $tmptargetsquashdir/tmp
+rm -f $tmptargetsquashfs/{vmlinuz,initrd.img,cdrom,dev,proc}
+mkdir -p $tmptargetsquashfs/{proc,dev,tmp}
 tmptargetsquashfs="$tmpdir.squashfs"
 fakechroot fakeroot mksquashfs $tmptargetsquashdir $tmptargetsquashfs  \
     -noappend \
@@ -322,6 +332,7 @@ mkdir -p $tmpdir/initrd.hacks
 cp ./60-persistent-storage.rules $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
 cp $tmptargetsquashdir/sbin/losetup $tmpdir/initrd.hacks/sbin
 cp -R $tmptargetsquashdir/lib/modules/$kernelversion/* $tmpdir/initrd.hacks/lib/modules/$kernelversion
+depmod  -b $tmptargetsquashdir/lib/modules/$kernelversion -a
 (
     cd $tmpdir/initrd.hacks
     echo "Creating $tmptargetisodir/boot/initrd.gz"
