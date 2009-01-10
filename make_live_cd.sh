@@ -124,7 +124,7 @@ fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install ubuntu-minimal
     apt-get -y --force-yes --allow-unauthenticated install ubuntu-standard
     apt-get -y --force-yes --allow-unauthenticated install xorg
-    #apt-get -y --force-yes --allow-unauthenticated install ubuntu-desktop
+    apt-get -y --force-yes --allow-unauthenticated install ubuntu-desktop
 
     apt-get -y --force-yes --allow-unauthenticated install \
         vim-gui-common \
