@@ -368,9 +368,10 @@ mountroot() {
     udevadm trigger
     udevadm settle
 
+    log_begin_msg "Making new root with $UNIONFS in $rootmnt"
     mount_images_in_directory "${livefs_root}" "${rootmnt}"
-
     log_end_msg
+
 
     ##maybe_break casper-bottom
     ##[ "$quiet" != "y" ] && log_begin_msg "Running /scripts/casper-bottom"
@@ -389,9 +390,6 @@ mountroot() {
     mkdir -p /lib/modules/`uname -r`/
 
     mkdir -p $rootmnt/tmp
-
-    #panic "Huh?!"
-
 
     exec 1>&6 6>&-
     exec 2>&7 7>&-
