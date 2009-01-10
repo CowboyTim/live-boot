@@ -116,11 +116,8 @@ copy_live_to() {
     copytodev="${2}"
     copyto="${copyfrom}_swap"
 
-    size=1G
-
     if [ "${copytodev}" = "ram" ]; then
         # copying to ram:
-        mount_options="-o size=${size}"
         free_string="memory"
         fstype="tmpfs"
         dev="/dev/shm"
@@ -128,8 +125,8 @@ copy_live_to() {
 
     # begin copying..
     mkdir "${copyto}"
-    echo "mount -t ${fstype} ${mount_options} ${dev} ${copyto}"
-    mount -t "${fstype}" ${mount_options} "${dev}" "${copyto}"
+    echo "mount -t ${fstype} ${dev} ${copyto}"
+    mount -t "${fstype}" "${dev}" "${copyto}"
     cp -a ${copyfrom}/* ${copyto} # "cp -a" from busybox also copies hidden files
     umount ${copyfrom}
     mount -r -o move ${copyto} ${copyfrom}
@@ -251,7 +248,7 @@ setup_unionfs() {
     mkdir -p /cow
     cowdevice="tmpfs"
     cow_fstype="tmpfs"
-    cow_mountopt="rw,noatime,mode=755,size=256M,exec"
+    cow_mountopt="rw,noatime,mode=755,exec"
 
     # Looking for "${root_persistence}" device or file
     if [ -n "${PERSISTENT}" ]; then
@@ -391,7 +388,7 @@ mountroot() {
 
     mkdir -p /lib/modules/`uname -r`/
 
-    mkdir -p /tmp
+    mkdir -p $rootmnt/tmp
 
 
     #panic "Huh?!"
