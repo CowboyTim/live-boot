@@ -74,9 +74,6 @@ deb-src http://archive.ubuntu.com/ubuntu/ hardy main restricted universe multive
     apt-get update --allow-unauthenticated
     apt-get -y --force-yes --allow-unauthenticated install ucf
     apt-get -y --force-yes --allow-unauthenticated install module-init-tools
-    mkdir -p /lib/modules/`uname -r`
-    depmod -a
-
 "
 
 echo "Hacking ucf, fakeroot has a bug with -w check?"
@@ -254,6 +251,9 @@ cat >> $tmptargetsquashdir/etc/fstab <<EOfst
 /dev/shm	/tmp	tmpfs rw,exec,noatime,nodiratime	0	0
 EOfst
 
+echo "Running depmod for squashfs"
+depmod -b $tmptargetsquashdir $kernelversion -a
+
 echo "Creating squashfs file in $tmptargetsquashfs"
 rm -rf $tmptargetsquashdir/tmp
 rm -f $tmptargetsquashdir/{vmlinuz,initrd.img,cdrom,dev,proc}
@@ -336,7 +336,7 @@ mkdir -p $tmpdir/initrd.hacks
 cp ./60-persistent-storage.rules $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
 cp $tmptargetsquashdir/sbin/losetup $tmpdir/initrd.hacks/sbin
 cp -R $tmptargetsquashdir/lib/modules/$kernelversion/* $tmpdir/initrd.hacks/lib/modules/$kernelversion
-depmod  -b $tmptargetsquashdir $kernelversion -a
+depmod  -b $tmpdir/initrd.hacks -a $kernelversion
 (
     cd $tmpdir/initrd.hacks
     echo "Creating $tmptargetisodir/boot/initrd.gz"
