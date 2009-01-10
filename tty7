@@ -1,0 +1,11 @@
+start on runlevel 5
+
+stop on runlevel 0
+stop on runlevel 1
+stop on runlevel 2
+stop on runlevel 3
+stop on runlevel 4
+stop on runlevel 6
+
+respawn
+exec su - tim -c xinit
