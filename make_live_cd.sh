@@ -324,12 +324,11 @@ fakeroot fakechroot chroot $tmptargetsquashdir \
         -d /tmp/initrd.tmp  \
         -o /tmp/n.gz \
         $kernelversion
-mv $tmptargetsquashdir/tmp/n.gz $tmptargetisodir/boot/initrd.gz
 
 mkdir -p $tmpdir/initrd.hacks
 (
     cd $tmpdir/initrd.hacks
-    gunzip -c $tmptargetisodir/boot/initrd.gz|cpio -i
+    gunzip -c $tmptargetsquashdir/tmp/n.gz|cpio -i
     echo "Hacks in initramfs"
     ln -s /lib lib64
 )
