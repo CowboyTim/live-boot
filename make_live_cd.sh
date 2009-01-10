@@ -2,6 +2,7 @@
 
 # apt-get install debootstrap fakeroot fakechroot squashfs-tools genisoimage 
 
+
 sourcecdrom="/media/cdrom"
 version="hardy"
 architecture="amd64"
@@ -15,6 +16,9 @@ tmptargetsquashdir="$tmpdir/squashfs"
 tmptargetisodir="$tmpdir/iso"
 mkdir -p $tmptargetsquashdir
 mkdir -p $tmptargetisodir
+
+exec > >(tee $tmpdir/build.log)
+exec 2>&1
 
 echo "Will bootstrap a debian $version ($architecture) in $tmptargetsquashdir"
 fakechroot fakeroot debootstrap --variant=fakechroot \
