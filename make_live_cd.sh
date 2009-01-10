@@ -8,6 +8,7 @@ architecture="amd64"
 isotarget="/var/tmp/test_live_cd.iso"
 isoname="TIMUBUNTU"
 kernelversion="2.6.24-16-generic"
+nvidia_driver_file=~/NVIDIA-Linux-x86_64-180.16-pkg2.run
 
 tmpdir=$(mktemp -d -p /var/tmp live_cd_build_XXXXXX)
 tmptargetsquashdir="$tmpdir/squashfs"
@@ -76,9 +77,9 @@ deb-src http://archive.ubuntu.com/ubuntu/ hardy main restricted universe multive
 
 echo "Hacking ucf, fakeroot has a bug with -w check?"
 cp -f $tmptargetsquashdir/usr/bin/ucf $tmptargetsquashdir/usr/bin/ucf.REAL
-patch -p0 $tmptargetsquashdir/usr/bin/ucf < ~/ucf.patch
+cp ./ucf $tmptargetsquashdir/usr/bin/ucf
 cp -f $tmptargetsquashdir/usr/bin/ucfr $tmptargetsquashdir/usr/bin/ucfr.REAL
-patch -p0 $tmptargetsquashdir/usr/bin/ucfr < ~/ucfr.patch
+cp ./ucfr $tmptargetsquashdir/usr/bin/ucfr
 
 echo "Hacking GConf shit"
 fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
@@ -138,8 +139,8 @@ fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
         brltty
 "
 
-NV=NVIDIA-Linux-x86_64-180.16-pkg2.run
-cp ~/$NV $tmptargetsquashdir
+cp $nvidia_driver_file $tmptargetsquashdir
+NV=$(basename $nvidia_driver_file)
 fakechroot chroot $tmptargetsquashdir bash -c "
     rm -rf ./${NV%.run}
     sh ./$NV -x
@@ -174,7 +175,7 @@ if [ -d $tmptargetsquashdir/usr/share/gconf/schemas ]; then
     gconftool-2 --makefile-install-rule \
         $tmptargetsquashdir/usr/share/gconf/schemas/*.schemas
     if [ -d $tmptargetsquashdir/usr/share/gconf/defaults ]; then
-        ~/update-gconf-defaults.new \
+        ./update-gconf-defaults \
             --defaults-dir $tmptargetsquashdir/usr/share/gconf/defaults \
             --outdir $tmptargetsquashdir/var/lib/gconf/debian.defaults
     fi
@@ -290,8 +291,7 @@ DEVICE=eth0
 NFSROOT=auto
 EOinitramfsconf
 mkdir -p $tmpinitramfs/scripts
-cp ~/fastboot_by_tim $tmpinitramfs/scripts
-#cp -f ~/initrd.new $tmptargetsquashdir/usr/share/initramfs-tools/init
+cp ./fastboot_by_tim $tmpinitramfs/scripts
 chmod +x $tmptargetsquashdir/usr/share/initramfs-tools/init
 fakeroot fakechroot chroot $tmptargetsquashdir \
     mkinitramfs \
@@ -305,7 +305,7 @@ mkdir -p $tmpdir/initrd.hacks
     gunzip -c $tmptargetisodir/boot/initrd.gz|cpio -i
 
     echo "Hacks in initramfs"
-    cp ~/60-persistent-storage.rules.new $tmpdir/initrd.hacks/etc/udev/rules.d/20-persistent-storage.rules
+    cp ./60-persistent-storage.rules $tmpdir/initrd.hacks/etc/udev/rules.d/20-persistent-storage.rules
     ln -s /lib lib64
     cp $tmptargetsquashdir/sbin/losetup $tmpdir/initrd.hacks/sbin
     cp -R $tmptargetsquashdir/lib/modules/$kernelversion/* $tmpdir/initrd.hacks/lib/modules/$kernelversion
