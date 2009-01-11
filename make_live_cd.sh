@@ -14,6 +14,7 @@ flash_10_file=~/libflashplayer-10.0.d21.1.linux-x86_64.so.tar.gz
 user_id=$(id -u)
 user_name=$(id -nu)
 
+
 tmpdir=$(mktemp -d -p /var/tmp live_cd_build_XXXXXX)
 tmptargetsquashdir="$tmpdir/squashfs"
 tmptargetisodir="$tmpdir/iso"
@@ -129,7 +130,8 @@ fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install ubuntu-minimal
     apt-get -y --force-yes --allow-unauthenticated install ubuntu-standard
     apt-get -y --force-yes --allow-unauthenticated install \
-        xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk mplayer
+        xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk \
+        mplayer obconf screen
     #apt-get -y --force-yes --allow-unauthenticated install ubuntu-desktop
 
     # mainly for the NVIDIA driver compile:
@@ -232,24 +234,90 @@ fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
     update-rc.d -f samba remove
     update-rc.d -f sysstat remove
     update-rc.d -f openbsd-inetd remove
-    useradd -m -s /bin/bash --uid $user_id $user_name
-    cat > /home/$user_name/.xserverrc <<EOxserverrc
+"
+
+cat > $tmptargetsquashdir/etc/fastboot_by_tim.conf <<EOff
+#!/bin/bash
+
+if [ ! -e /etc/done ]; then
+
+    chroot \$rootmnt useradd -m -s /bin/bash --uid $user_id $user_name
+
+    cat > \$rootmnt/home/$user_name/.xserverrc <<EOxserverrc
 #!/bin/bash
 exec X -nolisten tcp vt7
 EOxserverrc
-    chmod +x /home/$user_name/.xserverrc
-    cat > /home/$user_name/.xinitrc <<EOxserverrc
+
+    chmod +x \$rootmnt/home/$user_name/.xserverrc
+
+    cat > \$rootmnt/home/$user_name/.xinitrc <<EOxserverrc
 #!/bin/bash
 fbpanel &
 gnome-settings-daemon &
 xsetroot -solid DimGray
+xset m 1 4
 exec openbox
 EOxserverrc
-    chmod +x /home/$user_name/.xinitrc
-"
 
+    chmod +x \$rootmnt/home/$user_name/.xinitrc
 
-cp ./tty7 $tmptargetsquashdir/etc/event.d
+    chown -R $user_name:$user_name /home/$user_name
+
+    touch /etc/done
+fi
+EOff
+
+cat > $tmptargetsquashdir/etc/event.d/tty7 <<EOtty
+start on runlevel 2
+
+stop on runlevel 0
+stop on runlevel 1
+stop on runlevel 3
+stop on runlevel 4
+stop on runlevel 5
+stop on runlevel 6
+
+respawn
+exec su - $user_name -c bash --login -c 'exec xinit >> /tmp/xinit.log 2>&1'
+EOtty
+
+cat > $tmptargetsquashdir/etc/network/interfaces <<EOif
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+auto eth0
+iface eth0 inet dhcp
+EOif
+
+cat > $tmptargetsquashdir/etc/hosts <<EOh
+127.0.0.1 localhost oleeeh
+EOh
+
+cat > $tmptargetsquashdir/etc/sudoers <<EOs
+# /etc/sudoers
+#
+# This file MUST be edited with the 'visudo' command as root.
+#
+# See the man page for details on how to write a sudoers file.
+# Host alias specification
+
+# User alias specification
+
+# Cmnd alias specification
+
+# Defaults
+
+Defaults        !lecture,tty_tickets,!fqdn
+
+# User privilege specification
+root    ALL=(ALL) ALL
+
+# Members of the admin group may gain root privileges
+%admin ALL=(ALL) ALL
+EOs
+chmod 0400 $tmptargetsquashdir/etc/sudoers
 
 
 echo "Removing all the dpkg-divert's"
