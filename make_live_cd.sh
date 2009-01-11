@@ -44,16 +44,18 @@ fakechroot fakeroot chroot $tmptargetsquashdir debconf-set-selections <<EOpresee
 # No language support packages.
 #d-i     pkgsel/install-language-support boolean false
 
-dash                  dash/sh                            boolean true
-debconf               debconf/frontend                   string Noninteractive
-debconf               debconf/priority                   string critical
-ucf                   ucf/changeprompt_threeway          string replace
-adduser               adduser/homedir-permission         boolean true
-fdutils               fdutils/fdmount_setuid             boolean false
-man-db                man-db/build-database              boolean false
-man-db                man-db/rebuild-database            boolean false
-man-db                man-db/install-setuid              boolean false
-popularity-contest    popularity-contest/participate     boolean false
+dash                  dash/sh                                   boolean true
+debconf               debconf/frontend                          string Noninteractive
+debconf               debconf/priority                          string critical
+ucf                   ucf/changeprompt_threeway                 string replace
+adduser               adduser/homedir-permission                boolean true
+fdutils               fdutils/fdmount_setuid                    boolean false
+man-db                man-db/build-database                     boolean false
+man-db                man-db/rebuild-database                   boolean false
+man-db                man-db/install-setuid                     boolean false
+popularity-contest    popularity-contest/participate            boolean false
+x11-common            x11-common/xwrapper/allowed_users         string Anybody
+x11-common            x11-common/xwrapper/actual_allowed_users  string anybody
 
 EOpreseed
 
@@ -231,18 +233,21 @@ fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
     update-rc.d -f sysstat remove
     update-rc.d -f openbsd-inetd remove
     useradd -m -s /bin/bash --uid $user_id $user_name
-"
-
-cat > $tmptargetsquashdir/home/$user_name/.xserverrc <<EOxserverrc
+    cat > /home/$user_name/.xserverrc <<EOxserverrc
 #!/bin/bash
-exec X -nolisten vt7
+exec X -nolisten tcp vt7
 EOxserverrc
-chmod +x $tmptargetsquashdir/home/$user_name/.xserverrc
-cat > $tmptargetsquashdir/home/$user_name/.xinitrc <<EOxserverrc
+    chmod +x /home/$user_name/.xserverrc
+    cat > /home/$user_name/.xinitrc <<EOxserverrc
 #!/bin/bash
+fbpanel &
+gnome-settings-daemon &
+xsetroot -solid DimGray
 exec openbox
 EOxserverrc
-chmod +x $tmptargetsquashdir/home/$user_name/.xinitrc
+    chmod +x /home/$user_name/.xinitrc
+"
+
 
 cp ./tty7 $tmptargetsquashdir/etc/event.d
 
