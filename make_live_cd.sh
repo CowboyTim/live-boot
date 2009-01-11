@@ -10,6 +10,7 @@ isotarget="/var/tmp/test_live_cd.iso"
 isoname="TIMUBUNTU"
 kernelversion="2.6.24-16-generic"
 nvidia_driver_file=~/NVIDIA-Linux-x86_64-180.16-pkg2.run
+flash_10_file=~/libflashplayer-10.0.d21.1.linux-x86_64.so.tar.gz
 user_id=$(id -u)
 user_name=$(id -nu)
 
@@ -67,12 +68,14 @@ chmod +x $tmptargetsquashdir/usr/share/update-notifier/notify-reboot-required
 echo "CDROM Setup for apt and hacks for ucf"
 fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
     :> /etc/apt/sources.list
-    mkdir -p /etc/apt/sources.list.d
     echo 'deb http://archive.ubuntu.com/ubuntu/ hardy main restricted universe multiverse
 deb-src http://archive.ubuntu.com/ubuntu/ hardy main restricted universe multiverse' \
-        > /etc/apt/sources.list.d/extra_ubuntu
+        >> /etc/apt/sources.list
+
+    rm -f /var/lib/apt/lists/*
 
     apt-cdrom -mf add
+    apt-get -y --force-yes --allow-unauthenticated install gnupg
     apt-get update --allow-unauthenticated
     apt-get -y --force-yes --allow-unauthenticated install ucf
     apt-get -y --force-yes --allow-unauthenticated install module-init-tools
@@ -84,7 +87,7 @@ cp ./ucf $tmptargetsquashdir/usr/bin/ucf
 cp -f $tmptargetsquashdir/usr/bin/ucfr $tmptargetsquashdir/usr/bin/ucfr.REAL
 cp ./ucfr $tmptargetsquashdir/usr/bin/ucfr
 
-echo "Hacking GConf shit"
+echo "Hacking GConf shit, actually only needed for ubuntu-desktop probably..."
 fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
     dpkg-divert --rename --add /usr/bin/gconf-merge-tree
     dpkg-divert --rename --add /usr/sbin/gconf-schemas
@@ -123,9 +126,11 @@ echo "Installing extra packages"
 fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install ubuntu-minimal
     apt-get -y --force-yes --allow-unauthenticated install ubuntu-standard
-    apt-get -y --force-yes --allow-unauthenticated install xorg
-    apt-get -y --force-yes --allow-unauthenticated install ubuntu-desktop
+    apt-get -y --force-yes --allow-unauthenticated install \
+        xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk mplayer
+    #apt-get -y --force-yes --allow-unauthenticated install ubuntu-desktop
 
+    # mainly for the NVIDIA driver compile:
     apt-get -y --force-yes --allow-unauthenticated install \
         vim-gui-common \
         linux-headers-generic \
@@ -208,12 +213,37 @@ if [ -d $tmptargetsquashdir/usr/share/gconf/schemas ]; then
     fi
 fi
 
+echo "Install good flash from $flash_10_file"
+(
+    mkdir -p /usr/lib/firefox-addons/plugins
+    cd /usr/lib/firefox-addons/plugins
+    tar xvzf $flash_10_file
+)
+
 fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
     update-rc.d -f gdm remove
     update-rc.d -f cupsys remove
     update-rc.d -f readahead remove
-    useradd -m --uid $user_id $user_name
+    update-rc.d -f sshd remove
+    update-rc.d -f avahi-daemon remove
+    update-rc.d -f pcmciautils remove
+    update-rc.d -f samba remove
+    update-rc.d -f sysstat remove
+    update-rc.d -f openbsd-inetd remove
+    useradd -m -s /bin/bash --uid $user_id $user_name
 "
+
+cat > $tmptargetsquashdir/home/$user_name/.xserverrc <<EOxserverrc
+#!/bin/bash
+exec X -nolisten vt7
+EOxserverrc
+chmod +x $tmptargetsquashdir/home/$user_name/.xserverrc
+cat > $tmptargetsquashdir/home/$user_name/.xinitrc <<EOxserverrc
+#!/bin/bash
+exec openbox
+EOxserverrc
+chmod +x $tmptargetsquashdir/home/$user_name/.xinitrc
+
 cp ./tty7 $tmptargetsquashdir/etc/event.d
 
 
