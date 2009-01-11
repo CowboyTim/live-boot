@@ -374,6 +374,11 @@ mountroot() {
 
     mkdir -p $rootmnt/tmp
 
+    if [ -f $rootmnt/etc/fastboot_by_tim.conf ]; then
+        . $rootmnt/etc/fastboot_by_tim.conf
+    fi
+
+
     exec 1>&6 6>&-
     exec 2>&7 7>&-
     cp casper.log "${rootmnt}/var/log/"
