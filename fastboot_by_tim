@@ -6,6 +6,7 @@ export PATH=/usr/bin:/usr/sbin:/bin:/sbin
 
 export BOOT
 mountpoint=/cdrom
+mkdir -p $mountpoint
 
 root_persistence="casper-rw"
 home_persistence="home-rw"
