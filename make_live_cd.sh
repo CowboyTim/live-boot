@@ -149,7 +149,6 @@ fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
         vim-gui-common \
         linux-headers-generic \
         linux-image \
-        linux-restricted-modules \
         linux-restricted-modules-common \
         libc6-dev \
         make \
@@ -160,6 +159,9 @@ fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
         usplash \
         brltty \
         #linux-source
+
+    apt-get -y --force-yes --allow-unauthenticated install \
+        linux-restricted-modules
 "
 
 cp $nvidia_driver_file $tmptargetsquashdir
