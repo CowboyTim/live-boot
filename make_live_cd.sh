@@ -129,17 +129,27 @@ echo "Installing extra packages"
 fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install ubuntu-minimal
     apt-get -y --force-yes --allow-unauthenticated install ubuntu-standard
+#    apt-get -y --force-yes --allow-unauthenticated install \
+#        xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk vim-gui-common \
+#        mplayer obconf screen
+    apt-get -y --force-yes --allow-unauthenticated install ubuntu-desktop
+    apt-get -y --force-yes --allow-unauthenticated install ubiquity
+    apt-get -y --force-yes --allow-unauthenticated install ntfsprogs xfsprogs jfsutils
     apt-get -y --force-yes --allow-unauthenticated install \
-        xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk \
-        mplayer obconf screen
-    #apt-get -y --force-yes --allow-unauthenticated install ubuntu-desktop
+        user-setup \
+        xresprobe \
+        gparted gawk \
+        aspell ispell hspell gij \
+        openoffice.org-base \
+        openoffice.org-math   \
+        scim-pinyin scim-chewing scim-hangul
 
     # mainly for the NVIDIA driver compile:
     apt-get -y --force-yes --allow-unauthenticated install \
         vim-gui-common \
         linux-headers-generic \
-        linux-source \
         linux-image \
+        linux-restricted-modules \
         linux-restricted-modules-common \
         libc6-dev \
         make \
@@ -148,7 +158,8 @@ fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
         initramfs-tools \
         dmsetup \
         usplash \
-        brltty
+        brltty \
+        #linux-source
 "
 
 cp $nvidia_driver_file $tmptargetsquashdir
