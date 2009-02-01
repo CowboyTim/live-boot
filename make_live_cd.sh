@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# apt-get install debootstrap fakeroot fakechroot squashfs-tools genisoimage 
+# apt-get install debootstrap fakeroot fakechroot squashfs-tools genisoimage mcrypt
 
 
 sourcecdrom="/media/cdrom"
@@ -8,6 +8,7 @@ version="hardy"
 architecture="amd64"
 isotarget="/var/tmp/test_live_cd.iso"
 isoname="TIMUBUNTU"
+passwd="tubuntu"
 kernelversion="2.6.24-16-generic"
 nvidia_driver_file=~/NVIDIA-Linux-x86_64-180.16-pkg2.run
 flash_10_file=~/libflashplayer-10.0.d21.1.linux-x86_64.so.tar.gz
@@ -264,8 +265,10 @@ chroot $tmptargetsquashdir bash -c "
     update-rc.d -f openbsd-inetd remove
 "
 
+my_crypt_p=$(openssl passwd -crypt -salt xx '')
+chroot $tmptargetsquashdir useradd -m -s /bin/bash --uid $user_id -G admin -p $passwd $user_name
+#chroot $tmptargetsquashdir passwd -e $user_name
 
-chroot $tmptargetsquashdir useradd -m -s /bin/bash --uid $user_id $user_name -G admin
 mkdir -p $tmptargetsquashdir/home/tim/Desktop
 
 cp $here/kdmrc $tmptargetsquashdir/etc/kde3/kdm
@@ -349,6 +352,7 @@ root    ALL=(ALL) ALL
 
 # Members of the admin group may gain root privileges
 %admin ALL=(ALL) ALL
+%admin ALL=NOPASSWD: ALL
 EOs
 chmod 0400 $tmptargetsquashdir/etc/sudoers
 
@@ -377,6 +381,14 @@ chroot $tmptargetsquashdir bash -c "
 
 echo "Cleaning the cache of apt-get"
 chroot $tmptargetsquashdir apt-get clean
+
+echo "Humpf, sometimes I wonder.. maybe this is in fact a compat package!?"
+chroot $tmptargetsquashdir ln -s /usr/lib/libnspr4.so.0d /usr/lib/libnspr4.so
+chroot $tmptargetsquashdir ln -s /usr/lib/libssl3.so.1d /usr/lib/libssl3.so
+chroot $tmptargetsquashdir ln -s /usr/lib/libsmime3.so.1d /usr/lib/libsmime3.so
+chroot $tmptargetsquashdir ln -s /usr/lib/libnss3.so.1d /usr/lib/libnss3.so
+chroot $tmptargetsquashdir ln -s /usr/lib/libplc4.so.0d /usr/lib/libplc4.so
+chroot $tmptargetsquashdir ln -s /usr/lib/libplds4.so.0d /usr/lib/libplds4.so
 
 echo "Fix all symlinks, debootstrap sucks a bit on it"
 (
