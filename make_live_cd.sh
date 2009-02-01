@@ -253,8 +253,8 @@ echo "Install good flash from $flash_10_file"
 )
 
 chroot $tmptargetsquashdir bash -c "
-    #update-rc.d -f gdm remove
-    update-rc.d -f kdm remove
+    update-rc.d -f gdm remove
+    #update-rc.d -f kdm remove
     update-rc.d -f cupsys remove
     update-rc.d -f readahead remove
     update-rc.d -f sshd remove
