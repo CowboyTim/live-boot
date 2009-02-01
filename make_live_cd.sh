@@ -146,6 +146,7 @@ chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install \
         xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk vim-gui-common \
         mplayer obconf screen xterm
+    apt-get -y --force-yes --allow-unauthenticated install language-pack-en
     apt-get -y --force-yes --allow-unauthenticated install ntfsprogs xfsprogs jfsutils
     apt-get -y --force-yes --allow-unauthenticated install xresprobe gparted gawk
     apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
@@ -208,7 +209,7 @@ chroot $tmptargetsquashdir bash -c "
     cp -fR ${NV%.run}/usr/* /usr
     cp -fR ${NV%.run}/nvidia-installer /usr/bin
     ln -s ${NV%.run}/nvidia-installer /usr/bin/nvidia-uninstall
-    nvidia-xconfig --logo
+    #nvidia-xconfig --logo
 
 "
 for i in `find $tmptargetsquashdir/${NV%.run} -name 'lib*.so*'|grep -v X11R6`; do 
@@ -251,7 +252,8 @@ echo "Install good flash from $flash_10_file"
 )
 
 chroot $tmptargetsquashdir bash -c "
-    update-rc.d -f gdm remove
+    #update-rc.d -f gdm remove
+    update-rc.d -f kdm remove
     update-rc.d -f cupsys remove
     update-rc.d -f readahead remove
     update-rc.d -f sshd remove
@@ -263,7 +265,8 @@ chroot $tmptargetsquashdir bash -c "
 "
 
 
-chroot $tmptargetsquashdir useradd -m -s /bin/bash --uid $user_id $user_name
+chroot $tmptargetsquashdir useradd -m -s /bin/bash --uid $user_id $user_name -G admin
+mkdir -p $tmptargetsquashdir/home/tim/Desktop
 
 cat > $tmptargetsquashdir/home/$user_name/.xserverrc <<EOxserverrc
 #!/bin/bash
@@ -283,19 +286,19 @@ chmod +x $tmptargetsquashdir/home/$user_name/.xserverrc
 #chmod +x $tmptargetsquashdir/home/$user_name/.xinitrc
 chown -R $user_name:$user_name $tmptargetsquashdir/home/$user_name
 
-cat > $tmptargetsquashdir/etc/event.d/tty7 <<EOtty
-start on runlevel 2
-
-stop on runlevel 0
-stop on runlevel 1
-stop on runlevel 3
-stop on runlevel 4
-stop on runlevel 5
-stop on runlevel 6
-
-respawn
-exec su - $user_name -c bash --login -c 'exec startx /usr/bin/$wm -- :0 >> /tmp/xinit.log 2>&1'
-EOtty
+#cat > $tmptargetsquashdir/etc/event.d/tty7 <<EOtty
+#start on runlevel 2
+#
+#stop on runlevel 0
+#stop on runlevel 1
+#stop on runlevel 3
+#stop on runlevel 4
+#stop on runlevel 5
+#stop on runlevel 6
+#
+#respawn
+#exec su - $user_name -c bash --login -c 'exec startx /usr/bin/$wm -- :0 >> /tmp/xinit.log 2>&1'
+#EOtty
 
 cat > $tmptargetsquashdir/etc/network/interfaces <<EOif
 # The loopback network interface
@@ -310,6 +313,11 @@ iface eth0 inet dhcp
 auto eth1
 iface eth1 inet dhcp
 EOif
+
+cat > $tmptargetsquashdir/etc/default/locale <<EOift
+LANG="en_US.UTF-8"
+LANGUAGE="en_US:en"
+EOift
 
 cat > $tmptargetsquashdir/etc/hosts <<EOh
 127.0.0.1 localhost oleeeh
