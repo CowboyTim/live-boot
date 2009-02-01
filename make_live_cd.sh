@@ -268,11 +268,13 @@ chroot $tmptargetsquashdir bash -c "
 chroot $tmptargetsquashdir useradd -m -s /bin/bash --uid $user_id $user_name -G admin
 mkdir -p $tmptargetsquashdir/home/tim/Desktop
 
-cat > $tmptargetsquashdir/home/$user_name/.xserverrc <<EOxserverrc
-#!/bin/bash
-exec X -nolisten tcp vt7
-EOxserverrc
-chmod +x $tmptargetsquashdir/home/$user_name/.xserverrc
+cp $here/kdmrc $tmptargetsquashdir/etc/kde3/kdm
+
+#cat > $tmptargetsquashdir/home/$user_name/.xserverrc <<EOxserverrc
+##!/bin/bash
+#exec X -nolisten tcp vt7
+#EOxserverrc
+#chmod +x $tmptargetsquashdir/home/$user_name/.xserverrc
 
 #cat > $tmptargetsquashdir/home/$user_name/.xinitrc <<EOxserverrc
 ##!/bin/bash
@@ -321,6 +323,9 @@ EOift
 
 cat > $tmptargetsquashdir/etc/hosts <<EOh
 127.0.0.1 localhost oleeeh
+
+# The following lines are desirable for IPv6 capable hosts
+::1 ip6-localhost ip6-loopback
 EOh
 
 cat > $tmptargetsquashdir/etc/sudoers <<EOs
