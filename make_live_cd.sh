@@ -11,9 +11,21 @@ isoname="TIMUBUNTU"
 kernelversion="2.6.24-16-generic"
 nvidia_driver_file=~/NVIDIA-Linux-x86_64-180.16-pkg2.run
 flash_10_file=~/libflashplayer-10.0.d21.1.linux-x86_64.so.tar.gz
-user_id=$(id -u)
-user_name=$(id -nu)
+if [ -z $user_id ]; then
+    user_id=$(id -u)
+    user_name=$(id -nu)
+    export user_id user_name
+fi
+here=$(readlink -f -- "${0%/*}") 
 
+#------------------------------------------------------------------------------
+if [ -z $1 ]; then
+    exec fakechroot fakeroot $0 'ok'
+fi
+#------------------------------------------------------------------------------
+#
+# from here, we're fakechroot fakeroot
+#
 
 tmpdir=$(mktemp -d -p /var/tmp live_cd_build_XXXXXX)
 tmptargetsquashdir="$tmpdir/squashfs"
@@ -24,21 +36,22 @@ mkdir -p $tmptargetisodir
 exec > >(tee $tmpdir/build.log)
 exec 2>&1
 
+echo $tmptargetsquashdir
+ls -l $(dirname $tmptargetsquashdir)
+
 echo "Will bootstrap a debian $version ($architecture) in $tmptargetsquashdir"
-fakechroot fakeroot debootstrap --variant=fakechroot \
+debootstrap --variant=fakechroot \
     --arch $architecture \
     $version \
     $tmptargetsquashdir \
     file://$sourcecdrom
 
-
 ln -s $sourcecdrom $tmptargetsquashdir
-
 
 echo "Making preseed"
 ##cat > $tmpdir/installf.preseed <<EOpreseed
 ##EOpreseed
-fakechroot fakeroot chroot $tmptargetsquashdir debconf-set-selections <<EOpreseed
+chroot $tmptargetsquashdir debconf-set-selections <<EOpreseed
 # Only install the standard system and language packs.
 #tasksel tasksel/first   multiselect
 #d-i     pkgsel/language-pack-patterns   string
@@ -69,7 +82,7 @@ EOnop
 chmod +x $tmptargetsquashdir/usr/share/update-notifier/notify-reboot-required
 
 echo "CDROM Setup for apt and hacks for ucf"
-fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
+chroot $tmptargetsquashdir bash -c "
     :> /etc/apt/sources.list
     echo 'deb http://archive.ubuntu.com/ubuntu/ hardy main restricted universe multiverse
 deb-src http://archive.ubuntu.com/ubuntu/ hardy main restricted universe multiverse' \
@@ -86,12 +99,12 @@ deb-src http://archive.ubuntu.com/ubuntu/ hardy main restricted universe multive
 
 echo "Hacking ucf, fakeroot has a bug with -w check?"
 cp -f $tmptargetsquashdir/usr/bin/ucf $tmptargetsquashdir/usr/bin/ucf.REAL
-cp ./ucf $tmptargetsquashdir/usr/bin/ucf
+cp $here/ucf $tmptargetsquashdir/usr/bin/ucf
 cp -f $tmptargetsquashdir/usr/bin/ucfr $tmptargetsquashdir/usr/bin/ucfr.REAL
-cp ./ucfr $tmptargetsquashdir/usr/bin/ucfr
+cp $here/ucfr $tmptargetsquashdir/usr/bin/ucfr
 
 echo "Hacking GConf shit, actually only needed for ubuntu-desktop probably..."
-fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
+chroot $tmptargetsquashdir bash -c "
     dpkg-divert --rename --add /usr/bin/gconf-merge-tree
     dpkg-divert --rename --add /usr/sbin/gconf-schemas
     dpkg-divert --rename --add /usr/sbin/update-gconf-defaults
@@ -126,23 +139,22 @@ EOgc
 "
 
 echo "Installing extra packages"
-fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
+chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install ubuntu-minimal
     apt-get -y --force-yes --allow-unauthenticated install ubuntu-standard
-#    apt-get -y --force-yes --allow-unauthenticated install \
-#        xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk vim-gui-common \
-#        mplayer obconf screen
-    apt-get -y --force-yes --allow-unauthenticated install ubuntu-desktop
-    apt-get -y --force-yes --allow-unauthenticated install ubiquity
-    apt-get -y --force-yes --allow-unauthenticated install ntfsprogs xfsprogs jfsutils
     apt-get -y --force-yes --allow-unauthenticated install \
-        user-setup \
-        xresprobe \
-        gparted gawk \
-        aspell ispell hspell gij \
-        openoffice.org-base \
-        openoffice.org-math   \
-        scim-pinyin scim-chewing scim-hangul
+        xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk vim-gui-common \
+        mplayer obconf screen
+    apt-get -y --force-yes --allow-unauthenticated install ntfsprogs xfsprogs jfsutils
+    apt-get -y --force-yes --allow-unauthenticated install xresprobe gparted gawk
+#    apt-get -y --force-yes --allow-unauthenticated install ubuntu-desktop
+#    apt-get -y --force-yes --allow-unauthenticated install ubiquity
+#    apt-get -y --force-yes --allow-unauthenticated install \
+#        user-setup \
+#        aspell ispell hspell gij \
+#        openoffice.org-base \
+#        openoffice.org-math   \
+#        scim-pinyin scim-chewing scim-hangul
 
     # mainly for the NVIDIA driver compile:
     apt-get -y --force-yes --allow-unauthenticated install \
@@ -166,7 +178,7 @@ fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
 
 cp $nvidia_driver_file $tmptargetsquashdir
 NV=$(basename $nvidia_driver_file)
-fakechroot chroot $tmptargetsquashdir bash -c "
+chroot $tmptargetsquashdir bash -c "
     rm -rf ./${NV%.run}
     sh ./$NV -x
     cd ${NV%.run}/usr/src/nv
@@ -205,7 +217,7 @@ for i in `find $tmptargetsquashdir/${NV%.run} -name 'lib*.so*'|grep -v X11R6`; d
     echo rm -f $f/${b%.180.16} $f/${b%.180.16}.1
     echo ln -s $f/$b $f/${b%.180.16}
     echo ln -s $f/$b $f/${b%.180.16}.1
-    fakeroot fakechroot chroot $tmptargetsquashdir "
+    chroot $tmptargetsquashdir bash -c "
         rm -f $f/${b%.180.16} $f/${b%.180.16}.1
         ln -s $f/$b $f/${b%.180.16}
         ln -s $f/$b $f/${b%.180.16}.1
@@ -232,12 +244,12 @@ fi
 
 echo "Install good flash from $flash_10_file"
 (
-    mkdir -p /usr/lib/firefox-addons/plugins
-    cd /usr/lib/firefox-addons/plugins
+    mkdir -p $tmptargetsquashdir/usr/lib/firefox-addons/plugins
+    cd $tmptargetsquashdir/usr/lib/firefox-addons/plugins
     tar xvzf $flash_10_file
 )
 
-fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
+chroot $tmptargetsquashdir bash -c "
     update-rc.d -f gdm remove
     update-rc.d -f cupsys remove
     update-rc.d -f readahead remove
@@ -302,6 +314,10 @@ iface lo inet loopback
 # The primary network interface
 auto eth0
 iface eth0 inet dhcp
+
+# The secondary network interface
+auto eth1
+iface eth1 inet dhcp
 EOif
 
 cat > $tmptargetsquashdir/etc/hosts <<EOh
@@ -334,7 +350,7 @@ chmod 0400 $tmptargetsquashdir/etc/sudoers
 
 
 echo "Removing all the dpkg-divert's"
-fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
+chroot $tmptargetsquashdir bash -c "
     rm -f /usr/bin/gconf-merge-tree        && dpkg-divert --remove /usr/bin/gconf-merge-tree
     rm -f /usr/sbin/gconf-schemas          && dpkg-divert --remove /usr/sbin/gconf-schemas
     rm -f /usr/sbin/update-gconf-defaults  && dpkg-divert --remove /usr/sbin/update-gconf-defaults
@@ -351,22 +367,22 @@ fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
 
 
 #echo "running dpkg-reconfigure -a -u"
-#fakechroot fakeroot chroot $tmptargetsquashdir bash -c "
+#chroot $tmptargetsquashdir bash -c "
 #    dpkg-reconfigure -plow -a -u
 #"
 
 echo "Cleaning the cache of apt-get"
-fakechroot chroot $tmptargetsquashdir apt-get clean
+chroot $tmptargetsquashdir apt-get clean
 
 echo "Fix all symlinks, debootstrap sucks a bit on it"
 (
     cd $tmptargetsquashdir
-    for s in `find . -type l`; do
+    for s in `find . -type l|grep -v '/proc'|grep -v '/dev'`; do
         orig_source=$(readlink $s);
         new_source=$(echo $orig_source|sed "s|^$tmptargetsquashdir||")
         if [ x"$orig_source" != x"$new_source" ]; then
             echo chroot $tmptargetsquashdir ln -s /$new_source $s
-            fakechroot fakeroot chroot $tmptargetsquashdir rm -f $s && ln -s $new_source $s
+            chroot $tmptargetsquashdir rm -f $s && ln -s $new_source $s
         fi
     done
 )
@@ -389,7 +405,7 @@ rm -rf $tmptargetsquashdir/tmp
 rm -f $tmptargetsquashdir/{vmlinuz,initrd.img,cdrom,dev,proc}
 mkdir -p $tmptargetsquashdir/{proc,dev,tmp}
 tmptargetsquashfs="$tmpdir.squashfs"
-fakechroot fakeroot mksquashfs $tmptargetsquashdir $tmptargetsquashfs  \
+mksquashfs $tmptargetsquashdir $tmptargetsquashfs  \
     -noappend \
     -always-use-fragments
 
@@ -449,7 +465,7 @@ EOinitramfsconf
 mkdir -p $tmpinitramfs/scripts
 cp ./fastboot_by_tim $tmpinitramfs/scripts
 chmod +x $tmptargetsquashdir/usr/share/initramfs-tools/init
-fakeroot fakechroot chroot $tmptargetsquashdir \
+chroot $tmptargetsquashdir \
     mkinitramfs \
         -d /tmp/initrd.tmp  \
         -o /tmp/n.gz \
