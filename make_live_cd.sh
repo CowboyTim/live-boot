@@ -17,6 +17,7 @@ if [ -z $user_id ]; then
     export user_id user_name
 fi
 here=$(readlink -f -- "${0%/*}") 
+wm='startkde'
 
 #------------------------------------------------------------------------------
 if [ -z $1 ]; then
@@ -144,10 +145,10 @@ chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install ubuntu-standard
     apt-get -y --force-yes --allow-unauthenticated install \
         xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk vim-gui-common \
-        mplayer obconf screen
+        mplayer obconf screen xterm
     apt-get -y --force-yes --allow-unauthenticated install ntfsprogs xfsprogs jfsutils
     apt-get -y --force-yes --allow-unauthenticated install xresprobe gparted gawk
-#    apt-get -y --force-yes --allow-unauthenticated install ubuntu-desktop
+    apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
 #    apt-get -y --force-yes --allow-unauthenticated install ubiquity
 #    apt-get -y --force-yes --allow-unauthenticated install \
 #        user-setup \
@@ -261,36 +262,26 @@ chroot $tmptargetsquashdir bash -c "
     update-rc.d -f openbsd-inetd remove
 "
 
-cat > $tmptargetsquashdir/etc/fastboot_by_tim.conf <<EOff
-#!/bin/bash
 
-if [ ! -e /etc/done ]; then
+chroot $tmptargetsquashdir useradd -m -s /bin/bash --uid $user_id $user_name
 
-    chroot \$rootmnt useradd -m -s /bin/bash --uid $user_id $user_name
-
-    cat > \$rootmnt/home/$user_name/.xserverrc <<EOxserverrc
+cat > $tmptargetsquashdir/home/$user_name/.xserverrc <<EOxserverrc
 #!/bin/bash
 exec X -nolisten tcp vt7
 EOxserverrc
+chmod +x $tmptargetsquashdir/home/$user_name/.xserverrc
 
-    chmod +x \$rootmnt/home/$user_name/.xserverrc
-
-    cat > \$rootmnt/home/$user_name/.xinitrc <<EOxserverrc
-#!/bin/bash
-fbpanel &
-gnome-settings-daemon &
-xsetroot -solid DimGray
-xset m 1 4
-exec openbox
-EOxserverrc
-
-    chmod +x \$rootmnt/home/$user_name/.xinitrc
-
-    chown -R $user_name:$user_name /home/$user_name
-
-    touch /etc/done
-fi
-EOff
+#cat > $tmptargetsquashdir/home/$user_name/.xinitrc <<EOxserverrc
+##!/bin/bash
+#fbpanel &
+#gnome-settings-daemon &
+#xsetroot -solid DimGray
+#xset m 1 4
+#exec openbox
+#EOxserverrc
+#
+#chmod +x $tmptargetsquashdir/home/$user_name/.xinitrc
+chown -R $user_name:$user_name $tmptargetsquashdir/home/$user_name
 
 cat > $tmptargetsquashdir/etc/event.d/tty7 <<EOtty
 start on runlevel 2
@@ -303,7 +294,7 @@ stop on runlevel 5
 stop on runlevel 6
 
 respawn
-exec su - $user_name -c bash --login -c 'exec xinit >> /tmp/xinit.log 2>&1'
+exec su - $user_name -c bash --login -c 'exec startx /usr/bin/$wm -- :0 >> /tmp/xinit.log 2>&1'
 EOtty
 
 cat > $tmptargetsquashdir/etc/network/interfaces <<EOif
