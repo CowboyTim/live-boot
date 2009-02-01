@@ -148,10 +148,10 @@ chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install \
         xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk vim-gui-common \
         mplayer obconf screen xterm
-#    apt-get -y --force-yes --allow-unauthenticated install language-pack-en
-#    apt-get -y --force-yes --allow-unauthenticated install ntfsprogs xfsprogs jfsutils
-#    apt-get -y --force-yes --allow-unauthenticated install xresprobe gparted gawk
-#    apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
+    apt-get -y --force-yes --allow-unauthenticated install language-pack-en
+    apt-get -y --force-yes --allow-unauthenticated install ntfsprogs xfsprogs jfsutils
+    apt-get -y --force-yes --allow-unauthenticated install xresprobe gparted gawk
+    apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
 #    apt-get -y --force-yes --allow-unauthenticated install ubiquity
 #    apt-get -y --force-yes --allow-unauthenticated install \
 #        user-setup \
@@ -392,18 +392,18 @@ chroot $tmptargetsquashdir ln -s /usr/lib/libnss3.so.1d /usr/lib/libnss3.so
 chroot $tmptargetsquashdir ln -s /usr/lib/libplc4.so.0d /usr/lib/libplc4.so
 chroot $tmptargetsquashdir ln -s /usr/lib/libplds4.so.0d /usr/lib/libplds4.so
 
-echo "Fix all symlinks, debootstrap sucks a bit on it"
-(
-    cd $tmptargetsquashdir
-    for s in `find . -type l|grep -v '/proc'|grep -v '/dev'`; do
-        orig_source=$(readlink $s);
-        new_source=$(echo $orig_source|sed "s|^$tmptargetsquashdir||")
-        if [ x"$orig_source" != x"$new_source" ]; then
-            echo chroot $tmptargetsquashdir ln -s /$new_source $s
-            chroot $tmptargetsquashdir rm -f $s && ln -s $new_source $s
-        fi
-    done
-)
+#echo "Fix all symlinks, debootstrap sucks a bit on it"
+#(
+#    cd $tmptargetsquashdir
+#    for s in `find . -type l|grep -v '/proc'|grep -v '/dev'`; do
+#        orig_source=$(readlink $s);
+#        new_source=$(echo $orig_source|sed "s|^$tmptargetsquashdir||")
+#        if [ x"$orig_source" != x"$new_source" ]; then
+#            echo chroot $tmptargetsquashdir ln -s /$new_source $s
+#            chroot $tmptargetsquashdir rm -f $s && ln -s $new_source $s
+#        fi
+#    done
+#)
 
 echo "Making ucf the original again"
 rm -f $tmptargetsquashdir/usr/bin/ucf
