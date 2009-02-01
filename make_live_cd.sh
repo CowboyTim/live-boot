@@ -97,6 +97,7 @@ deb-src http://archive.ubuntu.com/ubuntu/ hardy main restricted universe multive
     apt-get update --allow-unauthenticated
     apt-get -y --force-yes --allow-unauthenticated install ucf
     apt-get -y --force-yes --allow-unauthenticated install module-init-tools
+    apt-get -y --force-yes --allow-unauthenticated install squashfs-tools
 "
 
 echo "Hacking ucf, fakeroot has a bug with -w check?"
@@ -147,10 +148,10 @@ chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install \
         xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk vim-gui-common \
         mplayer obconf screen xterm
-    apt-get -y --force-yes --allow-unauthenticated install language-pack-en
-    apt-get -y --force-yes --allow-unauthenticated install ntfsprogs xfsprogs jfsutils
-    apt-get -y --force-yes --allow-unauthenticated install xresprobe gparted gawk
-    apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
+#    apt-get -y --force-yes --allow-unauthenticated install language-pack-en
+#    apt-get -y --force-yes --allow-unauthenticated install ntfsprogs xfsprogs jfsutils
+#    apt-get -y --force-yes --allow-unauthenticated install xresprobe gparted gawk
+#    apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
 #    apt-get -y --force-yes --allow-unauthenticated install ubiquity
 #    apt-get -y --force-yes --allow-unauthenticated install \
 #        user-setup \
@@ -174,6 +175,7 @@ chroot $tmptargetsquashdir bash -c "
         usplash \
         brltty \
         #linux-source
+
 
     apt-get -y --force-yes --allow-unauthenticated install \
         linux-restricted-modules
@@ -421,9 +423,11 @@ rm -rf $tmptargetsquashdir/tmp
 rm -f $tmptargetsquashdir/{vmlinuz,initrd.img,cdrom,dev,proc}
 mkdir -p $tmptargetsquashdir/{proc,dev,tmp}
 tmptargetsquashfs="$tmpdir.squashfs"
-mksquashfs $tmptargetsquashdir $tmptargetsquashfs  \
+chroot $tmptargetsquashdir mksquashfs . /var/tmp/a.squashfs  \
     -noappend \
-    -always-use-fragments
+    -always-use-fragments \
+    -e /var/tmp
+mv $tmptargetsquashdir/var/tmp/a.squashfs $tmptargetsquashfs
 
 mkdir -p $tmptargetisodir/modules
 cp -f $tmptargetsquashfs $tmptargetisodir/modules
