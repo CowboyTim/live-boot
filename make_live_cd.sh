@@ -418,16 +418,17 @@ EOfst
 echo "Running depmod for squashfs"
 depmod -b $tmptargetsquashdir $kernelversion -a
 
-echo "Creating squashfs file in $tmptargetsquashfs"
+tmptargetsquashfs="$tmpdir.squashfs"
+echo "Creating squashfs file $tmptargetsquashfs"
 rm -rf $tmptargetsquashdir/tmp
 rm -f $tmptargetsquashdir/{vmlinuz,initrd.img,cdrom,dev,proc}
 mkdir -p $tmptargetsquashdir/{proc,dev,tmp}
-tmptargetsquashfs="$tmpdir.squashfs"
-chroot $tmptargetsquashdir mksquashfs . /var/tmp/a.squashfs  \
+mkdir -p $tmptargetsquashdir/aa
+chroot $tmptargetsquashdir mksquashfs . /aa/a.squashfs  \
     -noappend \
     -always-use-fragments \
-    -e /var/tmp
-mv $tmptargetsquashdir/var/tmp/a.squashfs $tmptargetsquashfs
+    -e /aa
+mv $tmptargetsquashdir/aa/a.squashfs $tmptargetsquashfs
 
 mkdir -p $tmptargetisodir/modules
 cp -f $tmptargetsquashfs $tmptargetisodir/modules
