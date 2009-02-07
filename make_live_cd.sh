@@ -149,11 +149,15 @@ chroot $tmptargetsquashdir bash -c "
         xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk vim-gui-common \
         mplayer obconf screen xterm
     apt-get -y --force-yes --allow-unauthenticated install language-pack-en
-    apt-get -y --force-yes --allow-unauthenticated install ntfsprogs xfsprogs jfsutils reiserfsprogs reiser4progs
+    apt-get -y --force-yes --allow-unauthenticated install \
+        ntfsprogs xfsprogs jfsutils reiserfsprogs reiser4progs
     apt-get -y --force-yes --allow-unauthenticated install xresprobe gparted gawk
+    apt-get -y --force-yes --allow-unauthenticated install compiz compiz-kde
     apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
     apt-get -y --force-yes --allow-unauthenticated install msttcorefonts
     apt-get -y --force-yes --allow-unauthenticated install syslinux
+    apt-get -y --force-yes --allow-unauthenticated install \
+        debootstrap fakeroot fakechroot squashfs-tools genisoimage mcrypt
 #    apt-get -y --force-yes --allow-unauthenticated install ubiquity
 #    apt-get -y --force-yes --allow-unauthenticated install \
 #        user-setup \
