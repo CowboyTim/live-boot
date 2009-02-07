@@ -107,12 +107,16 @@ copy_live_to() {
     fi
 
     # begin copying..
-    mkdir "${copyto}"
+    mkdir -p "${copyto}/modules"
     echo "mount -t ${fstype} ${dev} ${copyto}"
     mount -t "${fstype}" "${dev}" "${copyto}"
-    cp -a ${copyfrom}/* ${copyto} # "cp -a" from busybox also copies hidden files
+    cp -a ${copyfrom}/modules/* ${copyto} # "cp -a" from busybox also copies hidden files
     umount ${copyfrom}
     mount -r -o move ${copyto} ${copyfrom}
+
+    # never use rm -rf, who knows what stupid mistakes I've made.. It was
+    # copying / entirely, the full 160G .. :-)
+    rmdir ${copyto}/modules
     rmdir ${copyto}
     return 0
 }
@@ -285,10 +289,10 @@ set_usplash_timeout() {
 }
 
 mountroot() {
-    exec 6>&1
-    exec 7>&2
-    exec > casper.log
-    exec 2>&1
+##    exec 6>&1
+##    exec 7>&2
+##    exec > casper.log
+##    exec 2>&1
 
     parse_cmdline
 
@@ -350,10 +354,6 @@ mountroot() {
     mount_images_in_directory "${livefs_root}" "${rootmnt}"
     log_end_msg
 
-    log_begin_msg "unmounting $mountpoint again, not needed anymore"
-    umount $mountpoint
-    log_end_msg
-
     log_begin_msg "Mounting homedir"
     if [ -n "${PERSISTENT}" ]; then
         homecow="/dev/disk/by-label/$home_persistence"
@@ -389,7 +389,7 @@ mountroot() {
     fi
 
 
-    exec 1>&6 6>&-
-    exec 2>&7 7>&-
-    cp casper.log "${rootmnt}/var/log/"
+##    exec 1>&6 6>&-
+##    exec 2>&7 7>&-
+##    cp casper.log "${rootmnt}/var/log/"
 }
