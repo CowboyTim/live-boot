@@ -464,7 +464,7 @@ default live
 label live
   menu label ^Try running
   kernel /boot/vmlinuz
-  append boot=fastboot_by_tim root=LABEL=$isoname initrd=/boot/initrd.gz noquiet nosplash toram --
+  append boot=fastboot_by_tim root=LABEL=$isoname persistent initrd=/boot/initrd.gz noquiet nosplash toram --
 label hd
   menu label ^Boot from first hard disk
   localboot 0x80
