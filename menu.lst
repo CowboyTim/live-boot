@@ -1,3 +1,5 @@
+splashimage=(hd0,0)/boot/grub/splashimages/KUBUNTU_splashscreen_blue_neon_logo_03.xpm.gz
+
 default		3
 timeout		3
 hiddenmenu
@@ -20,7 +22,7 @@ title 		Darwin PC_EFI
 kernel          (hd0,0)/boot_v8
 
 title		Tubuntu
-root		(hd3,0)
-kernel		/vmlinuz boot=fastboot_by_tim root=LABEL=TIMUBUNTU persistent nosplash noquiet nosplash toram --
-initrd		/initrd.gz
+root		(hd0,0)
+kernel		/boot/vmlinuz boot=fastboot_by_tim root=LABEL=TIMUBUNTU persistent nosplash noquiet nosplash toram --
+initrd		/boot/initrd.gz
 quiet
