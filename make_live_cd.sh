@@ -247,7 +247,7 @@ if [ -d $tmptargetsquashdir/usr/share/gconf/schemas ]; then
     gconftool-2 --makefile-install-rule \
         $tmptargetsquashdir/usr/share/gconf/schemas/*.schemas
     if [ -d $tmptargetsquashdir/usr/share/gconf/defaults ]; then
-        ./update-gconf-defaults \
+        $here/update-gconf-defaults \
             --defaults-dir $tmptargetsquashdir/usr/share/gconf/defaults \
             --outdir $tmptargetsquashdir/var/lib/gconf/debian.defaults
     fi
@@ -490,7 +490,7 @@ DEVICE=eth0
 NFSROOT=auto
 EOinitramfsconf
 mkdir -p $tmpinitramfs/scripts
-cp ./fastboot_by_tim $tmpinitramfs/scripts
+cp $here/fastboot_by_tim $tmpinitramfs/scripts
 chmod +x $tmptargetsquashdir/usr/share/initramfs-tools/init
 chroot $tmptargetsquashdir \
     mkinitramfs \
@@ -505,7 +505,7 @@ mkdir -p $tmpdir/initrd.hacks
     echo "Hacks in initramfs"
     ln -s /lib lib64
 )
-cp ./60-persistent-storage.rules $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
+cp $here/60-persistent-storage.rules $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
 cp $tmptargetsquashdir/sbin/losetup $tmpdir/initrd.hacks/sbin
 cp -R $tmptargetsquashdir/lib/modules/$kernelversion/* $tmpdir/initrd.hacks/lib/modules/$kernelversion
 depmod  -b $tmpdir/initrd.hacks -a $kernelversion
