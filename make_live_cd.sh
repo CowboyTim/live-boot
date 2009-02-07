@@ -149,9 +149,11 @@ chroot $tmptargetsquashdir bash -c "
         xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk vim-gui-common \
         mplayer obconf screen xterm
     apt-get -y --force-yes --allow-unauthenticated install language-pack-en
-    apt-get -y --force-yes --allow-unauthenticated install ntfsprogs xfsprogs jfsutils
+    apt-get -y --force-yes --allow-unauthenticated install ntfsprogs xfsprogs jfsutils reiserfsprogs reiser4progs
     apt-get -y --force-yes --allow-unauthenticated install xresprobe gparted gawk
     apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
+    apt-get -y --force-yes --allow-unauthenticated install msttcorefonts
+    apt-get -y --force-yes --allow-unauthenticated install syslinux
 #    apt-get -y --force-yes --allow-unauthenticated install ubiquity
 #    apt-get -y --force-yes --allow-unauthenticated install \
 #        user-setup \
@@ -212,7 +214,7 @@ chroot $tmptargetsquashdir bash -c "
     cp -fR ${NV%.run}/usr/* /usr
     cp -fR ${NV%.run}/nvidia-installer /usr/bin
     ln -s ${NV%.run}/nvidia-installer /usr/bin/nvidia-uninstall
-    #nvidia-xconfig --logo
+    nvidia-xconfig --logo
 
 "
 for i in `find $tmptargetsquashdir/${NV%.run} -name 'lib*.so*'|grep -v X11R6`; do 
