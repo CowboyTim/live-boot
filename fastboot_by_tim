@@ -255,19 +255,6 @@ setup_unionfs() {
     mount -t ${UNIONFS} -o exec,noatime,nodiratime,dirs=/cow=rw:$rofsstring \
         ${UNIONFS} "$rootmnt" || panic "${UNIONFS} mount failed"
 
-    # Adding other custom mounts
-    if [ -n "${PERSISTENT}" ]; then
-        # directly mount /home
-        # FIXME: add a custom mounts configurable system
-        homecow="/dev/disk/by-label/${home_persistence}"
-        if [ -b "${homecow}" ]; then
-            mount -t $(get_fstype "${homecow}") -o rw,noatime,nodiratime "${homecow}" "${rootmnt}/home"
-            export HOMEMOUNTED=1 # used to proper calculate free space in do_snap_copy()
-        else
-            [ "$quiet" != "y" ] && log_warning_msg "Unable to find the persistent home medium"
-        fi
-    fi
-
     if [ -n "${SHOWMOUNTS}" ]; then
         for d in ${rofslist}; do
             mkdir -p "${rootmnt}/boot/${d##*/}"
@@ -321,10 +308,18 @@ mountroot() {
                 udevadm trigger
                 udevadm settle
                 if [ -b "$ROOT" ] ; then
-                    fstype=$(get_fstype $ROOT)
-                    mount -t $fstype $ROOT $mountpoint
+                    rootfstype=$(get_fstype $ROOT)
+                    mount -t $rootfstype $ROOT $mountpoint
                     livefs_root=$mountpoint
                     break
+                else
+                    homecow="/dev/disk/by-label/$home_persistence"
+                    if [ -b "$homecow" ] ; then
+                        rootfstype=$(get_fstype $homecow)
+                        mount -t $rootfstype $homecow $mountpoint
+                        livefs_root=$mountpoint
+                        break   
+                    fi
                 fi
                 sleep 1
                 i="$(($i + 1))"
@@ -353,6 +348,21 @@ mountroot() {
 
     log_begin_msg "Making new root with $UNIONFS in $rootmnt"
     mount_images_in_directory "${livefs_root}" "${rootmnt}"
+    log_end_msg
+
+    log_begin_msg "unmounting $mountpoint again, not needed anymore"
+    umount $mountpoint
+    log_end_msg
+
+    log_begin_msg "Mounting homedir"
+    if [ -n "${PERSISTENT}" ]; then
+        homecow="/dev/disk/by-label/$home_persistence"
+        if [ -b "${homecow}" ]; then
+            mount -t $(get_fstype $homecow) -o rw,noatime,nodiratime $homecow $rootmnt/home
+        else
+            [ "$quiet" != "y" ] && log_warning_msg "Unable to find the persistent home medium"
+        fi
+    fi
     log_end_msg
 
 
