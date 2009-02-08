@@ -1,28 +1,10 @@
 splashimage=(hd0,0)/boot/grub/splashimages/KUBUNTU_splashscreen_blue_neon_logo_03.xpm.gz
 
-default		3
-timeout		3
-hiddenmenu
-
-title		windows XP
-map		(hd0) (hd1)
-map		(hd1) (hd0)
-rootnoverify    (hd1,0)
-root		(hd1,0)
-makeactive
-chainloader	+1
-
-title 		Darwin PC_EFI partition
-rootnoverify	(hd2,0)
-root		(hd2,0)
-makeactive
-chainloader	+1
-
-title 		Darwin PC_EFI
-kernel          (hd0,0)/boot_v8
+default		0
+timeout		1
 
 title		Tubuntu
 root		(hd0,0)
-kernel		/boot/vmlinuz boot=fastboot_by_tim root=LABEL=TIMUBUNTU persistent nosplash noquiet nosplash toram --
+kernel		/boot/vmlinuz boot=fastboot_by_tim root=LABEL=TIMUBUNTU persistent homepersistent nosplash noquiet nosplash toram --
 initrd		/boot/initrd.gz
 quiet
