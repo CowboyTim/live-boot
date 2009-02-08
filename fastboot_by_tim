@@ -37,7 +37,7 @@ parse_cmdline() {
             homepersistent)
                 export HOMEPERSISTENT="Yes" ;;
             nopersistent)
-                export PERSISTENT="" ;;
+                export PERSISTENT=""
                 export HOMEPERSISTENT="" ;;
             toram)
                 export TORAM="Yes" ;;
