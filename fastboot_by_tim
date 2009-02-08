@@ -240,7 +240,7 @@ setup_unionfs() {
     cow_mountopt="rw,noatime,mode=755,exec"
 
     # Looking for "${root_persistence}" device or file
-    if [ -n "${HOMEPERSISTENT}" ]; then
+    if [ -n "${PERSISTENT}" ]; then
         cc="/dev/disk/by-label/${root_persistence}"
         if [ -b "${cc}" ]; then
             cowdevice="${cc}"
@@ -357,7 +357,7 @@ mountroot() {
     log_end_msg
 
     log_begin_msg "Mounting homedir"
-    if [ -n "${PERSISTENT}" ]; then
+    if [ -n "${HOMEPERSISTENT}" ]; then
         homecow="/dev/disk/by-label/$home_persistence"
         if [ -b "${homecow}" ]; then
             mount -t $(get_fstype $homecow) -o rw,noatime,nodiratime $homecow $rootmnt/home
