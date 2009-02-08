@@ -34,8 +34,11 @@ parse_cmdline() {
         case $x in
             persistent)
                 export PERSISTENT="Yes" ;;
+            homepersistent)
+                export HOMEPERSISTENT="Yes" ;;
             nopersistent)
                 export PERSISTENT="" ;;
+                export HOMEPERSISTENT="" ;;
             toram)
                 export TORAM="Yes" ;;
             union=*)
@@ -237,7 +240,7 @@ setup_unionfs() {
     cow_mountopt="rw,noatime,mode=755,exec"
 
     # Looking for "${root_persistence}" device or file
-    if [ -n "${PERSISTENT}" ]; then
+    if [ -n "${HOMEPERSISTENT}" ]; then
         cc="/dev/disk/by-label/${root_persistence}"
         if [ -b "${cc}" ]; then
             cowdevice="${cc}"
