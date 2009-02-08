@@ -107,16 +107,15 @@ copy_live_to() {
     fi
 
     # begin copying..
-    mkdir -p "${copyto}/modules"
+    mkdir -p "${copyto}"
     echo "mount -t ${fstype} ${dev} ${copyto}"
     mount -t "${fstype}" "${dev}" "${copyto}"
-    cp -a ${copyfrom}/modules/* ${copyto} # "cp -a" from busybox also copies hidden files
+    cp -a ${copyfrom}/modules ${copyto} # "cp -a" from busybox also copies hidden files
     umount ${copyfrom}
     mount -r -o move ${copyto} ${copyfrom}
 
     # never use rm -rf, who knows what stupid mistakes I've made.. It was
     # copying / entirely, the full 160G .. :-)
-    rmdir ${copyto}/modules
     rmdir ${copyto}
     return 0
 }
