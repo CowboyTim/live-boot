@@ -156,6 +156,7 @@ chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
     apt-get -y --force-yes --allow-unauthenticated install msttcorefonts
     apt-get -y --force-yes --allow-unauthenticated install syslinux
+    apt-get -y --force-yes --allow-unauthenticated install git subversion lvm2
     apt-get -y --force-yes --allow-unauthenticated install \
         debootstrap fakeroot fakechroot squashfs-tools genisoimage mcrypt
 #    apt-get -y --force-yes --allow-unauthenticated install ubiquity
