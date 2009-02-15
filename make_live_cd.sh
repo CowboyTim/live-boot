@@ -72,6 +72,8 @@ man-db                man-db/install-setuid                     boolean false
 popularity-contest    popularity-contest/participate            boolean false
 x11-common            x11-common/xwrapper/allowed_users         string Anybody
 x11-common            x11-common/xwrapper/actual_allowed_users  string anybody
+sun-java6-bin         shared/accepted-sun-dlj-v1-1              boolean true
+sun-java6-jre         shared/accepted-sun-dlj-v1-1              boolean true
 
 EOpreseed
 
