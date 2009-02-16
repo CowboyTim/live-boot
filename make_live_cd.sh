@@ -159,8 +159,6 @@ chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install msttcorefonts
     apt-get -y --force-yes --allow-unauthenticated install syslinux
     apt-get -y --force-yes --allow-unauthenticated install git subversion lvm2
-    apt-get -y --force-yes --allow-unauthenticated install \
-        debootstrap fakeroot fakechroot squashfs-tools genisoimage mcrypt
 #    apt-get -y --force-yes --allow-unauthenticated install ubiquity
 #    apt-get -y --force-yes --allow-unauthenticated install \
 #        user-setup \
@@ -188,6 +186,15 @@ chroot $tmptargetsquashdir bash -c "
 
     apt-get -y --force-yes --allow-unauthenticated install \
         linux-restricted-modules
+
+    # to allow this distro to build itself, the latest updates of fakechroot
+    # must be installed, as the original one contains a bug.
+    echo 'deb http://archive.ubuntu.com/ubuntu/ hardy-updates main restricted universe multiverse
+deb-src http://archive.ubuntu.com/ubuntu/ hardy-updates main restricted universe multiverse' \
+        >> /etc/apt/sources.list
+    apt-get -y --force-yes --allow-unauthenticated install \
+        debootstrap fakeroot fakechroot squashfs-tools genisoimage mcrypt grub
+    apt-get update --allow-unauthenticated
 "
 
 cp $nvidia_driver_file $tmptargetsquashdir
@@ -430,6 +437,7 @@ depmod -b $tmptargetsquashdir $kernelversion -a
 tmptargetsquashfs="$tmpdir.squashfs"
 echo "Creating squashfs file $tmptargetsquashfs"
 rm -rf $tmptargetsquashdir/tmp
+rm -rf $tmptargetsquashdir/boot/*
 rm -f $tmptargetsquashdir/{vmlinuz,initrd.img,cdrom,dev,proc}
 mkdir -p $tmptargetsquashdir/{proc,dev,tmp}
 mkdir -p $tmptargetsquashdir/aa
