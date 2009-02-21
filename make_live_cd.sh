@@ -12,6 +12,7 @@ passwd="tubuntu"
 kernelversion="2.6.24-16-generic"
 nvidia_driver_file=~/NVIDIA-Linux-x86_64-180.16-pkg2.run
 flash_10_file=~/libflashplayer-10.0.d21.1.linux-x86_64.so.tar.gz
+opera_to_install=~/opera_9.63.2474.gcc4.qt3_amd64.deb
 if [ -z $user_id ]; then
     user_id=$(id -u)
     user_name=$(id -nu)
@@ -269,6 +270,11 @@ echo "Install good flash from $flash_10_file"
     cd $tmptargetsquashdir/usr/lib/firefox-addons/plugins
     tar xvzf $flash_10_file
 )
+
+echo "Install opera $opera_to_install"
+chroot $tmptargetsquashdir dpkg -i $opera_to_install
+chroot $tmptargetsquashdir ln -s /usr/lib/firefox-addons/plugins/libflashplayer.so \
+                                 /usr/lib/opera/plugins/libflashplayer.so
 
 chroot $tmptargetsquashdir bash -c "
     update-rc.d -f gdm remove
