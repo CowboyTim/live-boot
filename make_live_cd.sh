@@ -293,7 +293,7 @@ chroot $tmptargetsquashdir bash -c "
 "
 
 my_crypt_p=$(openssl passwd -crypt -salt xx '')
-chroot $tmptargetsquashdir useradd -m -s /bin/bash --uid $user_id -G admin -p $passwd $user_name
+chroot $tmptargetsquashdir useradd -m -s /bin/bash --uid $user_id -G admin,audio -p $passwd $user_name
 #chroot $tmptargetsquashdir passwd -e $user_name
 
 mkdir -p $tmptargetsquashdir/home/tim/Desktop
