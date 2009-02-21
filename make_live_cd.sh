@@ -159,7 +159,10 @@ chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
     apt-get -y --force-yes --allow-unauthenticated install msttcorefonts
     apt-get -y --force-yes --allow-unauthenticated install syslinux
-    apt-get -y --force-yes --allow-unauthenticated install git subversion lvm2
+    apt-get -y --force-yes --allow-unauthenticated install git git-core\
+         subversion lvm2 htop
+    apt-get -y --force-yes --allow-unauthenticated install \
+        libdevice-serialport-perl
 #    apt-get -y --force-yes --allow-unauthenticated install ubiquity
 #    apt-get -y --force-yes --allow-unauthenticated install \
 #        user-setup \
