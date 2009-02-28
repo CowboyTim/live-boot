@@ -150,7 +150,7 @@ chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install ubuntu-standard
     apt-get -y --force-yes --allow-unauthenticated install \
         xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk vim-gui-common \
-        mplayer obconf screen xterm
+        mplayer obconf screen xterm lvm2 htop
     apt-get -y --force-yes --allow-unauthenticated install language-pack-en
     apt-get -y --force-yes --allow-unauthenticated install \
         ntfsprogs xfsprogs jfsutils reiserfsprogs reiser4progs
@@ -159,8 +159,8 @@ chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
     apt-get -y --force-yes --allow-unauthenticated install msttcorefonts
     apt-get -y --force-yes --allow-unauthenticated install syslinux
-    apt-get -y --force-yes --allow-unauthenticated install git git-core\
-         subversion lvm2 htop
+    apt-get -y --force-yes --allow-unauthenticated install \
+        git git-core subversion 
     apt-get -y --force-yes --allow-unauthenticated install \
         libdevice-serialport-perl
 #    apt-get -y --force-yes --allow-unauthenticated install ubiquity
