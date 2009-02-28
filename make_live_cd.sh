@@ -31,6 +31,11 @@ wm='startkde'
 
 tmpdir=$(mktemp -d -p $tmpscratchdir live_cd_build_XXXXXX)
 
+#------------------------------------------------------------------------------
+if [ -z $1 ]; then
+    exec fakechroot fakeroot $0 'ok'
+fi
+
 exec > >(tee $tmpdir/build.log)
 exec 2>&1
 
@@ -46,12 +51,8 @@ ls -l $(dirname $tmptargetsquashdir)
 
 echo "Copying the repository cache to $tmptargetsquashdir"
 mkdir -p $tmptargetsquashdir/var/cache/apt
-cp -R $apt_repository_cache $tmptargetsquashdir/var/cache/apt/archives
+cp -fR $apt_repository_cache $tmptargetsquashdir/var/cache/apt/archives
 
-#------------------------------------------------------------------------------
-if [ -z $1 ]; then
-    exec fakechroot fakeroot $0 'ok'
-fi
 
 echo "Will bootstrap a debian $version ($architecture) in $tmptargetsquashdir"
 debootstrap --variant=fakechroot \
@@ -166,10 +167,14 @@ chroot $tmptargetsquashdir bash -c "
         xresprobe gparted gawk syslinux lua5.1 \
         msttcorefonts \
         git git-core subversion \
-        libdevice-serialport-perl
-    apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
-    apt-get -y --force-yes --allow-unauthenticated install compiz compiz-kde
-    apt-get -y --force-yes --allow-unauthenticated install language-pack-en
+        libdevice-serialport-perl                                          \
+            || exit 1
+    apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop \
+            || exit 1
+    apt-get -y --force-yes --allow-unauthenticated install compiz compiz-kde \
+            || exit 1
+    apt-get -y --force-yes --allow-unauthenticated install language-pack-en \
+            || exit 1
 
 # Not needed packages, but 'needed' when making the same distro as
 # ubuntu, the live CD.
@@ -210,9 +215,8 @@ deb-src http://archive.ubuntu.com/ubuntu/ hardy-updates main restricted universe
     apt-get -y --force-yes --allow-unauthenticated install \
         debootstrap fakeroot fakechroot squashfs-tools genisoimage mcrypt grub
     apt-get update --allow-unauthenticated
-"
+" || exit 1
 
-exit;
 
 cp $nvidia_driver_file $tmptargetsquashdir
 NV=$(basename $nvidia_driver_file)
@@ -419,6 +423,9 @@ chroot $tmptargetsquashdir bash -c "
 #    dpkg-reconfigure -plow -a -u
 #"
 
+echo "Adding deb's to the cache"
+cp -fR $tmptargetsquashdir/var/cache/apt/archives/* $apt_repository_cache
+
 echo "Cleaning the cache of apt-get"
 chroot $tmptargetsquashdir apt-get clean
 
@@ -557,7 +564,6 @@ depmod  -b $tmpdir/initrd.hacks -a $kernelversion
     echo "Creating $tmptargetisodir/boot/initrd.gz"
     find . |cpio -ov -H newc|gzip > $tmptargetisodir/boot/$isoname-initrd.gz
 )
-
 
 
 echo "Making the iso from $tmptargetisodir to $isotarget"
