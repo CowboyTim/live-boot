@@ -443,6 +443,10 @@ EOfst
 echo "Running depmod for squashfs"
 depmod -b $tmptargetsquashdir $kernelversion -a
 
+echo "Getting a kernel and an initrd"
+mkdir -p $tmptargetisodir/boot
+cp -f $tmptargetsquashdir/boot/vmlinuz-$kernelversion $tmptargetisodir/boot/vmlinuz
+
 tmptargetsquashfs="$tmpdir.squashfs"
 echo "Creating squashfs file $tmptargetsquashfs"
 rm -rf $tmptargetsquashdir/tmp
@@ -494,10 +498,6 @@ prompt 0
 timeout 3
 gfxboot bootlogo
 EOisocfg
-
-echo "Getting a kernel and an initrd"
-mkdir -p $tmptargetisodir/boot
-cp -f $tmptargetsquashdir/boot/vmlinuz-$kernelversion $tmptargetisodir/boot/vmlinuz
 
 echo "Making a new initramfs"
 tmpinitramfs="$tmptargetsquashdir/tmp/initrd.tmp"
