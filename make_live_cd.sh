@@ -150,19 +150,17 @@ chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install ubuntu-standard
     apt-get -y --force-yes --allow-unauthenticated install \
         xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk vim-gui-common \
-        mplayer obconf screen xterm lvm2 htop
-    apt-get -y --force-yes --allow-unauthenticated install language-pack-en
-    apt-get -y --force-yes --allow-unauthenticated install \
-        ntfsprogs xfsprogs jfsutils reiserfsprogs reiser4progs
-    apt-get -y --force-yes --allow-unauthenticated install xresprobe gparted gawk
-    apt-get -y --force-yes --allow-unauthenticated install compiz compiz-kde
-    apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
+        mplayer obconf screen xterm lvm2 htop \
+        ntfsprogs xfsprogs jfsutils reiserfsprogs reiser4progs \
+        xresprobe gparted gawk syslinux
     apt-get -y --force-yes --allow-unauthenticated install msttcorefonts
-    apt-get -y --force-yes --allow-unauthenticated install syslinux
     apt-get -y --force-yes --allow-unauthenticated install \
         git git-core subversion 
     apt-get -y --force-yes --allow-unauthenticated install \
         libdevice-serialport-perl
+    apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
+    apt-get -y --force-yes --allow-unauthenticated install compiz compiz-kde
+    apt-get -y --force-yes --allow-unauthenticated install language-pack-en
 #    apt-get -y --force-yes --allow-unauthenticated install ubiquity
 #    apt-get -y --force-yes --allow-unauthenticated install \
 #        user-setup \
@@ -445,7 +443,8 @@ depmod -b $tmptargetsquashdir $kernelversion -a
 
 echo "Getting a kernel and an initrd"
 mkdir -p $tmptargetisodir/boot
-cp -f $tmptargetsquashdir/boot/vmlinuz-$kernelversion $tmptargetisodir/boot/vmlinuz
+cp -f $tmptargetsquashdir/boot/vmlinuz-$kernelversion \
+    $tmptargetisodir/boot/vmlinuz-$kernelversion-$isoname
 
 tmptargetsquashfs="$tmpdir.squashfs"
 echo "Creating squashfs file $tmptargetsquashfs"
@@ -467,6 +466,8 @@ echo "Making a syslinux/isolinux config in $tmptargetisodir"
 mkdir -p $tmptargetisodir/isolinux
 cp -f /usr/lib/syslinux/{isolinux.bin,vesamenu.c32,chain.c32} \
     $tmptargetisodir/isolinux
+ 
+append="boot=fastboot_by_tim root=LABEL=$isoname persistent initrd=/boot/$isoname-initrd.gz"
 
 cat > $tmptargetisodir/isolinux/isolinux.cfg <<EOisocfg
 menu hshift 13
@@ -486,9 +487,15 @@ menu timeoutrow 17
 menu tabmsg Press ENTER to boot or TAB to edit a menu entry
 default live
 label live
-  menu label ^Try running
-  kernel /boot/vmlinuz
-  append boot=fastboot_by_tim root=LABEL=$isoname persistent initrd=/boot/initrd.gz noquiet nosplash toram --
+  menu label ^Tubuntu to ram + persistent home + persistent root
+  kernel /boot/vmlinuz-$kernelversion-$isoname
+  append $append noquiet nosplash toram persistent homepersistent --
+  menu label ^Tubuntu to ram + persistent root, NOT persistent home
+  kernel /boot/vmlinuz-$kernelversion-$isoname
+  append $append noquiet nosplash toram persistent --
+  menu label ^Tubuntu to ram + NOTHING persistent
+  kernel /boot/vmlinuz-$kernelversion-$isoname
+  append $append noquiet nosplash toram --
 label hd
   menu label ^Boot from first hard disk
   localboot 0x80
@@ -532,7 +539,7 @@ depmod  -b $tmpdir/initrd.hacks -a $kernelversion
 (
     cd $tmpdir/initrd.hacks
     echo "Creating $tmptargetisodir/boot/initrd.gz"
-    find . |cpio -ov -H newc|gzip > $tmptargetisodir/boot/initrd.gz
+    find . |cpio -ov -H newc|gzip > $tmptargetisodir/boot/$isoname-initrd.gz
 )
 
 
