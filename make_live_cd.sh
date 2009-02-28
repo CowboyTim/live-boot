@@ -161,6 +161,10 @@ chroot $tmptargetsquashdir bash -c "
     apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
     apt-get -y --force-yes --allow-unauthenticated install compiz compiz-kde
     apt-get -y --force-yes --allow-unauthenticated install language-pack-en
+
+# Not needed packages, but 'needed' when making the same distro as
+# ubuntu, the live CD.
+#
 #    apt-get -y --force-yes --allow-unauthenticated install ubiquity
 #    apt-get -y --force-yes --allow-unauthenticated install \
 #        user-setup \
