@@ -3,10 +3,13 @@
 # apt-get install debootstrap fakeroot fakechroot squashfs-tools genisoimage mcrypt
 
 
+
 sourcecdrom="/media/cdrom"
 version="hardy"
 architecture="amd64"
+tmpscratchdir="/tmp"
 isotarget="/var/tmp/test_live_cd.iso"
+apt_repository_cache="/var/tmp/test_live_apt_cache"
 isoname="TIMUBUNTU"
 passwd="tubuntu"
 kernelversion="2.6.24-16-generic"
@@ -22,25 +25,33 @@ here=$(readlink -f -- "${0%/*}")
 wm='startkde'
 
 #------------------------------------------------------------------------------
-if [ -z $1 ]; then
-    exec fakechroot fakeroot $0 'ok'
-fi
-#------------------------------------------------------------------------------
 #
 # from here, we're fakechroot fakeroot
 #
 
-tmpdir=$(mktemp -d -p /var/tmp live_cd_build_XXXXXX)
-tmptargetsquashdir="$tmpdir/squashfs"
-tmptargetisodir="$tmpdir/iso"
-mkdir -p $tmptargetsquashdir
-mkdir -p $tmptargetisodir
+tmpdir=$(mktemp -d -p $tmpscratchdir live_cd_build_XXXXXX)
 
 exec > >(tee $tmpdir/build.log)
 exec 2>&1
 
+tmptargetsquashdir="$tmpdir/squashfs"
+tmptargetisodir="$tmpdir/iso"
+mkdir -p $tmptargetsquashdir
+mkdir -p $tmptargetisodir
+mkdir -p $apt_repository_cache
+
+
 echo $tmptargetsquashdir
 ls -l $(dirname $tmptargetsquashdir)
+
+echo "Copying the repository cache to $tmptargetsquashdir"
+mkdir -p $tmptargetsquashdir/var/cache/apt
+cp -R $apt_repository_cache $tmptargetsquashdir/var/cache/apt/archives
+
+#------------------------------------------------------------------------------
+if [ -z $1 ]; then
+    exec fakechroot fakeroot $0 'ok'
+fi
 
 echo "Will bootstrap a debian $version ($architecture) in $tmptargetsquashdir"
 debootstrap --variant=fakechroot \
@@ -146,17 +157,15 @@ EOgc
 
 echo "Installing extra packages"
 chroot $tmptargetsquashdir bash -c "
-    apt-get -y --force-yes --allow-unauthenticated install ubuntu-minimal
-    apt-get -y --force-yes --allow-unauthenticated install ubuntu-standard
     apt-get -y --force-yes --allow-unauthenticated install \
+        ubuntu-minimal \
+        ubuntu-standard \
         xinit xorg openbox fbpanel rxvt-unicode firefox pidgin vim-gtk vim-gui-common \
         mplayer obconf screen xterm lvm2 htop \
         ntfsprogs xfsprogs jfsutils reiserfsprogs reiser4progs \
-        xresprobe gparted gawk syslinux
-    apt-get -y --force-yes --allow-unauthenticated install msttcorefonts
-    apt-get -y --force-yes --allow-unauthenticated install \
-        git git-core subversion 
-    apt-get -y --force-yes --allow-unauthenticated install \
+        xresprobe gparted gawk syslinux lua5.1 \
+        msttcorefonts \
+        git git-core subversion \
         libdevice-serialport-perl
     apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop
     apt-get -y --force-yes --allow-unauthenticated install compiz compiz-kde
@@ -202,6 +211,8 @@ deb-src http://archive.ubuntu.com/ubuntu/ hardy-updates main restricted universe
         debootstrap fakeroot fakechroot squashfs-tools genisoimage mcrypt grub
     apt-get update --allow-unauthenticated
 "
+
+exit;
 
 cp $nvidia_driver_file $tmptargetsquashdir
 NV=$(basename $nvidia_driver_file)
@@ -453,7 +464,7 @@ cp -f $tmptargetsquashdir/boot/vmlinuz-$kernelversion \
 tmptargetsquashfs="$tmpdir.squashfs"
 echo "Creating squashfs file $tmptargetsquashfs"
 rm -rf $tmptargetsquashdir/tmp
-rm -rf $tmptargetsquashdir/boot/*
+#rm -rf $tmptargetsquashdir/boot/*
 rm -f $tmptargetsquashdir/{vmlinuz,initrd.img,cdrom,dev,proc}
 mkdir -p $tmptargetsquashdir/{proc,dev,tmp}
 mkdir -p $tmptargetsquashdir/aa
@@ -474,9 +485,9 @@ cp -f /usr/lib/syslinux/{isolinux.bin,vesamenu.c32,chain.c32} \
 append="boot=fastboot_by_tim root=LABEL=$isoname persistent initrd=/boot/$isoname-initrd.gz"
 
 cat > $tmptargetisodir/isolinux/isolinux.cfg <<EOisocfg
-menu hshift 13
-menu width 49
-menu margin 8
+menu hshift 1
+menu width 80
+menu margin 3
 
 menu title OleOla
 menu color title    * #FFFFFFFF *
@@ -484,22 +495,23 @@ menu color border   * #00000000 #00000000 none
 menu color sel      * #ffffffff #76a1d0ff *
 menu color hotsel   1;7;37;40 #ffffffff #76a1d0ff *
 menu color tabmsg   * #ffffffff #00000000 *
-menu vshift 12
+menu vshift 1
 menu rows 10
 menu tabmsgrow 16
 menu timeoutrow 17
 menu tabmsg Press ENTER to boot or TAB to edit a menu entry
-default live
-label live
-  menu label ^Tubuntu to ram + persistent home + persistent root
-  kernel /boot/vmlinuz-$kernelversion-$isoname
-  append $append noquiet nosplash toram persistent homepersistent --
-  menu label ^Tubuntu to ram + persistent root, NOT persistent home
-  kernel /boot/vmlinuz-$kernelversion-$isoname
-  append $append noquiet nosplash toram persistent --
+label nothingpersistent
   menu label ^Tubuntu to ram + NOTHING persistent
   kernel /boot/vmlinuz-$kernelversion-$isoname
   append $append noquiet nosplash toram --
+label allpersistent
+  menu label ^Tubuntu to ram + persistent home + persistent root
+  kernel /boot/vmlinuz-$kernelversion-$isoname
+  append $append noquiet nosplash toram persistent homepersistent --
+label rootpersistent
+  menu label ^Tubuntu to ram + persistent root, NOT persistent home
+  kernel /boot/vmlinuz-$kernelversion-$isoname
+  append $append noquiet nosplash toram persistent --
 label hd
   menu label ^Boot from first hard disk
   localboot 0x80
