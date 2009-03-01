@@ -7,9 +7,9 @@
 sourcecdrom="/media/cdrom"
 version="hardy"
 architecture="amd64"
-tmpscratchdir="/tmp"
-isotarget="/var/tmp/test_live_cd.iso"
-apt_repository_cache="/var/tmp/test_live_apt_cache"
+tmpscratchdir="/var/tmp"
+isotarget="/home/tim/test_live_cd.iso"
+apt_repository_cache="/home/tim/test_live_apt_cache"
 isoname="TIMUBUNTU"
 passwd="tubuntu"
 kernelversion="2.6.24-16-generic"
@@ -23,18 +23,21 @@ if [ -z $user_id ]; then
 fi
 here=$(readlink -f -- "${0%/*}") 
 wm='startkde'
+timezone=$(date +%Z)
 
 #------------------------------------------------------------------------------
 #
 # from here, we're fakechroot fakeroot
 #
 
-tmpdir=$(mktemp -d -p $tmpscratchdir live_cd_build_XXXXXX)
 
 #------------------------------------------------------------------------------
 if [ -z $1 ]; then
     exec fakechroot fakeroot $0 'ok'
 fi
+
+tmpdir=$(mktemp -d -p $tmpscratchdir live_cd_build_XXXXXX)
+trap exit ERR
 
 exec > >(tee $tmpdir/build.log)
 exec 2>&1
@@ -64,8 +67,6 @@ debootstrap --variant=fakechroot \
 ln -s $sourcecdrom $tmptargetsquashdir
 
 echo "Making preseed"
-##cat > $tmpdir/installf.preseed <<EOpreseed
-##EOpreseed
 chroot $tmptargetsquashdir debconf-set-selections <<EOpreseed
 # Only install the standard system and language packs.
 #tasksel tasksel/first   multiselect
@@ -99,7 +100,7 @@ EOnop
 chmod +x $tmptargetsquashdir/usr/share/update-notifier/notify-reboot-required
 
 echo "CDROM Setup for apt and hacks for ucf"
-chroot $tmptargetsquashdir bash -c "
+chroot $tmptargetsquashdir bash -e -c "
     :> /etc/apt/sources.list
     echo 'deb http://archive.ubuntu.com/ubuntu/ hardy main restricted universe multiverse
 deb-src http://archive.ubuntu.com/ubuntu/ hardy main restricted universe multiverse' \
@@ -122,7 +123,7 @@ cp -f $tmptargetsquashdir/usr/bin/ucfr $tmptargetsquashdir/usr/bin/ucfr.REAL
 cp $here/ucfr $tmptargetsquashdir/usr/bin/ucfr
 
 echo "Hacking GConf shit, actually only needed for ubuntu-desktop probably..."
-chroot $tmptargetsquashdir bash -c "
+chroot $tmptargetsquashdir bash -e -c "
     dpkg-divert --rename --add /usr/bin/gconf-merge-tree
     dpkg-divert --rename --add /usr/sbin/gconf-schemas
     dpkg-divert --rename --add /usr/sbin/update-gconf-defaults
@@ -156,8 +157,10 @@ EOgc
     apt-get -y --force-yes --allow-unauthenticated install gconf2
 "
 
+df -kh
+
 echo "Installing extra packages"
-chroot $tmptargetsquashdir bash -c "
+chroot $tmptargetsquashdir bash -e -c "
     apt-get -y --force-yes --allow-unauthenticated install \
         ubuntu-minimal \
         ubuntu-standard \
@@ -167,14 +170,10 @@ chroot $tmptargetsquashdir bash -c "
         xresprobe gparted gawk syslinux lua5.1 \
         msttcorefonts \
         git git-core subversion \
-        libdevice-serialport-perl                                          \
-            || exit 1
-    apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop \
-            || exit 1
-    apt-get -y --force-yes --allow-unauthenticated install compiz compiz-kde \
-            || exit 1
-    apt-get -y --force-yes --allow-unauthenticated install language-pack-en \
-            || exit 1
+        libdevice-serialport-perl
+    apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop 
+    apt-get -y --force-yes --allow-unauthenticated install compiz compiz-kde 
+    apt-get -y --force-yes --allow-unauthenticated install language-pack-en 
 
 # Not needed packages, but 'needed' when making the same distro as
 # ubuntu, the live CD.
@@ -215,12 +214,12 @@ deb-src http://archive.ubuntu.com/ubuntu/ hardy-updates main restricted universe
     apt-get -y --force-yes --allow-unauthenticated install \
         debootstrap fakeroot fakechroot squashfs-tools genisoimage mcrypt grub
     apt-get update --allow-unauthenticated
-" || exit 1
+"
 
 
 cp $nvidia_driver_file $tmptargetsquashdir
 NV=$(basename $nvidia_driver_file)
-chroot $tmptargetsquashdir bash -c "
+chroot $tmptargetsquashdir bash -e -c "
     rm -rf ./${NV%.run}
     sh ./$NV -x
     cd ${NV%.run}/usr/src/nv
@@ -284,6 +283,13 @@ if [ -d $tmptargetsquashdir/usr/share/gconf/schemas ]; then
     fi
 fi
 
+echo "Setting timezone to $timezone"
+srczonefile="$tmptargetsquashdir/usr/share/zoneinfo/$timezone"
+if [ -e "$sourcezonefile" ]; then
+    cp "$sourcezonefile" $tmptargetsquashdir/etc/localtime
+fi
+
+
 echo "Install good flash from $flash_10_file"
 (
     mkdir -p $tmptargetsquashdir/usr/lib/firefox-addons/plugins
@@ -296,7 +302,7 @@ chroot $tmptargetsquashdir dpkg -i $opera_to_install
 chroot $tmptargetsquashdir ln -s /usr/lib/firefox-addons/plugins/libflashplayer.so \
                                  /usr/lib/opera/plugins/libflashplayer.so
 
-chroot $tmptargetsquashdir bash -c "
+chroot $tmptargetsquashdir bash -e -c "
     update-rc.d -f gdm remove
     #update-rc.d -f kdm remove
     update-rc.d -f cupsys remove
@@ -315,7 +321,9 @@ chroot $tmptargetsquashdir useradd -m -s /bin/bash --uid $user_id -G admin,audio
 
 mkdir -p $tmptargetsquashdir/home/tim/Desktop
 
-cp $here/kdmrc $tmptargetsquashdir/etc/kde3/kdm
+if [ -e $tmptargetsquashdir/etc/kde3 ]; then
+    cp $here/kdmrc $tmptargetsquashdir/etc/kde3/kdm
+fi
 
 #cat > $tmptargetsquashdir/home/$user_name/.xserverrc <<EOxserverrc
 ##!/bin/bash
@@ -402,7 +410,7 @@ chmod 0400 $tmptargetsquashdir/etc/sudoers
 
 
 echo "Removing all the dpkg-divert's"
-chroot $tmptargetsquashdir bash -c "
+chroot $tmptargetsquashdir bash -e -c "
     rm -f /usr/bin/gconf-merge-tree        && dpkg-divert --remove /usr/bin/gconf-merge-tree
     rm -f /usr/sbin/gconf-schemas          && dpkg-divert --remove /usr/sbin/gconf-schemas
     rm -f /usr/sbin/update-gconf-defaults  && dpkg-divert --remove /usr/sbin/update-gconf-defaults
@@ -572,3 +580,4 @@ mkisofs \
     -iso-level 4 -no-emul-boot -boot-load-size 4 -boot-info-table \
     -b isolinux/isolinux.bin  \
     $tmptargetisodir
+
