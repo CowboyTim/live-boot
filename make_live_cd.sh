@@ -30,14 +30,123 @@ timezone=$(date +%Z)
 # from here, we're fakechroot fakeroot
 #
 
+make_initramfs(){
+    #tmpdir="$1"
+    #tmptargetsquashdir="$2"
+    #tmptargetisodir="$3"
+
+    echo "Making a new initramfs in $tmptargetsquashdir"
+    tmpinitramfs="$tmptargetsquashdir/tmp/initrd.tmp"
+    rm -rf $tmpinitramfs
+    mkdir -p $tmpinitramfs
+    cat > $tmpinitramfs/initramfs.conf <<EOinitramfsconf
+MODULES=most
+BUSYBOX=y
+BOOT=local
+DEVICE=eth0
+NFSROOT=auto
+EOinitramfsconf
+    mkdir -p $tmpinitramfs/scripts
+    cp $here/fastboot_by_tim $tmpinitramfs/scripts
+    chmod +x $tmptargetsquashdir/usr/share/initramfs-tools/init
+    chroot $tmptargetsquashdir \
+        mkinitramfs \
+            -d /tmp/initrd.tmp  \
+            -o /tmp/n.gz \
+            $kernelversion
+
+    rm -rf $tmpdir/initrd.hacks
+    mkdir -p $tmpdir/initrd.hacks
+    (
+        cd $tmpdir/initrd.hacks
+        gunzip -c $tmptargetsquashdir/tmp/n.gz|cpio -i
+        echo "Hacks in initramfs"
+        ln -s /lib lib64
+    )
+    cp $here/60-persistent-storage.rules $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
+    cp $tmptargetsquashdir/sbin/losetup $tmpdir/initrd.hacks/sbin
+    cp -R $tmptargetsquashdir/lib/modules/$kernelversion/* $tmpdir/initrd.hacks/lib/modules/$kernelversion
+    depmod  -b $tmpdir/initrd.hacks -a $kernelversion
+    (
+        cd $tmpdir/initrd.hacks
+        dd if=/dev/zero of=./empty_ext2_fs bs=1M count=512
+        mkfs.ext2 -F -F -L cow ./empty_ext2_fs
+        gzip ./empty_ext2_fs
+        echo "Creating $tmptargetisodir/boot/initrd.gz"
+        find . |cpio -ov -H newc|gzip > $tmptargetisodir/boot/$isoname-initrd.gz
+    )
+}
+
+
+make_iso() {
+    echo "Making a syslinux/isolinux config in $tmptargetisodir"
+    mkdir -p $tmptargetisodir/isolinux
+    cp -f /usr/lib/syslinux/{isolinux.bin,vesamenu.c32,chain.c32} \
+        $tmptargetisodir/isolinux
+ 
+    append="boot=fastboot_by_tim root=LABEL=$isoname persistent initrd=/boot/$isoname-initrd.gz"
+
+    cat > $tmptargetisodir/isolinux/isolinux.cfg <<EOisocfg
+menu hshift 1
+menu width 80
+menu margin 3
+
+menu title OleOla
+menu color title    * #FFFFFFFF *
+menu color border   * #00000000 #00000000 none
+menu color sel      * #ffffffff #76a1d0ff *
+menu color hotsel   1;7;37;40 #ffffffff #76a1d0ff *
+menu color tabmsg   * #ffffffff #00000000 *
+menu vshift 1
+menu rows 10
+menu tabmsgrow 16
+menu timeoutrow 17
+menu tabmsg Press ENTER to boot or TAB to edit a menu entry
+label nothingpersistent
+  menu label ^Tubuntu to ram + NOTHING persistent
+  kernel /boot/vmlinuz-$kernelversion-$isoname
+  append $append noquiet nosplash toram --
+label allpersistent
+  menu label ^Tubuntu to ram + persistent home + persistent root
+  kernel /boot/vmlinuz-$kernelversion-$isoname
+  append $append noquiet nosplash toram rootpersistent homepersistent --
+label rootpersistent
+  menu label ^Tubuntu to ram + persistent root, NOT persistent home
+  kernel /boot/vmlinuz-$kernelversion-$isoname
+  append $append noquiet nosplash toram rootpersistent --
+label hd
+  menu label ^Boot from first hard disk
+  localboot 0x80
+
+default vesamenu.c32
+prompt 0
+timeout 3
+gfxboot bootlogo
+EOisocfg
+
+    echo "Making the iso from $tmptargetisodir to $isotarget"
+    mkisofs \
+        -V $isoname -o $isotarget \
+        -iso-level 4 -no-emul-boot -boot-load-size 4 -boot-info-table \
+        -b isolinux/isolinux.bin  \
+        $tmptargetisodir
+}
+
+
 
 #------------------------------------------------------------------------------
-if [ -z $1 ]; then
-    exec fakechroot fakeroot $0 'ok'
+if [ -z $2 ]; then
+    echo "1:$1,2:$2"
+    exec fakechroot fakeroot $0 "$1" 'ok'
 fi
 
-tmpdir=$(mktemp -d -p $tmpscratchdir live_cd_build_XXXXXX)
 trap exit ERR
+
+if [ -z $1 ]; then
+    tmpdir=$(mktemp -d -p $tmpscratchdir live_cd_build_XXXXXX)
+else
+    tmpdir=$1
+fi
 
 exec > >(tee $tmpdir/build.log)
 exec 2>&1
@@ -52,9 +161,18 @@ mkdir -p $apt_repository_cache
 echo $tmptargetsquashdir
 ls -l $(dirname $tmptargetsquashdir)
 
+if [ ! -z $1 ]; then
+    make_initramfs
+    make_iso
+    exit
+fi
+
+
 echo "Copying the repository cache to $tmptargetsquashdir"
 mkdir -p $tmptargetsquashdir/var/cache/apt/archives
-cp -fR $apt_repository_cache/* $tmptargetsquashdir/var/cache/apt/archives
+if [ -d $apt_repository_cache ]; then
+    cp -fR $apt_repository_cache/* $tmptargetsquashdir/var/cache/apt/archives
+fi
 
 
 echo "Will bootstrap a debian $version ($architecture) in $tmptargetsquashdir"
@@ -170,9 +288,9 @@ chroot $tmptargetsquashdir bash -e -c "
         msttcorefonts \
         git git-core subversion \
         libdevice-serialport-perl
-    apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop 
-    apt-get -y --force-yes --allow-unauthenticated install compiz compiz-kde 
-    apt-get -y --force-yes --allow-unauthenticated install language-pack-en 
+    #apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop 
+    #apt-get -y --force-yes --allow-unauthenticated install compiz compiz-kde 
+    #apt-get -y --force-yes --allow-unauthenticated install language-pack-en 
 
 # Not needed packages, but 'needed' when making the same distro as
 # ubuntu, the live CD.
@@ -296,11 +414,11 @@ echo "Install good flash from $flash_10_file"
     tar xvzf $flash_10_file
 )
 
-echo "Install opera $opera_to_install"
-cp $opera_to_install $tmptargetsquashdir/tmp
-chroot $tmptargetsquashdir dpkg -i /tmp/$(basename $opera_to_install)
-chroot $tmptargetsquashdir ln -s /usr/lib/firefox-addons/plugins/libflashplayer.so \
-                                 /usr/lib/opera/plugins/libflashplayer.so
+##echo "Install opera $opera_to_install"
+##cp $opera_to_install $tmptargetsquashdir/tmp
+##chroot $tmptargetsquashdir dpkg -i /tmp/$(basename $opera_to_install)
+##chroot $tmptargetsquashdir ln -s /usr/lib/firefox-addons/plugins/libflashplayer.so \
+##                                 /usr/lib/opera/plugins/libflashplayer.so
 
 chroot $tmptargetsquashdir bash -e -c "
     update-rc.d -f gdm remove
@@ -316,6 +434,7 @@ chroot $tmptargetsquashdir bash -e -c "
 "
 
 my_crypt_p=$(openssl passwd -crypt -salt xx '')
+chroot $tmptargetsquashdir groupadd admin
 chroot $tmptargetsquashdir useradd -m -s /bin/bash --uid $user_id -G admin,audio -p $passwd $user_name
 #chroot $tmptargetsquashdir passwd -e $user_name
 
@@ -492,92 +611,6 @@ mv $tmptargetsquashdir/aa/a.squashfs $tmptargetsquashfs
 mkdir -p $tmptargetisodir/modules
 cp -f $tmptargetsquashfs $tmptargetisodir/modules
 
-echo "Making a syslinux/isolinux config in $tmptargetisodir"
-mkdir -p $tmptargetisodir/isolinux
-cp -f /usr/lib/syslinux/{isolinux.bin,vesamenu.c32,chain.c32} \
-    $tmptargetisodir/isolinux
- 
-append="boot=fastboot_by_tim root=LABEL=$isoname persistent initrd=/boot/$isoname-initrd.gz"
 
-cat > $tmptargetisodir/isolinux/isolinux.cfg <<EOisocfg
-menu hshift 1
-menu width 80
-menu margin 3
-
-menu title OleOla
-menu color title    * #FFFFFFFF *
-menu color border   * #00000000 #00000000 none
-menu color sel      * #ffffffff #76a1d0ff *
-menu color hotsel   1;7;37;40 #ffffffff #76a1d0ff *
-menu color tabmsg   * #ffffffff #00000000 *
-menu vshift 1
-menu rows 10
-menu tabmsgrow 16
-menu timeoutrow 17
-menu tabmsg Press ENTER to boot or TAB to edit a menu entry
-label nothingpersistent
-  menu label ^Tubuntu to ram + NOTHING persistent
-  kernel /boot/vmlinuz-$kernelversion-$isoname
-  append $append noquiet nosplash toram --
-label allpersistent
-  menu label ^Tubuntu to ram + persistent home + persistent root
-  kernel /boot/vmlinuz-$kernelversion-$isoname
-  append $append noquiet nosplash toram persistent homepersistent --
-label rootpersistent
-  menu label ^Tubuntu to ram + persistent root, NOT persistent home
-  kernel /boot/vmlinuz-$kernelversion-$isoname
-  append $append noquiet nosplash toram persistent --
-label hd
-  menu label ^Boot from first hard disk
-  localboot 0x80
-
-default vesamenu.c32
-prompt 0
-timeout 3
-gfxboot bootlogo
-EOisocfg
-
-echo "Making a new initramfs"
-tmpinitramfs="$tmptargetsquashdir/tmp/initrd.tmp"
-mkdir -p $tmpinitramfs
-cat > $tmpinitramfs/initramfs.conf <<EOinitramfsconf
-MODULES=most
-BUSYBOX=y
-BOOT=local
-DEVICE=eth0
-NFSROOT=auto
-EOinitramfsconf
-mkdir -p $tmpinitramfs/scripts
-cp $here/fastboot_by_tim $tmpinitramfs/scripts
-chmod +x $tmptargetsquashdir/usr/share/initramfs-tools/init
-chroot $tmptargetsquashdir \
-    mkinitramfs \
-        -d /tmp/initrd.tmp  \
-        -o /tmp/n.gz \
-        $kernelversion
-
-mkdir -p $tmpdir/initrd.hacks
-(
-    cd $tmpdir/initrd.hacks
-    gunzip -c $tmptargetsquashdir/tmp/n.gz|cpio -i
-    echo "Hacks in initramfs"
-    ln -s /lib lib64
-)
-cp $here/60-persistent-storage.rules $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
-cp $tmptargetsquashdir/sbin/losetup $tmpdir/initrd.hacks/sbin
-cp -R $tmptargetsquashdir/lib/modules/$kernelversion/* $tmpdir/initrd.hacks/lib/modules/$kernelversion
-depmod  -b $tmpdir/initrd.hacks -a $kernelversion
-(
-    cd $tmpdir/initrd.hacks
-    echo "Creating $tmptargetisodir/boot/initrd.gz"
-    find . |cpio -ov -H newc|gzip > $tmptargetisodir/boot/$isoname-initrd.gz
-)
-
-
-echo "Making the iso from $tmptargetisodir to $isotarget"
-mkisofs \
-    -V $isoname -o $isotarget \
-    -iso-level 4 -no-emul-boot -boot-load-size 4 -boot-info-table \
-    -b isolinux/isolinux.bin  \
-    $tmptargetisodir
-
+make_initramfs 
+make_iso 
