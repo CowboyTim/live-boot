@@ -297,7 +297,8 @@ echo "Install good flash from $flash_10_file"
 )
 
 echo "Install opera $opera_to_install"
-chroot $tmptargetsquashdir dpkg -i $opera_to_install
+cp $opera_to_install $tmptargetsquashdir/tmp
+chroot $tmptargetsquashdir dpkg -i /tmp/$(basename $opera_to_install)
 chroot $tmptargetsquashdir ln -s /usr/lib/firefox-addons/plugins/libflashplayer.so \
                                  /usr/lib/opera/plugins/libflashplayer.so
 
