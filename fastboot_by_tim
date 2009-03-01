@@ -8,10 +8,11 @@ export BOOT
 mountpoint=/cdrom
 mkdir -p $mountpoint
 
-root_persistence="casper-rw"
-home_persistence="home-rw"
-root_snapshot_label="casper-sn"
-home_snapshot_label="home-sn"
+root_persistence_entity=".root_cow_loop.ext2"
+root_persistence_type="loop"
+home_persistence_entity="home-rw"
+
+export UNIONFS="aufs"
 
 if [ ! -x "/bin/fstype" ]; then
     # klibc not in path -> not in initramfs
@@ -32,30 +33,23 @@ get_fstype() {
 parse_cmdline() {
     for x in $(cat /proc/cmdline); do
         case $x in
-            persistent)
-                export PERSISTENT="Yes" ;;
+            rootpersistent)
+                export root_persistent="Yes";;
+            rootpersistenttype=*)
+                export root_persistent_type="${x#rootpersistenttype=}";;
+            rootpersistententity=*)
+                export root_persistence_entity="${x#rootpersistententity=}";;
             homepersistent)
-                export HOMEPERSISTENT="Yes" ;;
+                export home_persistent="Yes";;
+            homepersistententity=*)
+                export home_persistence_entity="${x#homepersistententity=}";;
             nopersistent)
-                export PERSISTENT=""
-                export HOMEPERSISTENT="" ;;
+                export root_persistent=""
+                export home_persistent="";;
             toram)
                 export TORAM="Yes" ;;
-            union=*)
-                export UNIONFS="${x#union=}";;
-            ip*)
-                STATICIP=${x#ip=}
-                if [ "${STATICIP}" = "" ]; then
-                    STATICIP="frommedia"
-                fi
-                export STATICIP ;;
-            ignore_uuid)
-                IGNORE_UUID="Yes" ;;
         esac
     done
-    if [ "${UNIONFS}" = "" ]; then
-        export UNIONFS="aufs"
-    fi
 }
 
 setup_loop() {
@@ -75,143 +69,58 @@ setup_loop() {
 }
 
 
-match_files_in_dir() {
-    # Does any files match pattern $1 ?
-
-    local pattern="$1"
-    if [ "$(echo $pattern)" != "$pattern" ]; then
-        return 0
-    fi
-    return 1
-}
-
-mount_images_in_directory() {
-    directory="$1"
-    rootmnt="$2"
-    if match_files_in_dir "$directory/modules/*.squashfs" ||
-        match_files_in_dir "$directory/modules/*.ext2" ||
-        match_files_in_dir "$directory/modules/*.dir"; then
-        setup_unionfs "$directory/modules" "$rootmnt"
-    else
-        :
-    fi
-}
-
-copy_live_to() {
-    copyfrom="${1}"
-    copytodev="${2}"
-    copyto="${copyfrom}_swap"
-
-    if [ "${copytodev}" = "ram" ]; then
-        # copying to ram:
-        free_string="memory"
-        fstype="tmpfs"
-        dev="/dev/shm"
-    fi
-
-    # begin copying..
-    mkdir -p "${copyto}"
-    echo "mount -t ${fstype} ${dev} ${copyto}"
-    mount -t "${fstype}" "${dev}" "${copyto}"
-    cp -a ${copyfrom}/modules ${copyto} # "cp -a" from busybox also copies hidden files
-    umount ${copyfrom}
-    mount -r -o move ${copyto} ${copyfrom}
-
-    # never use rm -rf, who knows what stupid mistakes I've made.. It was
-    # copying / entirely, the full 160G .. :-)
-    rmdir ${copyto}
-    return 0
-}
-
-do_netmount() {
-    rc=1
-
-    modprobe af_packet # For DHCP
-
-    /sbin/udevadm trigger
-    /sbin/udevadm settle
-
-    ipconfig ${DEVICE} /tmp/net-${DEVICE}.conf | tee /netboot.config
-
-    if [ "${NFSROOT}" = "auto" ]; then
-        NFSROOT=${ROOTSERVER}:${ROOTPATH}
-    fi
-
-    [ "$quiet" != "y" ] && log_begin_msg "Trying netboot from ${NFSROOT}"
-
-    if [ "${NETBOOT}" != "nfs" ] && do_cifsmount ; then
-        rc=0
-    elif do_nfsmount ; then
-        NETBOOT="nfs"
-        export NETBOOT
-        rc=0
-    fi
-
-    [ "$quiet" != "y" ] && log_end_msg
-    return ${rc}
-}
-
-do_nfsmount() {
-    rc=1
-    modprobe nfs
-    if [ -z "${NFSOPTS}" ]; then
-        NFSOPTS=""
-    fi
-
-    [ "$quiet" != "y" ] && log_begin_msg "Trying nfsmount -o nolock -o ro ${NFSOPTS} ${NFSROOT} ${mountpoint}"
-    # FIXME: This while loop is an ugly HACK round an nfs bug
-    i=0
-    while [ "$i" -lt 60 ]; do
-        nfsmount -o nolock -o ro ${NFSOPTS} "${NFSROOT}" "${mountpoint}" && rc=0 && break
-        sleep 1
-        i="$(($i + 1))"
-    done
-    return ${rc}
-}
-
-do_cifsmount() {
-    rc=1
-    if [ -x "/sbin/mount.cifs" ]; then
-        if [ -z "${NFSOPTS}" ]; then
-            CIFSOPTS="-ouser=root,password="
-        else
-            CIFSOPTS="${NFSOPTS}"
-        fi
-
-        [ "$quiet" != "y" ] && log_begin_msg "Trying mount.cifs ${NFSROOT} ${mountpoint} ${CIFSOPTS}"
-        modprobe cifs
-
-        if mount.cifs "${NFSROOT}" "${mountpoint}" "${CIFSOPTS}" ; then
-            rc=0
-        fi
-    fi
-    return ${rc}
-}
-
-
 setup_unionfs() {
-    image_directory="$1"
+    livefs_root="$1"
     rootmnt="$2"
 
-    modprobe -b ${UNIONFS}
+    image_directory="$livefs_root/modules"
 
-    # run-init can't deal with images in a subdir, but we're going to
-    # move all of these away before it runs anyway.  No, we're not,
-    # put them in / since move-mounting them into / breaks mono and
-    # some other apps.
+    if [ ! -z $TORAM ]; then
+        echo "Copying live_media to $TORAM"
+        copyto="${livefs_root}_swap"
+
+        mkdir -p $copyto
+        echo "mount -t tmpfs /dev/shm $copyto"
+        mount -t tmpfs /dev/shm $copyto
+    
+        # "cp -a" from busybox also copies hidden files
+        cp -a $livefs_root/modules $copyto 
+
+        # This will unmount the original mountpoint.  This is possible as it
+        # makes a tmpfs and copies the squashfs to it, not needing the original
+        # mount anymore.
+        umount $livefs_root
+        mount -r -o move $copyto $livefs_root
+
+        # never use rm -rf, who knows what stupid mistakes I've made.. It was
+        # copying / entirely, the full 160G .. :-)
+        rmdir $copyto
+    fi
+
+    homemount=/home
+    if [ -n "$home_persistent" ]; then
+        echo "Mounting homedir $home_persistence_entity to $homemount"
+        homecow="/dev/disk/by-label/$home_persistence_entity"
+        if [ -b "$homecow" ]; then
+            echo "$home_persistence_entity is a block device, proceeding"
+            mkdir -p $homemount
+            mount -t $(get_fstype "$homecow") -o rw,noatime,nodiratime "$homecow" $homemount
+        fi
+    else
+        echo "Not mounting a homedir"
+    fi
+
+    modprobe -b $UNIONFS
+
+    # run-init can't deal with images in a subdir, but we're going to move all
+    # of these away before it runs anyway.  No, we're not, put them in / since
+    # move-mounting them into / breaks mono and some other apps.
 
     croot="/"
 
     # Let's just mount the read-only file systems first
     rofsstring=""
     rofslist=""
-    if [ "${NETBOOT}" = "nfs" ] ; then
-        roopt="nfsro" # go aroung a bug in nfs-unionfs locking
-    elif [ "${UNIONFS}" = "aufs" ]; then
-        roopt="rr"
-    else
-        roopt="ro"
-    fi
 
     mkdir -p "${croot}"
     for image_type in "ext2" "squashfs" ; do
@@ -224,10 +133,11 @@ setup_unionfs() {
                 fi
                 imagename=$(basename "${image}")
                 mkdir -p "${croot}/${imagename}"
+                echo "Mounting rofs $image to $croot/$imagename"
                 mount -t "${fstype}" -o ro,noatime "${backdev}" \
                     "${croot}/${imagename}" \
                     || panic "Can not mount $backdev ($image) on ${croot}/${imagename}"
-                rofsstring="${croot}/${imagename}=${roopt}:${rofsstring}"
+                rofsstring="${croot}/${imagename}=rr:${rofsstring}"
                 rofslist="${croot}/${imagename} ${rofslist}"
             fi
         done
@@ -239,49 +149,56 @@ setup_unionfs() {
     cow_fstype="tmpfs"
     cow_mountopt="rw,noatime,mode=755,exec"
 
-    # Looking for "${root_persistence}" device or file
-    if [ -n "${PERSISTENT}" ]; then
-        cc="/dev/disk/by-label/${root_persistence}"
-        if [ -b "${cc}" ]; then
-            cowdevice="${cc}"
-            cow_fstype=$(get_fstype "${cowdevice}")
-	        cow_mountopt="rw,noatime,nodiratime,exec"
-        else
-            [ "$quiet" != "y" ] && log_warning_msg "Unable to find the persistent medium"
+    if [ ! -z $root_persistent ]; then
+        if [ $root_persistence_type = 'loop' ]; then
+            if [ -z $homecow ]; then
+                echo "rootpersistent loop requested, but no homepersistent, disabling..."
+            else
+                lo_file=$homemount/$root_persistence_entity
+                echo "Mounting a loop $lo_file file as cow"
+                if [ ! -e $lo_file ]; then
+                    echo "No loop file $lo_file found, making one"
+                    gunzip -c /empty_ext2_fs.gz > $lo_file
+                fi
+                cowdevice=$(setup_loop $lo_file)
+                cow_fstype=$(get_fstype $cowdevice)
+                cow_mountopt="rw,noatime,nodiratime,exec"
+            fi
+        else 
+            echo "Searching for cow persistent medium $root_persistence_entity"
+            cc="/dev/disk/by-label/$root_persistence_entity"
+            if [ -b "$cc" ]; then
+                cowdevice="${cc}"
+                cow_fstype=$(get_fstype "$cowdevice")
+                cow_mountopt="rw,noatime,nodiratime,exec"
+            else
+                echo "Unable to find the cow persistent medium $root_persistence_entity"
+            fi
         fi
     fi
 
-    if [ -e /cow/etc/mtab ]; then
-        rm -f /cow/etc/mtab
-    fi
-
+    echo "Mounting a cow fs $cow_fstype to /cow"
     mount -t ${cow_fstype} -o ${cow_mountopt} ${cowdevice} /cow \
         || panic "Can not mount $cowdevice on /cow"
 
-    mount -t ${UNIONFS} -o exec,noatime,nodiratime,dirs=/cow=rw:$rofsstring \
-        ${UNIONFS} "$rootmnt" || panic "${UNIONFS} mount failed"
+    echo "Mounting the AUFS on $rootmnt"
+    mount -t ${UNIONFS} -o exec,noatime,nodiratime,dirs=/cow=rw:$rofsstring ${UNIONFS} $rootmnt \
+        || panic "${UNIONFS} mount failed"
 
-    if [ -n "${SHOWMOUNTS}" ]; then
-        for d in ${rofslist}; do
-            mkdir -p "${rootmnt}/boot/${d##*/}"
-            case d in
-                *.dir) # do nothing # mount -o bind "${d}" "${rootmnt}/boot/${d##*/}"
-                    ;;
-                *) mount -o move "${d}" "${rootmnt}/boot/${d##*/}"
-                    ;;
-            esac
-        done
-        # shows cow fs on /cow for use by boot-snapshot
-        mkdir -p "${rootmnt}/cow"
-        mount -o bind /cow "${rootmnt}/cow"
+    if [ ! -z $homecow ]; then
+        mkdir -p $rootmnt/home
+        mount -r -o move $homemount $rootmnt/home
     fi
 
-    # move the first mount; no head in busybox-initramfs
-    for d in $(mount -t squashfs | cut -d\  -f 3); do
-        mkdir -p "${rootmnt}/rofs"
-        mount -o move "${d}" "${rootmnt}/rofs"
-        break
+    # show all the rofs
+    for d in $rofslist; do
+        mkdir -p "$rootmnt/boot/${d##*/}"
+        mount -o move $d "${rootmnt}/boot/${d##*/}"
     done
+
+    # shows cow fs on /cow
+    mkdir -p $rootmnt/cow
+    mount -o bind /cow $rootmnt/cow
 }
 
 set_usplash_timeout() {
@@ -300,83 +217,43 @@ mountroot() {
 
     set_usplash_timeout
 
-    if [ ! -z "${NETBOOT}" ]; then
-        if do_netmount ; then
-            livefs_root="${mountpoint}"
-        else
-            panic "Unable to find a live file system on the network"
-        fi
-    else
-        if [ ! -z "$ROOT" ]; then
-            BOOT=$(basename $ROOT)
-            i=0
-            while [ "$i" -lt 10 ]; do
-                udevadm trigger
-                udevadm settle
-                if [ -b "$ROOT" ] ; then
-                    rootfstype=$(get_fstype $ROOT)
-                    mount -t $rootfstype $ROOT $mountpoint
+    if [ ! -z "$ROOT" ]; then
+        BOOT=$(basename $ROOT)
+        i=0
+        while [ "$i" -lt 10 ]; do
+            udevadm trigger
+            udevadm settle
+            if [ -b "$ROOT" ] ; then
+                rootfstype=$(get_fstype $ROOT)
+                mount -t $rootfstype $ROOT $mountpoint
+                livefs_root=$mountpoint
+                break
+            else
+                homecow="/dev/disk/by-label/$home_persistence_entity"
+                if [ -b "$homecow" ] ; then
+                    mount -t $(get_fstype "$homecow") -o ro,noatime,nodiratime "$homecow" $mountpoint
                     livefs_root=$mountpoint
-                    break
-                else
-                    homecow="/dev/disk/by-label/$home_persistence"
-                    if [ -b "$homecow" ] ; then
-                        rootfstype=$(get_fstype $homecow)
-                        mount -t $rootfstype $homecow $mountpoint
-                        livefs_root=$mountpoint
-                        break   
-                    fi
+                    break   
                 fi
-                sleep 1
-                i="$(($i + 1))"
-            done
-        fi
-        
+            fi
+            sleep 1
+            i="$(($i + 1))"
+        done
     fi
 
-    if [ -z "${livefs_root}" ]; then
+    if [ -z "$livefs_root" ]; then
         panic "Unable to find a medium containing a live file system"
-    fi
-
-    if [ "${TORAM}" ]; then
-        live_dest="ram"
-    elif [ "${TODISK}" ]; then
-        live_dest="${TODISK}"
-    fi
-    if [ "${live_dest}" ]; then
-        log_begin_msg "Copying live_media to ${live_dest}"
-        copy_live_to "${livefs_root}" "${live_dest}"
-        log_end_msg
     fi
 
     udevadm trigger
     udevadm settle
 
-    log_begin_msg "Making new root with $UNIONFS in $rootmnt"
-    mount_images_in_directory "${livefs_root}" "${rootmnt}"
-    log_end_msg
-
-    log_begin_msg "Mounting homedir"
-    if [ -n "${HOMEPERSISTENT}" ]; then
-        homecow="/dev/disk/by-label/$home_persistence"
-        if [ -b "${homecow}" ]; then
-            mount -t $(get_fstype $homecow) -o rw,noatime,nodiratime $homecow $rootmnt/home
-        else
-            [ "$quiet" != "y" ] && log_warning_msg "Unable to find the persistent home medium"
-        fi
-    fi
-    log_end_msg
-
-
-    ##maybe_break casper-bottom
-    ##[ "$quiet" != "y" ] && log_begin_msg "Running /scripts/casper-bottom"
-
-    ##run_scripts /scripts/casper-bottom
-    ##[ "$quiet" != "y" ] && log_end_msg
+    echo "Making new root with $UNIONFS in $rootmnt"
+    setup_unionfs "$livefs_root" "$rootmnt"
 
     # mksquashfs or debootstrap did this..
-    rm -f "${rootmnt}/proc"
-    rm -f "${rootmnt}/dev"
+    rmdir "${rootmnt}/proc"
+    rmdir "${rootmnt}/dev"
     mkdir -p "${rootmnt}/proc"
     mkdir -p "${rootmnt}/dev"
     mkdir -p /dev/pts
