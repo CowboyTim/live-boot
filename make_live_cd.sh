@@ -53,8 +53,8 @@ echo $tmptargetsquashdir
 ls -l $(dirname $tmptargetsquashdir)
 
 echo "Copying the repository cache to $tmptargetsquashdir"
-mkdir -p $tmptargetsquashdir/var/cache/apt
-cp -fR $apt_repository_cache $tmptargetsquashdir/var/cache/apt/archives
+mkdir -p $tmptargetsquashdir/var/cache/apt/archives
+cp -fR $apt_repository_cache/* $tmptargetsquashdir/var/cache/apt/archives
 
 
 echo "Will bootstrap a debian $version ($architecture) in $tmptargetsquashdir"
@@ -202,8 +202,8 @@ chroot $tmptargetsquashdir bash -e -c "
         #linux-source
 
 
-    apt-get -y --force-yes --allow-unauthenticated install \
-        linux-restricted-modules
+    #apt-get -y --force-yes --allow-unauthenticated install \
+        #linux-restricted-modules
 
     # to allow this distro to build itself, the latest updates of fakechroot
     # must be installed, as the original one contains a bug.
