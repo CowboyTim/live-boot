@@ -106,7 +106,8 @@ chroot $tmptargetsquashdir bash -e -c "
 deb-src http://archive.ubuntu.com/ubuntu/ hardy main restricted universe multiverse' \
         >> /etc/apt/sources.list
 
-    rm -f /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/*
+    mkdir -p /var/lib/apt/lists/partial
 
     apt-cdrom -mf add
     apt-get -y --force-yes --allow-unauthenticated install gnupg
@@ -156,8 +157,6 @@ exit 0
 EOgc
     apt-get -y --force-yes --allow-unauthenticated install gconf2
 "
-
-df -kh
 
 echo "Installing extra packages"
 chroot $tmptargetsquashdir bash -e -c "
