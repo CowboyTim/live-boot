@@ -283,7 +283,7 @@ if [ -d $tmptargetsquashdir/usr/share/gconf/schemas ]; then
 fi
 
 echo "Setting timezone to $timezone"
-srczonefile="$tmptargetsquashdir/usr/share/zoneinfo/$timezone"
+sourcezonefile="$tmptargetsquashdir/usr/share/zoneinfo/$timezone"
 if [ -e "$sourcezonefile" ]; then
     cp "$sourcezonefile" $tmptargetsquashdir/etc/localtime
 fi
