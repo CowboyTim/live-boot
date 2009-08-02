@@ -5,14 +5,12 @@
 
 
 sourcecdrom="/media/cdrom"
-version="intrepid"
+version="jaunty"
 architecture="amd64"
 tmpscratchdir="/var/tmp"
 isotarget="/home/tim/test_live_cd.iso"
 isoname="TIMUBUNTU"
 passwd="tubuntu"
-#kernelversion=$(uname -r)
-kernelversion='2.6.27-14-generic'
 flash_10_file=~/libflashplayer-10.0.d21.1.linux-x86_64.so.tar.gz
 if [ -z $user_id ]; then
     user_id=$(id -u)
@@ -37,6 +35,13 @@ mkdir -p $tmptargetisodir
 
 make_initramfs(){
     echo "Getting a kernel and an initrd"
+
+    if [ ! -d $tmptargetsquashdir/boot -a -d $tmpdir/boot ]; then
+        mv $tmpdir/boot $tmptargetsquashdir/boot
+    fi
+
+    kernelversion=$(basename $(readlink $tmptargetsquashdir/vmlinuz)|sed s/vmlinuz-//)
+
     mkdir -p $tmptargetisodir/boot
     cp -f $tmptargetsquashdir/boot/vmlinuz-$kernelversion \
         $tmptargetisodir/boot/vmlinuz-$kernelversion-$isoname
@@ -70,6 +75,7 @@ EOinitramfsconf
         echo "Hacks in initramfs"
         ln -s /lib lib64
     )
+    mkdir -p $tmpdir/initrd.hacks/etc/udev/rules.d
     cp $here/60-persistent-storage.rules \
         $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
     cp $tmptargetsquashdir/sbin/losetup \
@@ -81,6 +87,7 @@ EOinitramfsconf
         cd $tmpdir/initrd.hacks
         dd if=/dev/zero of=./empty_ext2_fs bs=1M count=512
         mkfs.ext3 -O dir_index -F -F -L cow ./empty_ext2_fs
+        tune2fs -c -1 -i -1 ./empty_ext2_fs
         gzip ./empty_ext2_fs
         echo "Creating $tmptargetisodir/boot/initrd.gz"
         find . |cpio -ov -H newc|gzip > $tmptargetisodir/boot/$isoname-initrd.gz
@@ -163,8 +170,7 @@ EOfst
 
     echo "Creating squashfs file $tmptargetsquashfs"
     rm -rf $tmptargetsquashdir/tmp
-    rm -rf $tmptargetsquashdir/boot/*
-    rm -f $tmptargetsquashdir/{vmlinuz,initrd.img,cdrom,dev,proc}
+    mv $tmptargetsquashdir/boot $tmpdir
     rm -rf $tmptargetsquashdir/var/cache/apt/archives
 
     mkdir -p $tmptargetsquashdir/{proc,dev,tmp}
