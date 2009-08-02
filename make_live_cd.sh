@@ -36,10 +36,6 @@ mkdir -p $tmptargetsquashdir
 mkdir -p $tmptargetisodir
 
 make_initramfs(){
-    #tmpdir="$1"
-    #tmptargetsquashdir="$2"
-    #tmptargetisodir="$3"
-
     echo "Getting a kernel and an initrd"
     mkdir -p $tmptargetisodir/boot
     cp -f $tmptargetsquashdir/boot/vmlinuz-$kernelversion \
@@ -74,9 +70,12 @@ EOinitramfsconf
         echo "Hacks in initramfs"
         ln -s /lib lib64
     )
-    cp $here/60-persistent-storage.rules $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
-    cp $tmptargetsquashdir/sbin/losetup $tmpdir/initrd.hacks/sbin
-    cp -R $tmptargetsquashdir/lib/modules/$kernelversion/* $tmpdir/initrd.hacks/lib/modules/$kernelversion
+    cp $here/60-persistent-storage.rules \
+        $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
+    cp $tmptargetsquashdir/sbin/losetup \
+        $tmpdir/initrd.hacks/sbin
+    cp -R $tmptargetsquashdir/lib/modules/$kernelversion/* \
+        $tmpdir/initrd.hacks/lib/modules/$kernelversion
     depmod  -b $tmpdir/initrd.hacks -a $kernelversion
     (
         cd $tmpdir/initrd.hacks
@@ -143,16 +142,17 @@ EOisocfg
         $tmptargetisodir
 }
 
+mount_vm_image (){
+    echo "Mounting image $tmptargetsquashdir to $tmpdir/loop.raw"
+    mount -o loop,offset=16384 $tmpdir/loop.raw $tmptargetsquashdir
+}
+
 make_squash (){
-    echo "Making squash image"
 
     tmptargetsquashfs="$tmpdir/core-$version-$architecture.squashfs"
     if [ -f $tmptargetsquashfs ]; then
         return
     fi
-
-    echo "Mounting that raw image"
-    mount -o loop,offset=16384 $tmpdir/loop.raw $tmptargetsquashdir
 
     cat >> $tmptargetsquashdir/etc/fstab <<EOfst
     /dev/shm	/tmp	tmpfs rw,exec,noatime,nodiratime	0	0
@@ -163,8 +163,10 @@ EOfst
 
     echo "Creating squashfs file $tmptargetsquashfs"
     rm -rf $tmptargetsquashdir/tmp
-    #rm -rf $tmptargetsquashdir/boot/*
+    rm -rf $tmptargetsquashdir/boot/*
     rm -f $tmptargetsquashdir/{vmlinuz,initrd.img,cdrom,dev,proc}
+    rm -rf $tmptargetsquashdir/var/cache/apt/archives
+
     mkdir -p $tmptargetsquashdir/{proc,dev,tmp}
     mksquashfs $tmptargetsquashdir $tmptargetsquashfs  \
         -noappend \
@@ -175,7 +177,7 @@ EOfst
 }
 
 if [ -z $1 ]; then
-    echo "Will bootstrap a ubuntu VMW6 image $version ($architecture) in $tmpdir/vmimage"
+    echo "Making vmw6 image $version ($architecture) in $tmpdir/vmimage"
     vmbuilder vmw6 ubuntu \
         --suite $version \
         --flavour generic \
@@ -186,6 +188,9 @@ if [ -z $1 ]; then
     qemu-img convert -f vmdk $tmpdir/vmimage/disk0.vmdk -O raw $tmpdir/loop.raw
 fi
 
-make_squash
+mount_vm_image
 make_initramfs 
+make_squash
 make_iso 
+
+umount $tmptargetsquashdir
