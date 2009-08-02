@@ -80,7 +80,7 @@ EOinitramfsconf
     (
         cd $tmpdir/initrd.hacks
         dd if=/dev/zero of=./empty_ext2_fs bs=1M count=512
-        mkfs.ext2 -F -F -L cow ./empty_ext2_fs
+        mkfs.ext3 -O dir_index -F -F -L cow ./empty_ext2_fs
         gzip ./empty_ext2_fs
         echo "Creating $tmptargetisodir/boot/initrd.gz"
         find . |cpio -ov -H newc|gzip > $tmptargetisodir/boot/$isoname-initrd.gz
@@ -176,6 +176,45 @@ EOfst
     cp -f $tmptargetsquashfs $tmptargetisodir/modules
 }
 
+various_hacks (){
+    user_id=$(id -u)
+    user_name=$(id -nu)
+    if [ $user_id == '0' ]; then
+        user_name=$passwd
+        user_id=500
+    fi
+    my_crypt_p=$(openssl passwd -crypt -salt xx '')
+    chroot $tmptargetsquashdir useradd -m -s /bin/bash \
+        --uid $user_id -G admin,audio -p $passwd $user_name || exit 1
+    chroot $tmptargetsquashdir passwd -d root || exit 1
+
+    cat > $tmptargetsquashdir/etc/sudoers <<EOs
+# /etc/sudoers
+#
+# This file MUST be edited with the 'visudo' command as root.
+#
+# See the man page for details on how to write a sudoers file.
+# Host alias specification
+
+# User alias specification
+
+# Cmnd alias specification
+
+# Defaults
+
+Defaults        !lecture,tty_tickets,!fqdn
+
+# User privilege specification
+root    ALL=(ALL) ALL
+
+# Members of the admin group may gain root privileges
+%admin ALL=(ALL) ALL
+%admin ALL=NOPASSWD: ALL
+EOs
+chmod 0400 $tmptargetsquashdir/etc/sudoers
+
+}
+
 if [ -z $1 ]; then
     echo "Making vmw6 image $version ($architecture) in $tmpdir/vmimage"
     vmbuilder vmw6 ubuntu \
@@ -190,6 +229,7 @@ fi
 
 mount_vm_image
 make_initramfs 
+various_hacks
 make_squash
 make_iso 
 
