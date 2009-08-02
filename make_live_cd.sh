@@ -120,7 +120,7 @@ label hd
 
 default vesamenu.c32
 prompt 0
-timeout 3
+timeout 10
 gfxboot bootlogo
 EOisocfg
 
@@ -170,7 +170,7 @@ fi
 
 echo "Copying the repository cache to $tmptargetsquashdir"
 mkdir -p $tmptargetsquashdir/var/cache/apt/archives
-if [ -d $apt_repository_cache ]; then
+if [ -d $apt_repository_cache -a x`ls $apt_repository_cache` != x ]; then
     cp -fR $apt_repository_cache/* $tmptargetsquashdir/var/cache/apt/archives
 fi
 
@@ -289,6 +289,7 @@ chroot $tmptargetsquashdir bash -e -c "
         git git-core subversion \
         libdevice-serialport-perl
     #apt-get -y --force-yes --allow-unauthenticated install kubuntu-desktop 
+    apt-get -y --force-yes --allow-unauthenticated install kcontrol
     #apt-get -y --force-yes --allow-unauthenticated install compiz compiz-kde 
     #apt-get -y --force-yes --allow-unauthenticated install language-pack-en 
 

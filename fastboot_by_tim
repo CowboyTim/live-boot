@@ -187,7 +187,7 @@ setup_unionfs() {
 
     if [ ! -z $homecow ]; then
         mkdir -p $rootmnt/home
-        mount -r -o move $homemount $rootmnt/home
+        mount -o move $homemount $rootmnt/home
     fi
 
     # show all the rofs
@@ -198,24 +198,15 @@ setup_unionfs() {
 
     # shows cow fs on /cow
     mkdir -p $rootmnt/cow
-    mount -o bind /cow $rootmnt/cow
-}
+    mount -o move /cow $rootmnt/cow
 
-set_usplash_timeout() {
-    if [ -x /sbin/usplash_write ]; then
-        /sbin/usplash_write "TIMEOUT 120"
-    fi
+    mkdir -p $rootmnt/$(basename $livefs_root)
+    mount -o move $livefs_root $rootmnt/$(basename $livefs_root)
 }
 
 mountroot() {
-##    exec 6>&1
-##    exec 7>&2
-##    exec > casper.log
-##    exec 2>&1
 
     parse_cmdline
-
-    set_usplash_timeout
 
     if [ ! -z "$ROOT" ]; then
         BOOT=$(basename $ROOT)
@@ -252,23 +243,23 @@ mountroot() {
     setup_unionfs "$livefs_root" "$rootmnt"
 
     # mksquashfs or debootstrap did this..
-    rmdir "${rootmnt}/proc"
-    rmdir "${rootmnt}/dev"
-    mkdir -p "${rootmnt}/proc"
-    mkdir -p "${rootmnt}/dev"
+    mkdir -p $rootmnt/dev
+    mkdir -p $rootmnt/proc
+    mkdir -p $rootmnt/sys
+    mkdir -p $rootmnt/tmp
     mkdir -p /dev/pts
     mkdir -p /dev/shm
 
-    mkdir -p /lib/modules/`uname -r`/
+    #done by initramfs-tools:
+    #mount -o move /dev $rootmnt/dev
+    #mount -o move /proc $rootmnt/proc
+    #mount -o move /sys $rootmnt/sys
 
-    mkdir -p $rootmnt/tmp
+    #mkdir -p /lib/modules/`uname -r`/
+
 
     if [ -f $rootmnt/etc/fastboot_by_tim.conf ]; then
         . $rootmnt/etc/fastboot_by_tim.conf
     fi
 
-
-##    exec 1>&6 6>&-
-##    exec 2>&7 7>&-
-##    cp casper.log "${rootmnt}/var/log/"
 }
