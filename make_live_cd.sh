@@ -217,16 +217,19 @@ root    ALL=(ALL) ALL
 %admin ALL=(ALL) ALL
 %admin ALL=NOPASSWD: ALL
 EOs
-chmod 0400 $tmptargetsquashdir/etc/sudoers
+
+    chmod 0400 $tmptargetsquashdir/etc/sudoers
 
 }
 
 if [ -z $1 ]; then
     echo "Making vmw6 image $version ($architecture) in $tmpdir/vmimage"
+    export http_proxy=http://127.0.0.1:9999
     vmbuilder vmw6 ubuntu \
         --suite $version \
         --flavour generic \
         --arch $architecture \
+        --addpkg vim --addpkg screen --addpkg openbox --addpkg freevo --addpkg mplayer \
         -d $tmpdir/vmimage
 
     echo "Convert to something loop-mountable with qemu"
