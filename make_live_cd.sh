@@ -171,7 +171,7 @@ EOfst
     echo "Creating squashfs file $tmptargetsquashfs"
     rm -rf $tmptargetsquashdir/tmp
     mv $tmptargetsquashdir/boot $tmpdir
-    rm -rf $tmptargetsquashdir/var/cache/apt/archives
+    chroot $tmptargetsquashdir apt-get clean
 
     mkdir -p $tmptargetsquashdir/{proc,dev,tmp}
     mksquashfs $tmptargetsquashdir $tmptargetsquashfs  \
@@ -224,11 +224,12 @@ EOs
 
 if [ -z $1 ]; then
     echo "Making vmw6 image $version ($architecture) in $tmpdir/vmimage"
-    export http_proxy=http://127.0.0.1:9999
     vmbuilder vmw6 ubuntu \
+        --components=main,restricted,universe,multiverse \
         --suite $version \
         --flavour generic \
         --arch $architecture \
+        --mirror http://127.0.0.1:9999/ubuntu \
         --addpkg vim --addpkg screen --addpkg openbox --addpkg freevo --addpkg mplayer \
         -d $tmpdir/vmimage
 
