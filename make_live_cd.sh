@@ -119,14 +119,14 @@ menu rows 10
 menu tabmsgrow 16
 menu timeoutrow 17
 menu tabmsg Press ENTER to boot or TAB to edit a menu entry
-label nothingpersistent
-  menu label ^Tubuntu to ram + NOTHING persistent
-  kernel /boot/vmlinuz-$kernelversion-$isoname
-  append $append noquiet nosplash toram --
 label allpersistent
   menu label ^Tubuntu to ram + persistent home + persistent root
   kernel /boot/vmlinuz-$kernelversion-$isoname
   append $append noquiet nosplash toram rootpersistent homepersistent --
+label nothingpersistent
+  menu label ^Tubuntu to ram + NOTHING persistent
+  kernel /boot/vmlinuz-$kernelversion-$isoname
+  append $append noquiet nosplash toram --
 label rootpersistent
   menu label ^Tubuntu to ram + persistent root, NOT persistent home
   kernel /boot/vmlinuz-$kernelversion-$isoname
@@ -171,7 +171,7 @@ EOfst
     echo "Creating squashfs file $tmptargetsquashfs"
     rm -rf $tmptargetsquashdir/tmp
     mv $tmptargetsquashdir/boot $tmpdir
-    chroot $tmptargetsquashdir apt-get clean
+    chroot $tmptargetsquashdir apt-get clean || exit 1
 
     mkdir -p $tmptargetsquashdir/{proc,dev,tmp}
     mksquashfs $tmptargetsquashdir $tmptargetsquashfs  \
@@ -222,7 +222,37 @@ EOs
 
 }
 
+make_package_list (){
+    distro="$1"
+    if [ -d $here/$distro ]; then
+        if [ -f $here/$distro/packagelist ]; then
+            list=`cat $here/$distro/packagelist`
+        else 
+            echo "Need packagelist $distro/packagelist"
+        fi
+    else
+        echo "Need subdir $distro"
+    fi
+    for p in $list; do
+        pkgcmdline=" $pkgcmdline --addpkg $p"
+    done
+    echo $pkgcmdline
+}
+
+post_specific_stuff (){
+    distro="$1"
+    if [ -d $here/$distro ]; then
+        if [ -f $here/$distro/postactions ]; then
+            echo "Executing postactions $here/$distro/postactions"
+            . $here/$distro/postactions
+        fi
+    fi
+}
+
 if [ -z $1 ]; then
+
+    make_package_list "freevo"    
+
     echo "Making vmw6 image $version ($architecture) in $tmpdir/vmimage"
     vmbuilder vmw6 ubuntu \
         --components=main,restricted,universe,multiverse \
@@ -230,7 +260,7 @@ if [ -z $1 ]; then
         --flavour generic \
         --arch $architecture \
         --mirror http://127.0.0.1:9999/ubuntu \
-        --addpkg vim --addpkg screen --addpkg openbox --addpkg freevo --addpkg mplayer \
+        $pkgcmdline \
         -d $tmpdir/vmimage
 
     echo "Convert to something loop-mountable with qemu"
@@ -239,7 +269,8 @@ fi
 
 mount_vm_image
 make_initramfs 
-various_hacks
+various_hacks "freevo"
+post_specific_stuff "freevo"
 make_squash
 make_iso 
 
