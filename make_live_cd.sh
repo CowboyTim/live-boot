@@ -119,14 +119,14 @@ menu rows 10
 menu tabmsgrow 16
 menu timeoutrow 17
 menu tabmsg Press ENTER to boot or TAB to edit a menu entry
-label allpersistent
-  menu label ^Tubuntu to ram + persistent home + persistent root
-  kernel /boot/vmlinuz-$kernelversion-$isoname
-  append $append noquiet nosplash toram rootpersistent homepersistent --
 label nothingpersistent
   menu label ^Tubuntu to ram + NOTHING persistent
   kernel /boot/vmlinuz-$kernelversion-$isoname
   append $append noquiet nosplash toram --
+label allpersistent
+  menu label ^Tubuntu to ram + persistent home + persistent root
+  kernel /boot/vmlinuz-$kernelversion-$isoname
+  append $append noquiet nosplash toram rootpersistent homepersistent --
 label rootpersistent
   menu label ^Tubuntu to ram + persistent root, NOT persistent home
   kernel /boot/vmlinuz-$kernelversion-$isoname

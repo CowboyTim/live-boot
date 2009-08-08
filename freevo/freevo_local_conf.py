@@ -10,10 +10,13 @@ plugin.remove('shutdown')
 plugin.remove('xine')
 plugin.remove('ossmixer')
 plugin.remove('image.apod')
+plugin.remove('headlines')
+plugin.remove('image')
 
-plugin.activate('usbstorage')
+plugin.activate('usb')
 plugin.activate('idlebar')
 plugin.activate('idlebar.clock',   level=50)
+plugin.activate('alsamixer2')
 
 
 START_FULLSCREEN_X  = 1
@@ -33,22 +36,27 @@ EVENTS['video']['8'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='switch_ratio 1.33334')
 EVENTS['video']['9'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='switch_ratio 1.77778')
 
 MPLAYER_VERSION = 0.9
-MPLAYER_ARGS = { 'dvd'    : '-cache 8192 -monitoraspect 16:9 -af volnorm=2 -vf pp=fd',
-                 'vcd'    : '-cache 4096 -monitoraspect 16:9',
-                 'cd'     : '-cache 1024 -cdda speed=2',
-                 'mkv'    : '-cache 5000 -idx -alang jpn,ja -slang eng,en,En -framedrop -monitoraspect 16:9 -af volnorm=1',
-                 'ogm'    : '-cache 5000 -aid 1 -sid 0 -monitoraspect 16:9',
-                 'tv'     : '-nocache',
-                 'ivtv'   : '-cache 8192',
-                 'avi'    : '-cache 5000 -monitoraspect 16:9 -af volnorm=1',
-                 'mpg'    : '-cache 5000 -monitoraspect 16:9 -af volnorm=1 -vf pp=fd',
-                 'rm'     : '-cache 5000 -forceidx',
-                 'rmvb'   : '-cache 5000 -forceidx -monitoraspect 16:9',
-                 'webcam' : 'tv:// -tv driver=v4l:width=352:height=288:outfmt=yuy2:device=/dev/video2',
-                 'default': '-cache 5000 -monitoraspect 16:9 -af volnorm=1'
-                 }
+MPLAYER_ARGS = {
+    'dvd'    : '-cache 8192 -monitoraspect 16:9 -af volnorm=2 -vf pp=fd',
+    'vcd'    : '-cache 4096 -monitoraspect 16:9',
+    'cd'     : '-cache 1024 -cdda speed=2',
+    'mkv'    : '-cache 5000 -slang eng,en,En -monitoraspect 16:9 -ac hwdts,hwac3 -ao alsa:device spdif -utf8 -ass -ass-color ffffff00 -fs',
+    'ogm'    : '-cache 5000 -aid 1 -sid 0 -monitoraspect 16:9',
+    'tv'     : '-nocache',
+    'ivtv'   : '-cache 8192',
+    'avi'    : '-cache 5000 -monitoraspect 16:9 -af volnorm=1',
+    'mpg'    : '-cache 5000 -monitoraspect 16:9 -af volnorm=1 -vf pp=fd',
+    'rm'     : '-cache 5000 -forceidx',
+    'rmvb'   : '-cache 5000 -forceidx -monitoraspect 16:9',
+    'webcam' : 'tv:// -tv driver=v4l:width=352:height=288:outfmt=yuy2:device=/dev/video2',
+    'default': ''
+}
 
-VIDEO_ITEMS = [ ('Video Archive', '/media/video') ]
-AUDIO_ITEMS = [ ('MP3 Collection', '/media/mp3') ]
-GAMES_ITEMS = [ ('Atari 2600', '/media/atari', ('GENERIC', '/usr/games/stella', '-zoom 4 -fullscreen -hidecursor -sound 1 -video soft', ' ', [ 'bin' ] )) ]
+GUI_XML_FILE = 'dark'
+
+IMAGE_ITEMS = []
+TV_CHANNELS = []
+VIDEO_ITEMS = [ ('Video Archive', '/media') ]
+AUDIO_ITEMS = [ ('MP3 Collection', '/media') ]
+GAMES_ITEMS = [ ('MSX', '/media', ('GENERIC', 'openmsx', '', '', [ 'ROM', 'rom' ] )) ]
 
