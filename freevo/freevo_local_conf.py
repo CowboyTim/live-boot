@@ -40,7 +40,7 @@ MPLAYER_ARGS = {
     'dvd'    : '-cache 8192 -monitoraspect 16:9 -af volnorm=2 -vf pp=fd',
     'vcd'    : '-cache 4096 -monitoraspect 16:9',
     'cd'     : '-cache 1024 -cdda speed=2',
-    'mkv'    : '-cache 5000 -slang eng,en,En -monitoraspect 16:9 -ac hwdts,hwac3 -ao alsa:device spdif -utf8 -ass -ass-color ffffff00 -fs',
+    'mkv'    : '-cache 5000 -slang eng,en,En -monitoraspect 16:9 -ac hwdts,hwac3 -ao alsa:device=spdif -utf8 -ass -ass-color ffffff00 -fs',
     'ogm'    : '-cache 5000 -aid 1 -sid 0 -monitoraspect 16:9',
     'tv'     : '-nocache',
     'ivtv'   : '-cache 8192',
@@ -52,11 +52,11 @@ MPLAYER_ARGS = {
     'default': ''
 }
 
-GUI_XML_FILE = 'dark'
+SKIN_XML_FILE = 'dark'
 
 IMAGE_ITEMS = []
 TV_CHANNELS = []
 VIDEO_ITEMS = [ ('Video Archive', '/media') ]
 AUDIO_ITEMS = [ ('MP3 Collection', '/media') ]
-GAMES_ITEMS = [ ('MSX', '/media', ('GENERIC', 'openmsx', '', '', [ 'ROM', 'rom' ] )) ]
+GAMES_ITEMS = [ ('MSX', '/media', ('GENERIC', 'openmsx', '', '', [ 'ROM', 'rom', 'zip', 'ZIP' ] )) ]
 

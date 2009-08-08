@@ -1,10 +1,19 @@
-splashimage=(hd0,0)/boot/grub/splashimages/KUBUNTU_splashscreen_blue_neon_logo_03.xpm.gz
-
 default		0
 timeout		1
+hiddenmenu
 
-title		Tubuntu
+title		Tubuntu to ram + nothing persistent
 root		(hd0,0)
-kernel		/boot/vmlinuz boot=fastboot_by_tim root=LABEL=TIMUBUNTU persistent homepersistent nosplash noquiet nosplash toram --
-initrd		/boot/initrd.gz
-quiet
+kernel		/boot/vmlinuz-2.6.28-14-generic-TIMUBUNTU boot=fastboot_by_tim
+root=LABEL=TIMUBUNTU noquiet nosplash toram nopersistent --
+initrd		/boot/TIMUBUNTU-initrd.gz
+
+title		Tubuntu to ram + persistent home + persistent root
+root		(hd0,0)
+kernel		/boot/vmlinuz-2.6.28-14-generic-TIMUBUNTU boot=fastboot_by_tim root=LABEL=TIMUBUNTU homepersistent rootpersistent noquiet nosplash toram --
+initrd		/boot/TIMUBUNTU-initrd.gz
+
+title		Tubuntu to ram + persistent home + *NOT* persistent root
+root		(hd0,0)
+kernel		/boot/vmlinuz-2.6.28-14-generic-TIMUBUNTU boot=fastboot_by_tim root=LABEL=TIMUBUNTU homepersistent noquiet nosplash toram --
+initrd		/boot/TIMUBUNTU-initrd.gz
