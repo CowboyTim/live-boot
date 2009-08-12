@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # apt-get install python-vm-builder
+# grub as boot: grub-install --recheck --root-directory=/media/TIMUBUNTU/ /dev/sd
 
 
 
@@ -194,6 +195,15 @@ various_hacks (){
         --uid $user_id -G admin,audio -p $passwd $user_name || exit 1
     chroot $tmptargetsquashdir passwd -d root || exit 1
 
+    chroot $tmptargetsquashdir update-rc.d -f udev remove || exit 1
+
+    chroot $tmptargetsquashdir nvidia-xconfig \
+        --add-argb-glx-visuals \
+        --allow-glx-with-composite \
+        --composite \
+        --force-generate \
+        --separate-x-screens 
+
     cat > $tmptargetsquashdir/etc/sudoers <<EOs
 # /etc/sudoers
 #
@@ -269,7 +279,7 @@ fi
 
 mount_vm_image
 make_initramfs 
-various_hacks "freevo"
+various_hacks
 post_specific_stuff "freevo"
 make_squash
 make_iso 
