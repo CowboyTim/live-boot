@@ -4,8 +4,7 @@ hiddenmenu
 
 title		Tubuntu to ram + nothing persistent
 root		(hd0,0)
-kernel		/boot/vmlinuz-2.6.28-14-generic-TIMUBUNTU boot=fastboot_by_tim
-root=LABEL=TIMUBUNTU noquiet nosplash toram nopersistent --
+kernel		/boot/vmlinuz-2.6.28-14-generic-TIMUBUNTU boot=fastboot_by_tim root=LABEL=TIMUBUNTU noquiet nosplash toram nopersistent --
 initrd		/boot/TIMUBUNTU-initrd.gz
 
 title		Tubuntu to ram + persistent home + persistent root
