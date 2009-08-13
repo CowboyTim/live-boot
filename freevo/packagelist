@@ -4,6 +4,8 @@ freevo-lirc
 freevo-data 
 python-freevo 
 python-alsaaudio
+python-gobject
+python-dbus
 alsa
 mplayer 
 cdparanoia 
