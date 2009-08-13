@@ -195,8 +195,6 @@ various_hacks (){
         --uid $user_id -G admin,audio -p $passwd $user_name || exit 1
     chroot $tmptargetsquashdir passwd -d root || exit 1
 
-    chroot $tmptargetsquashdir update-rc.d -f udev remove || exit 1
-
     chroot $tmptargetsquashdir nvidia-xconfig \
         --add-argb-glx-visuals \
         --allow-glx-with-composite \
