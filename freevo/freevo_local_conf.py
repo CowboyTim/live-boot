@@ -42,7 +42,7 @@ MPLAYER_ARGS = {
     'dvd'    : '-cache 8192 -monitoraspect 16:9 -af volnorm=2 -vf pp=fd',
     'vcd'    : '-cache 4096 -monitoraspect 16:9',
     'cd'     : '-cache 1024 -cdda speed=2',
-    'mkv'    : '-cache 5000 -slang eng,en,En -monitoraspect 16:9 -ac hwdts,hwac3 -utf8 -ass -ass-color ffffff00 -fs',
+    'mkv'    : '-cache 5000 -alang eng,en,En -monitoraspect 16:9 -ac hwdts,hwac3 -ass -ass-color ffffff00 -ass-font-scale 0.9',
     'ogm'    : '-cache 5000 -aid 1 -sid 0 -monitoraspect 16:9',
     'tv'     : '-nocache',
     'ivtv'   : '-cache 8192',

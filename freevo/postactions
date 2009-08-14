@@ -4,3 +4,9 @@ cp $here/$distro/freevo_local_conf.py \
     $tmptargetsquashdir/etc/freevo/local_conf.py
 
 chroot $tmptargetsquashdir chown -R freevo /home/freevo
+
+cp $here/../yaams-git/yaams.py $tmptargetsquashdir/etc/ || exit 1
+cat > $tmptargetsquashdir/etc/rc.local <<EO
+python /etc/yaams.py -d
+exit 0
+EO
