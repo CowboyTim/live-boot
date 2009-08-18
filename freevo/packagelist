@@ -23,3 +23,6 @@ dgen
 nvidia-180-modaliases
 nvidia-glx-180
 nvidia-180-libvdpau
+bluez-compat
+joystick
+libusb-0.1-4

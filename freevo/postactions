@@ -10,3 +10,5 @@ cat > $tmptargetsquashdir/etc/rc.local <<EO
 python /etc/yaams.py -d
 exit 0
 EO
+
+gcc -o $tmptargetsquashdir/etc/sixpair $here/freevo/sixpair.c -lusb
