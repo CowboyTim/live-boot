@@ -11,4 +11,24 @@ python /etc/yaams.py -d
 exit 0
 EO
 
+# sixaxis pair-over-usb utility
 gcc -o $tmptargetsquashdir/etc/sixpair $here/freevo/sixpair.c -lusb
+
+# udev rules that goes along with that:
+cp $here/$distro/99-sixaxis.rules $tmptargetsquashdir/etc/udev/rules.d/
+
+(
+    cd $tmpdir
+    apt-get source bluez-utils
+    apt-get build-dep bluez-utils
+    patch bluez-*/compat/hidd.c $here/$distro/patch-hidd-3.19-pabr3
+    cd bluez-*
+    dpkg-buildpackage -rfakeroot
+    cd ..
+    cp bluez-compat*.deb $tmptargetsquashdir/tmp || exit 1
+) || exit 1
+
+# use bash to do th '*' globbing, don't forget, the '*' is glob-ed by *this*
+# shell, which isn't chrooted, and thus has no /tmp/bluez-compat_*
+chroot $tmptargetsquashdir bash -c 'dpkg -i /tmp/bluez-compat_*' || exit 1
+
