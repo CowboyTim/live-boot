@@ -206,14 +206,19 @@ setup_unionfs() {
 
 mountroot() {
 
+    echo "FASTBOOT's mountroot called"
+
     parse_cmdline
 
     if [ ! -z "$ROOT" ]; then
         BOOT=$(basename $ROOT)
         i=0
         while [ "$i" -lt 10 ]; do
+            echo "udevadm trigger+settle called"
             udevadm trigger
             udevadm settle
+            echo "ls -l /dev/disk/by-label"
+            ls -l /dev/disk/by-label
             if [ -b "$ROOT" ] ; then
                 rootfstype=$(get_fstype $ROOT)
                 mount -t $rootfstype $ROOT $mountpoint
@@ -261,5 +266,7 @@ mountroot() {
     if [ -f $rootmnt/etc/fastboot_by_tim.conf ]; then
         . $rootmnt/etc/fastboot_by_tim.conf
     fi
+
+    echo "FASTBOOT's mountroot done"
 
 }
