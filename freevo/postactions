@@ -1,10 +1,12 @@
 #!/bin/bash
 
+# our freevo config
 cp $here/$distro/freevo_local_conf.py \
     $tmptargetsquashdir/etc/freevo/local_conf.py
 
 chroot $tmptargetsquashdir chown -R freevo /home/freevo
 
+# our own written automounter
 cp $here/../yaams-git/yaams.py $tmptargetsquashdir/etc/ || exit 1
 cat > $tmptargetsquashdir/etc/rc.local <<EO
 python /etc/yaams.py -d
@@ -17,6 +19,7 @@ gcc -o $tmptargetsquashdir/etc/sixpair $here/freevo/sixpair.c -lusb
 # udev rules that goes along with that:
 cp $here/$distro/99-sixaxis.rules $tmptargetsquashdir/etc/udev/rules.d/
 
+# the hidd patch for the sixaxis auth enable
 (
     cd $tmpdir
     apt-get source bluez-utils
@@ -31,4 +34,7 @@ cp $here/$distro/99-sixaxis.rules $tmptargetsquashdir/etc/udev/rules.d/
 # use bash to do th '*' globbing, don't forget, the '*' is glob-ed by *this*
 # shell, which isn't chrooted, and thus has no /tmp/bluez-compat_*
 chroot $tmptargetsquashdir bash -c 'dpkg -i /tmp/bluez-compat_*' || exit 1
+
+# disable the bluetooth daemon, we're using hidd itself
+chroot $tmptargetsquashdir update-rc.d -f bluetooth remove
 
