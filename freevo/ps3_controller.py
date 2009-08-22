@@ -6,6 +6,10 @@ from threading import Thread
 from Queue import Queue
 from Queue import Empty
 
+from subprocess import Popen
+from subprocess import PIPE
+from subprocess import check_call
+
 import struct
 import select
 import time
@@ -53,7 +57,7 @@ button_to_abbreviation = {
 
 class JoyImp(Thread):
     def init_dev(self):
-        print("Trying opening /dev/input/js0")
+        _debug_("Trying opening /dev/input/js0")
         fd = open('/dev/input/js0')
         p = select.poll()
         p.register(fd, select.POLLIN)
@@ -104,7 +108,8 @@ class JoyImp(Thread):
                     print('unknown')
 
             except IOError as (errno, strerror):
-                print("I/O error({0}): {1}".format(errno, strerror))
+                if errno != 19:
+                    print("I/O error({0}): {1}".format(errno, strerror))
                 if fd: fd.close()
                 p = None
                 time.sleep(1)
@@ -122,8 +127,9 @@ class PluginInterface(plugin.DaemonPlugin):
     """
 
     def __init__(self):
+        plugin.DaemonPlugin.__init__(self)
         self.plugin_name = 'PS3_CONTROLLER'
-        #self.poll_interval  = 1
+        self.poll_interval  = 10
         self.poll_menu_only = False
         self.enabled = True
         self.w = JoyImp()
@@ -132,7 +138,7 @@ class PluginInterface(plugin.DaemonPlugin):
             'button' : {}
         }
         self.w.start()
-        plugin.DaemonPlugin.__init__(self)
+        self.ps_button_time = 0
 
     def config(self):
         return []
@@ -174,7 +180,27 @@ class PluginInterface(plugin.DaemonPlugin):
                         print('command:'+str(command))
                         handler = rc.get_singleton()
                         handler.post_event(handler.key_event_mapper(command))
+                if abbr_button == 'ps':
+                    _debug_("PS button state:"+str(self.ps_button_time)+":"+str(value)+":"+str(time.time()))
+                    if self.ps_button_time != 0 and time.time() > self.ps_button_time + 2:
+                        self.ps_button_time = 0
+                        print("SHUTDOWN")
+                    elif value == 1 and self.ps_button_time == 0:
+                        self.ps_button_time = time.time()
+                    elif value == 0 and self.ps_button_time != 0:
+                        self.ps_button_time = 0
+                        self.shutdown_controller()
+
 
     def enable(self, enable_joy=True):
         self.enabled = enable_joy
         return
+
+    def shutdown_controller(self):
+        # for now, turn off the PS3 controller
+        # FIXME: make more python way. Especially the grep+awk.
+        p1 = Popen(["hcitool", "con"], stdout=PIPE)
+        p2 = Popen(["grep", "ACL"], stdin=p1.stdout, stdout=PIPE)
+        p3 = Popen(["awk", "{print $3}"], stdin=p2.stdout, stdout=PIPE)
+        output = p3.communicate()[0]
+        check_call(["hcitool", "dc", output])

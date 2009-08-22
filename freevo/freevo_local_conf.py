@@ -14,9 +14,17 @@ plugin.remove('headlines')
 plugin.remove('image')
 plugin.remove('usb')
 plugin.remove('idlebar')
+plugin.remove('idlebar.clock')
+plugin.remove('idlebar.tc')
+plugin.remove('idlebar.diskfree')
+plugin.remove('idlebar.cdstatus')
+plugin.remove('file_ops')
+plugin.remove('rom_drives.rom_items')
+plugin.remove('tiny_osd')
 
 plugin.activate('alsamixer2')
 plugin.activate('ps3_controller')
+plugin.activate('shutdown')
 
 
 START_FULLSCREEN_X  = 1
@@ -42,7 +50,7 @@ MPLAYER_ARGS = {
     'dvd'    : '-cache 8192 -monitoraspect 16:9 -af volnorm=2 -vf pp=fd',
     'vcd'    : '-cache 4096 -monitoraspect 16:9',
     'cd'     : '-cache 1024 -cdda speed=2',
-    'mkv'    : '-cache 5000 -alang eng,en,En -monitoraspect 16:9 -ac hwdts,hwac3 -ass -ass-color ffffff00 -ass-font-scale 0.9',
+    'mkv'    : '-cache 5000 -alang eng,en,En -monitoraspect 16:9 -ac hwdts,hwac3 -ass -ass-color ffffff00 -ass-font-scale 0.9 -fs',
     'ogm'    : '-cache 5000 -aid 1 -sid 0 -monitoraspect 16:9',
     'tv'     : '-nocache',
     'ivtv'   : '-cache 8192',
