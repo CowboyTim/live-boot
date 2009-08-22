@@ -12,11 +12,12 @@ plugin.remove('ossmixer')
 plugin.remove('image.apod')
 plugin.remove('headlines')
 plugin.remove('image')
+plugin.remove('usb')
 
-plugin.activate('usb')
 plugin.activate('idlebar')
 plugin.activate('idlebar.clock',   level=50)
 plugin.activate('alsamixer2')
+plugin.activate('ps3_controller')
 
 
 START_FULLSCREEN_X  = 1
@@ -35,7 +36,7 @@ EVENTS['video']['6'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='panscan -.05')
 EVENTS['video']['8'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='switch_ratio 1.33334')
 EVENTS['video']['9'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='switch_ratio 1.77778')
 
-MPLAYER_ARGS_DEF = ''
+MPLAYER_ARGS_DEF = '-nojoystick'
 MPLAYER_VERSION = 0.9
 MPLAYER_AO_DEV = 'alsa'
 MPLAYER_ARGS = {
@@ -55,6 +56,7 @@ MPLAYER_ARGS = {
 }
 
 SKIN_XML_FILE = 'dark'
+
 
 IMAGE_ITEMS = []
 TV_CHANNELS = []

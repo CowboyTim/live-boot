@@ -38,3 +38,6 @@ chroot $tmptargetsquashdir bash -c 'dpkg -i /tmp/bluez-compat_*' || exit 1
 # disable the bluetooth daemon, we're using hidd itself
 chroot $tmptargetsquashdir update-rc.d -f bluetooth remove
 
+# ps3 controller calibration, dunnow whether it works or is needed
+cp $here/$distro/ps3_controller_calibration $tmptargetsquashdir/home/freevo/.joystick
+
