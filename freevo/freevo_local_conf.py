@@ -1,7 +1,7 @@
 CONTROL_ALL_AUDIO   = 0
-MAJOR_AUDIO_CTRL    = 'PCM'
+MAJOR_AUDIO_CTRL    = 'Master'
 MAX_VOLUME          = 100
-DEFAULT_VOLUME      = 60
+DEFAULT_VOLUME      = 100
 CONFIG_VERSION      = 5.24
 
 plugin.remove('mixer')
@@ -13,14 +13,14 @@ plugin.remove('image.apod')
 plugin.remove('headlines')
 plugin.remove('image')
 plugin.remove('usb')
+plugin.remove('idlebar')
 
-plugin.activate('idlebar')
-plugin.activate('idlebar.clock',   level=50)
+#plugin.activate('idlebar.clock',   level=50)
 plugin.activate('alsamixer2')
 plugin.activate('ps3_controller')
 
 
-START_FULLSCREEN_X  = 1
+START_FULLSCREEN_X  = 0
 
 EVENTS['video']['1'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='switch_audio')
 EVENTS['video']['4'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='sub_select')
@@ -56,6 +56,15 @@ MPLAYER_ARGS = {
 }
 
 SKIN_XML_FILE = 'dark'
+JOY_CMDS = {
+   'select' : 'HELP',
+   'up'     : 'UP',
+   'down'   : 'DOWN',
+   'left'   : 'LEFT',
+   'right'  : 'RIGHT',
+   'cross'  : 'ENTER',
+   'round'  : 'EXIT',
+}
 
 
 IMAGE_ITEMS = []
@@ -63,4 +72,7 @@ TV_CHANNELS = []
 VIDEO_ITEMS = [ ('Video Archive', '/media') ]
 AUDIO_ITEMS = [ ('MP3 Collection', '/media') ]
 GAMES_ITEMS = [ ('MSX', '/media', ('GENERIC', 'openmsx', '', '', [ 'ROM', 'rom', 'zip', 'ZIP' ] )) ]
+
+ROM_DRIVES  = []
+VIDEO_SHOW_DATA_DIR  = '/media'
 
