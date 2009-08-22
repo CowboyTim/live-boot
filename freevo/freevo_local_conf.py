@@ -15,12 +15,11 @@ plugin.remove('image')
 plugin.remove('usb')
 plugin.remove('idlebar')
 
-#plugin.activate('idlebar.clock',   level=50)
 plugin.activate('alsamixer2')
 plugin.activate('ps3_controller')
 
 
-START_FULLSCREEN_X  = 0
+START_FULLSCREEN_X  = 1
 
 EVENTS['video']['1'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='switch_audio')
 EVENTS['video']['4'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='sub_select')
