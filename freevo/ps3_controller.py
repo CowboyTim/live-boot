@@ -135,17 +135,7 @@ class PluginInterface(plugin.DaemonPlugin):
         plugin.DaemonPlugin.__init__(self)
 
     def config(self):
-        return [
-            ('JOY_CMDS', {
-               'select' : 'HELP',
-               'up'     : 'UP',
-               'down'   : 'DOWN',
-               'left'   : 'LEFT',
-               'right'  : 'RIGHT',
-               'cross'  : 'ENTER',
-               'round'  : 'EXIT',
-            }, 'Mapping of controller buttons to actions')
-        ]
+        return []
 
     def poll(self):
         if not self.enabled:
@@ -174,7 +164,7 @@ class PluginInterface(plugin.DaemonPlugin):
             raise
         _debug_(str(self.state))
         _debug_(str(value_has_been))
-
+    
         for button, value in self.state['button'].iteritems():
             if button in button_to_abbreviation:
                 abbr_button = button_to_abbreviation[button]
