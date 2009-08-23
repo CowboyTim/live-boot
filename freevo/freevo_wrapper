@@ -22,8 +22,8 @@ exec 2>> $HOME/log/Xfreevo.log
 
 cat /etc/freevo/freevo.conf |grep -v geometry > /tmp/a.conf
 echo geometry = `xrandr |grep '*'|awk '{print $1}'` >> /tmp/a.conf
-mkdir ~/.freevo
-cp /tmp/a.conf ~/.freevo/freevo.conf || exit 1
+mkdir $HOME/.freevo
+cp /tmp/a.conf $HOME/.freevo/freevo.conf || exit 1
 
 # start freevo
 exec /usr/bin/freevo.real "$@"
