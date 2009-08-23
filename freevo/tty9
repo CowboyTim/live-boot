@@ -10,4 +10,4 @@ stop on runlevel 5
 stop on runlevel 6
 
 respawn
-exec openvt -e -c 9 -- su --shell /bin/sh freevo -c 'startx  /etc/freevo_wrapper   -- :1 vt9  -quiet'
+exec openvt -f -e -c 9 -- su --shell /bin/sh freevo -c 'startx  /etc/freevo_wrapper   -- :1 vt9  -quiet'
