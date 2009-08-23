@@ -1,0 +1,17 @@
+#!/bin/sh
+
+unset OS_LOGDIR FREEVO_LOGDIR OS_STATICDIR FREEVO_STATICDIR OS_CACHEDIR FREEVO_CACHEDIR FREEVO_SHARE FREEVO_CONTRIB FREEVO_SCRIPT FREEVO_CONFIG LD_PRELOAD SDL_VIDEODRIVER FREEVO_LOCALE FREEVO_PYTHON
+
+test -r /etc/freevo/debconf.sh && . /etc/freevo/debconf.sh
+
+test -r /etc/default/freevo && . /etc/default/freevo
+
+[ -d $HOME/log  ] || mkdir $HOME/log
+[ -f $HOME/log/Xfreevo.log  ] && mv $HOME/log/Xfreevo.log{,~}
+
+exec >> $HOME/log/Xfreevo.log
+exec 2>> $HOME/log/Xfreevo.log
+cat /etc/freevo/freevo.conf |grep -v geometry > /tmp/a.conf
+echo geometry = `xrandr |grep '*'|awk '{print $1}'` >> /tmp/a.conf
+cp /tmp/a.conf ~/.freevo/freevo.conf || exit 1
+exec /usr/bin/freevo.real "$@"
