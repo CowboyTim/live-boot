@@ -195,12 +195,12 @@ various_hacks (){
         --uid $user_id -G admin,audio -p $passwd $user_name || exit 1
     chroot $tmptargetsquashdir passwd -d root || exit 1
 
-    chroot $tmptargetsquashdir nvidia-xconfig \
-        --add-argb-glx-visuals \
-        --allow-glx-with-composite \
-        --composite \
-        --force-generate \
-        --separate-x-screens 
+    chroot $tmptargetsquashdir bash -c '\
+        LD_LIBRARY_PATH=/usr/lib/nvidia nvidia-xconfig \
+            --add-argb-glx-visuals \
+            --allow-glx-with-composite \
+            --composite \
+            --force-generate'
 
     cat > $tmptargetsquashdir/etc/sudoers <<EOs
 # /etc/sudoers
