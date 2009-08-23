@@ -11,7 +11,19 @@ test -r /etc/default/freevo && . /etc/default/freevo
 
 exec >> $HOME/log/Xfreevo.log
 exec 2>> $HOME/log/Xfreevo.log
+
+# FIXME: implement better way
+#
+#  use xrandr on the running X to find the current resolution and put that in
+#  the freevo.conf. The X server has chosen the best resolution anyways.
+#
+#  This script is basically the freevo+log script, which is started by tty9
+#  (upstart /etc/event.d/tty9), which is in fact an openvt + su + startx.
+
 cat /etc/freevo/freevo.conf |grep -v geometry > /tmp/a.conf
 echo geometry = `xrandr |grep '*'|awk '{print $1}'` >> /tmp/a.conf
+mkdir ~/.freevo
 cp /tmp/a.conf ~/.freevo/freevo.conf || exit 1
+
+# start freevo
 exec /usr/bin/freevo.real "$@"
