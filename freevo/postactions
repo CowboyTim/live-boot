@@ -10,6 +10,12 @@ chroot $tmptargetsquashdir chown -R freevo /home/freevo
 cp $here/../yaams-git/yaams.py $tmptargetsquashdir/etc/ || exit 1
 cat > $tmptargetsquashdir/etc/rc.local <<EO
 python /etc/yaams.py -d
+LD_LIBRARY_PATH=/usr/lib/nvidia /usr/bin/nvidia-xconfig \
+    --use-display-device=DFP \
+    --probe-all-gpus \
+    --dynamic-twinview \
+    --enable-all-gpus \
+    --force-generate
 exit 0
 EO
 
