@@ -37,6 +37,11 @@ chroot $tmptargetsquashdir bash -c 'dpkg -i /tmp/bluez-compat_*' || exit 1
 
 # disable the bluetooth daemon, we're using hidd itself
 chroot $tmptargetsquashdir update-rc.d -f bluetooth remove
+chroot $tmptargetsquashdir update-rc.d -f freevo_xserver remove
+chroot $tmptargetsquashdir update-rc.d -f freevo_recordserver remove
+chroot $tmptargetsquashdir update-rc.d -f freevo_webserver remove
+chroot $tmptargetsquashdir update-rc.d -f freevo_rssserver remove
+chroot $tmptargetsquashdir update-rc.d -f freevo_encodingserver remove
 
 # PS3 controller plugin
 cp $here/$distro/ps3_controller.py \
@@ -44,3 +49,7 @@ cp $here/$distro/ps3_controller.py \
 chroot $tmptargetsquashdir \
     ln -s /usr/share/pyshared/freevo/plugins/ps3_controller.py \
           /usr/lib/python2.6/dist-packages/freevo/plugins/ps3_controller.py
+
+cp $here/$distro/tty9 $tmptargetsquashdir/etc/event.d
+cp $here/$distro/freevo_wrapper $tmptargetsquashdir/etc/
+chmod +x $tmptargetsquashdir/etc/freevo_wrapper
