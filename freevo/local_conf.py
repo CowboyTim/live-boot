@@ -27,6 +27,11 @@ plugin.activate('ps3_controller')
 plugin.activate('shutdown')
 
 
+SYS_SHUTDOWN_ENABLE  = True
+SYS_SHUTDOWN_CONFIRM = True
+SYS_SHUTDOWN_CMD     = '/sbin/shutdown -h now'
+SYS_RESTART_CMD      = '/sbin/reboot' # aparently not needed/used when SYS_SHUTDOWN_ENABLE is True
+
 START_FULLSCREEN_X  = 1
 
 EVENTS['video']['1'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='switch_audio')
@@ -62,7 +67,7 @@ MPLAYER_ARGS = {
     'default': ''
 }
 
-SKIN_XML_FILE = 'dark'
+SKIN_XML_FILE = 'Tux\'n Tosh TV'
 JOY_CMDS = {
    'select' : 'HELP',
    'up'     : 'UP',
