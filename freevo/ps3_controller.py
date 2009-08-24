@@ -20,6 +20,7 @@ import rc
 
 q = Queue(1000)
 
+# currently not used:
 button_to_axis = {
      4 :  8,   # up
      5 :  9,   # right
@@ -88,27 +89,11 @@ class JoyImp(Thread):
                 evt = fd.read(JS_EVENT_SIZE)
                 ts, value, type, number = struct.unpack(JS_EVENT, evt)
                 evt = type & ~JS_EVENT_INIT
-                if evt == JS_EVENT_AXIS:
-                    # lowpass filter: http://en.wikipedia.org/wiki/Low-pass_filter
-                    if number not in y:
-                        y[number] = value
-                        last_k = y[number]
-                        q.put(['axis', number, value])
-                    else:
-                        last_k = y[number]
-                        y[number] = y[number] + a * (value - y[number])
-                        
-                    # push to queue
-                    if int(last_k) != int(y[number]):
-                        q.put(['axis', number, int(y[number])])
-
-                elif evt == JS_EVENT_BUTTON:
+                if evt == JS_EVENT_BUTTON:
                     q.put(['button', number, value])
-                else:
-                    print('unknown')
 
             except IOError as (errno, strerror):
-                if errno != 19:
+                if errno != 19 and errno != 2:
                     print("I/O error({0}): {1}".format(errno, strerror))
                 if fd: fd.close()
                 p = None
@@ -134,12 +119,12 @@ class PluginInterface(plugin.DaemonPlugin):
         self.enabled = True
         self.w = JoyImp()
         self.state = {
-            'axis'   : {},
             'button' : {}
         }
         self.w.start()
         self.ps_button_time  = 0
         self.last_input_time = time.time()
+        self.ps_controller_started = 1
 
     def config(self):
         return []
@@ -151,20 +136,19 @@ class PluginInterface(plugin.DaemonPlugin):
         _debug_('poll called')
 
         value_has_been = {
-            'axis'   : {},
             'button' : {} 
         }
 
         try:
             while True:
                 action = q.get_nowait()
+                print(str(action))
+                self.ps_controller_started = 1
+                self.last_input_time = time.time()
                 self.state[action[0]][action[1]] = action[2]
                 if action[0] == 'button':
                     if action[2] == 1:
                         value_has_been['button'][action[1]] = 1
-                    if action[2] == 0 and action[1] in button_to_axis:
-                        self.state['axis'][button_to_axis[action[1]]] = 0
-            print('state:'+str(self.state))
         except Empty, e:
             pass
         except:
@@ -178,6 +162,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 if abbr_button in config.JOY_CMDS:
                     command = config.JOY_CMDS[abbr_button]
                     if value == 1 or button in value_has_been['button']:
+                        self.ps_controller_started = 1
                         self.last_input_time = time.time()
                         print('command:'+str(command))
                         handler = rc.get_singleton()
@@ -193,7 +178,7 @@ class PluginInterface(plugin.DaemonPlugin):
                         self.ps_button_time = 0
                         self.shutdown_controller()
 
-        if self.last_input_time and time.time() - 10 > self.last_input_time:
+        if self.ps_controller_started and time.time() - 10 > self.last_input_time:
             self.shutdown_controller()
 
 
@@ -205,6 +190,7 @@ class PluginInterface(plugin.DaemonPlugin):
         try:
             print("PS3 wireless controller shutdown")
             self.last_input_time = time.time()
+            self.ps_controller_started = 0
 
             # for now, turn off the PS3 controller
             # FIXME: make more python way. Especially the grep+awk.
