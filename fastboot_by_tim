@@ -46,6 +46,8 @@ parse_cmdline() {
             nopersistent)
                 export root_persistent=""
                 export home_persistent="";;
+            rfsfile)
+                export rfsfile="${x#rfsfile=}";;
             toram)
                 export TORAM="Yes" ;;
         esac
@@ -73,7 +75,10 @@ setup_unionfs() {
     livefs_root="$1"
     rootmnt="$2"
 
-    image_directory="$livefs_root/modules"
+    image="$livefs_root/${rfsfile}"
+    if [ ! -f "$image" ]; then
+        panic "No file $image found to mount as loop rootfs"
+    fi
 
     if [ ! -z $TORAM ]; then
         echo "Copying live_media to $TORAM"
@@ -84,7 +89,7 @@ setup_unionfs() {
         mount -t tmpfs /dev/shm $copyto
     
         # "cp -a" from busybox also copies hidden files
-        cp -a $livefs_root/modules $copyto 
+        cp -a $image $copyto 
 
         # This will unmount the original mountpoint.  This is possible as it
         # makes a tmpfs and copies the squashfs to it, not needing the original
@@ -95,6 +100,8 @@ setup_unionfs() {
         # never use rm -rf, who knows what stupid mistakes I've made.. It was
         # copying / entirely, the full 160G .. :-)
         rmdir $copyto
+
+        image="$livefs_root/"$(basename "$image")
     fi
 
     homemount=/home
@@ -123,25 +130,18 @@ setup_unionfs() {
     rofslist=""
 
     mkdir -p "${croot}"
-    for image_type in "ext2" "squashfs" ; do
-        for image in "${image_directory}"/*."${image_type}"; do
-            if [ -f "${image}" ]; then
-                backdev=$(setup_loop "$image")
-                fstype=$(get_fstype "${backdev}")
-                if [ "${fstype}" = "unknown" ]; then
-                    panic "Unknown file system type on ${backdev} (${image})"
-                fi
-                imagename=$(basename "${image}")
-                mkdir -p "${croot}/${imagename}"
-                echo "Mounting rofs $image to $croot/$imagename"
-                mount -t "${fstype}" -o ro,noatime "${backdev}" \
-                    "${croot}/${imagename}" \
-                    || panic "Can not mount $backdev ($image) on ${croot}/${imagename}"
-                rofsstring="${croot}/${imagename}=rr:${rofsstring}"
-                rofslist="${croot}/${imagename} ${rofslist}"
-            fi
-        done
-    done
+    backdev=$(setup_loop "$image")
+    fstype=$(get_fstype "${backdev}")
+    if [ "${fstype}" = "unknown" ]; then
+        panic "Unknown file system type on ${backdev} (${image})"
+    fi
+    mkdir -p "${croot}/rofs_mount"
+    echo "Mounting rofs $image to $croot/rofs_mount"
+    mount -t "${fstype}" -o ro,noatime "${backdev}" \
+        "${croot}/rofs_mount" \
+        || panic "Can not mount $backdev ($image) on ${croot}/rofs_mount"
+    rofsstring="${croot}/rofs_mount=rr:${rofsstring}"
+    rofslist="${croot}/rofs_mount ${rofslist}"
     rofsstring=${rofsstring%:}
 
     mkdir -p /cow
