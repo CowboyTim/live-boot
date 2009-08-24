@@ -38,6 +38,7 @@ EVENTS['video']['r1']     = Event(VIDEO_SEND_MPLAYER_CMD, arg='seek +600')
 EVENTS['video']['l1']     = Event(VIDEO_SEND_MPLAYER_CMD, arg='seek -600')
 EVENTS['video']['SELECT'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='pause')
 EVENTS['video']['UP']     = Event(VIDEO_SEND_MPLAYER_CMD, arg='sub_select')
+EVENTS['video']['OSD']    = Event(VIDEO_SEND_MPLAYER_CMD, arg='osd')
 
 MPLAYER_ARGS_DEF = '-nojoystick'
 MPLAYER_VERSION = 0.9
@@ -67,6 +68,7 @@ JOY_CMDS = {
    'right'  : 'RIGHT',
    'cross'  : 'SELECT',
    'round'  : 'EXIT',
+   'square' : 'OSD',
    'r1'     : 'r1',
    'l1'     : 'l1',
 }
