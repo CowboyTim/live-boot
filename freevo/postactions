@@ -56,6 +56,6 @@ chroot $tmptargetsquashdir \
     ln -s /usr/share/pyshared/freevo/plugins/ps3_controller.py \
           /usr/lib/python2.6/dist-packages/freevo/plugins/ps3_controller.py
 
-cp $here/$distro/tty9 $tmptargetsquashdir/etc/event.d
+cp $here/$distro/freevo $tmptargetsquashdir/etc/event.d
 cp $here/$distro/freevo_wrapper $tmptargetsquashdir/etc/
 chmod +x $tmptargetsquashdir/etc/freevo_wrapper
