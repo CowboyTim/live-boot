@@ -1,5 +1,3 @@
-# tty9 - getty
-#
 start on runlevel 2
 start on runlevel 3
 
