@@ -1,5 +1,11 @@
 #!/bin/sh
 
+stop=$1
+if [ ! -z $stop ]; then
+    initctl stop freevo
+    exit 0
+fi
+
 unset OS_LOGDIR FREEVO_LOGDIR OS_STATICDIR FREEVO_STATICDIR OS_CACHEDIR FREEVO_CACHEDIR FREEVO_SHARE FREEVO_CONTRIB FREEVO_SCRIPT FREEVO_CONFIG LD_PRELOAD SDL_VIDEODRIVER FREEVO_LOCALE FREEVO_PYTHON
 
 test -r /etc/freevo/debconf.sh && . /etc/freevo/debconf.sh
@@ -24,6 +30,8 @@ cat /etc/freevo/freevo.conf |grep -v geometry > /tmp/a.conf
 echo geometry = `xrandr |grep '*'|awk '{print $1}'` >> /tmp/a.conf
 mkdir $HOME/.freevo
 cp /tmp/a.conf $HOME/.freevo/freevo.conf || exit 1
+
+export FREEVO_SCRIPT=/etc/freevo_wrapper
 
 # start freevo
 exec /usr/bin/freevo.real "$@"

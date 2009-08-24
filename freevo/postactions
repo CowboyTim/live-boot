@@ -1,8 +1,10 @@
 #!/bin/bash
 
+mkdir -p $tmptargetsquashdir/home/freevo/.freevo
+
 # our freevo config
-cp $here/$distro/freevo_local_conf.py \
-    $tmptargetsquashdir/etc/freevo/local_conf.py
+cp $here/$distro/local_conf.py \
+    $tmptargetsquashdir/home/freevo/.freevo/local_conf.py
 
 chroot $tmptargetsquashdir chown -R freevo /home/freevo
 
@@ -59,3 +61,8 @@ chroot $tmptargetsquashdir \
 cp $here/$distro/freevo $tmptargetsquashdir/etc/event.d
 cp $here/$distro/freevo_wrapper $tmptargetsquashdir/etc/
 chmod +x $tmptargetsquashdir/etc/freevo_wrapper
+
+# nasty trick to let freevo shutdown the PC from the user 'freevo'
+chmod o+s $tmptargetsquashdir/sbin/{initctl,shutdown,reboot}
+
+chroot $tmptargetsquashdir chown -R freevo /home/freevo
