@@ -113,7 +113,7 @@ class JoyImp(Thread):
                 if fd: fd.close()
                 p = None
                 time.sleep(1)
-            except e:
+            except Exception as e:
                 print(e)
                 
 
@@ -129,7 +129,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
         self.plugin_name = 'PS3_CONTROLLER'
-        self.poll_interval  = 10
+        self.poll_interval  = 15
         self.poll_menu_only = False
         self.enabled = True
         self.w = JoyImp()
@@ -138,7 +138,8 @@ class PluginInterface(plugin.DaemonPlugin):
             'button' : {}
         }
         self.w.start()
-        self.ps_button_time = 0
+        self.ps_button_time  = 0
+        self.last_input_time = 0
 
     def config(self):
         return []
@@ -177,6 +178,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 if abbr_button in config.JOY_CMDS:
                     command = config.JOY_CMDS[abbr_button]
                     if value == 1 or button in value_has_been['button']:
+                        self.last_input_time = time.time()
                         print('command:'+str(command))
                         handler = rc.get_singleton()
                         handler.post_event(handler.key_event_mapper(command))
@@ -191,16 +193,26 @@ class PluginInterface(plugin.DaemonPlugin):
                         self.ps_button_time = 0
                         self.shutdown_controller()
 
+        if self.last_input_time and time.time() - 10 > self.last_input_time:
+            self.shutdown_controller()
+
 
     def enable(self, enable_joy=True):
         self.enabled = enable_joy
         return
 
     def shutdown_controller(self):
-        # for now, turn off the PS3 controller
-        # FIXME: make more python way. Especially the grep+awk.
-        p1 = Popen(["hcitool", "con"], stdout=PIPE)
-        p2 = Popen(["grep", "ACL"], stdin=p1.stdout, stdout=PIPE)
-        p3 = Popen(["awk", "{print $3}"], stdin=p2.stdout, stdout=PIPE)
-        output = p3.communicate()[0]
-        check_call(["hcitool", "dc", output])
+        try:
+            print("PS3 wireless controller shutdown")
+            self.last_input_time = 0
+
+            # for now, turn off the PS3 controller
+            # FIXME: make more python way. Especially the grep+awk.
+            p1 = Popen(["hcitool", "con"], stdout=PIPE)
+            p2 = Popen(["grep", "ACL"], stdin=p1.stdout, stdout=PIPE)
+            p3 = Popen(["awk", "{print $3}"], stdin=p2.stdout, stdout=PIPE)
+            output = p3.communicate()[0]
+            if output:
+                check_call(["hcitool", "dc", output])
+        except Exception as e:
+            print(e)
