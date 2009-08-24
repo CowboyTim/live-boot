@@ -139,7 +139,7 @@ class PluginInterface(plugin.DaemonPlugin):
         }
         self.w.start()
         self.ps_button_time  = 0
-        self.last_input_time = 0
+        self.last_input_time = time.time()
 
     def config(self):
         return []
@@ -185,8 +185,8 @@ class PluginInterface(plugin.DaemonPlugin):
                 if abbr_button == 'ps':
                     _debug_("PS button state:"+str(self.ps_button_time)+":"+str(value)+":"+str(time.time()))
                     if self.ps_button_time != 0 and time.time() > self.ps_button_time + 2:
-                        self.ps_button_time = 0
-                        print("SHUTDOWN")
+                        handler = rc.get_singleton()
+                        handler.post_event(handler.key_event_mapper('SHUTDOWN'))
                     elif value == 1 and self.ps_button_time == 0:
                         self.ps_button_time = time.time()
                     elif value == 0 and self.ps_button_time != 0:
@@ -204,7 +204,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def shutdown_controller(self):
         try:
             print("PS3 wireless controller shutdown")
-            self.last_input_time = 0
+            self.last_input_time = time.time()
 
             # for now, turn off the PS3 controller
             # FIXME: make more python way. Especially the grep+awk.
