@@ -61,16 +61,17 @@ MPLAYER_ARGS = {
 
 SKIN_XML_FILE = 'Tux\'n Tosh TV'
 JOY_CMDS = {
-   'select' : 'HELP',
-   'up'     : 'UP',
-   'down'   : 'DOWN',
-   'left'   : 'LEFT',
-   'right'  : 'RIGHT',
-   'cross'  : 'SELECT',
-   'round'  : 'EXIT',
-   'square' : 'OSD',
-   'r1'     : 'r1',
-   'l1'     : 'l1',
+   'select'   : 'HELP',
+   'up'       : 'UP',
+   'down'     : 'DOWN',
+   'left'     : 'LEFT',
+   'right'    : 'RIGHT',
+   'cross'    : 'SELECT',
+   'round'    : 'EXIT',
+   'square'   : 'OSD',
+   'triangle' : 'ENTER',
+   'r1'       : 'r1',
+   'l1'       : 'l1',
 }
 
 

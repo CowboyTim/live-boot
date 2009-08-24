@@ -18,7 +18,7 @@ import config
 import plugin
 import rc
 
-q = Queue(1000)
+q = Queue(0)
 
 # currently not used:
 button_to_axis = {
@@ -90,6 +90,7 @@ class JoyImp(Thread):
                 ts, value, type, number = struct.unpack(JS_EVENT, evt)
                 evt = type & ~JS_EVENT_INIT
                 if evt == JS_EVENT_BUTTON:
+                    print('read:'+str(['button', number, value]))
                     q.put(['button', number, value])
 
             except IOError as (errno, strerror):
