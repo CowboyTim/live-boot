@@ -35,6 +35,7 @@ mkdir -p $tmptargetsquashdir
 mkdir -p $tmptargetisodir
 
 make_initramfs(){
+    distro="$1"
     echo "Getting a kernel and an initrd"
 
     if [ ! -d $tmptargetsquashdir/boot -a -d $tmpdir/boot ]; then
@@ -43,9 +44,9 @@ make_initramfs(){
 
     kernelversion=$(basename $(readlink $tmptargetsquashdir/vmlinuz)|sed s/vmlinuz-//)
 
-    mkdir -p $tmptargetisodir/boot
+    mkdir -p $tmptargetisodir/$distro
     cp -f $tmptargetsquashdir/boot/vmlinuz-$kernelversion \
-        $tmptargetisodir/boot/vmlinuz-$kernelversion-$isoname
+        $tmptargetisodir/$distro/vmlinuz-$distro-$isoname
 
     echo "Making a new initramfs in $tmptargetsquashdir"
     tmpinitramfs="$tmptargetsquashdir/tmp/initrd.tmp"
@@ -90,20 +91,59 @@ EOinitramfsconf
         mkfs.ext3 -O dir_index -F -F -L cow ./empty_ext2_fs
         tune2fs -c -1 -i -1 ./empty_ext2_fs
         gzip ./empty_ext2_fs
-        echo "Creating $tmptargetisodir/boot/initrd.gz"
-        find . |cpio -ov -H newc|gzip > $tmptargetisodir/boot/$isoname-initrd.gz
+        echo "Creating $tmptargetisodir/$distro/initrd-$distro-$isoname.gz"
+        find . |cpio -ov -H newc|gzip > $tmptargetisodir/$distro/initrd-$distro-$isoname.gz
     )
     rm -f $targetinitrd
+
+    echo "Moving $tmptargetsquashdir/boot back to $tmpdir/boot"
+    mv $tmptargetsquashdir/boot $tmpdir/boot
+}
+
+get_append_line(){
+    distro="$1"
+    echo "boot=fastboot_by_tim root=LABEL=${isoname} rfsfile=${distro}/${distro}.squashfs noquiet nosplash toram"
+    return
+}
+
+add_grub_config() {
+    distro="$1"
+    mkdir -p $tmptargetisodir/boot/grub
+
+    append=$(get_append_line "$distro")
+
+    cat > $tmptargetisodir/boot/grub/menu.lst <<EOgrub
+default		0
+timeout		1
+hiddenmenu
+
+title		Tubuntu to ram + nothing persistent
+root		(hd0,0)
+kernel		/$distro/vmlinuz-$distro-$isoname $append nopersistent --
+initrd		/$distro/initrd-$distro-$isoname.gz
+
+title		Tubuntu to ram + persistent home + persistent root
+root		(hd0,0)
+kernel		/$distro/vmlinuz-$distro-$isoname $append homepersistent rootpersistent --
+initrd		/$distro/initrd-$distro-$isoname.gz
+
+title		Tubuntu to ram + persistent home + *NOT* persistent root
+root		(hd0,0)
+kernel		/$distro/vmlinuz-$distro-$isoname $append homepersistent --
+initrd		/$distro/initrd-$distro-$isoname.gz
+EOgrub
 }
 
 make_iso() {
+    distro="$1"
     echo "Making a syslinux/isolinux config in $tmptargetisodir"
     mkdir -p $tmptargetisodir/isolinux
     cp -f /usr/lib/syslinux/{isolinux.bin,vesamenu.c32,chain.c32} \
         $tmptargetisodir/isolinux
- 
-    append="boot=fastboot_by_tim root=LABEL=$isoname persistent initrd=/boot/$isoname-initrd.gz"
 
+    append=$(get_append_line "$distro")
+    append="$append initrd=/$distro/initrd-$distro-$isoname.gz"
+ 
     cat > $tmptargetisodir/isolinux/isolinux.cfg <<EOisocfg
 menu hshift 1
 menu width 80
@@ -122,16 +162,16 @@ menu timeoutrow 17
 menu tabmsg Press ENTER to boot or TAB to edit a menu entry
 label nothingpersistent
   menu label ^Tubuntu to ram + NOTHING persistent
-  kernel /boot/vmlinuz-$kernelversion-$isoname
-  append $append noquiet nosplash toram --
+  kernel /$distro/vmlinuz-$distro-$isoname
+  append $append nopersistent --
 label allpersistent
   menu label ^Tubuntu to ram + persistent home + persistent root
-  kernel /boot/vmlinuz-$kernelversion-$isoname
-  append $append noquiet nosplash toram rootpersistent homepersistent --
+  kernel /$distro/vmlinuz-$distro-$isoname
+  append $append  rootpersistent homepersistent --
 label rootpersistent
   menu label ^Tubuntu to ram + persistent root, NOT persistent home
-  kernel /boot/vmlinuz-$kernelversion-$isoname
-  append $append noquiet nosplash toram rootpersistent --
+  kernel /$distro/vmlinuz-$distro-$isoname
+  append $append rootpersistent --
 label hd
   menu label ^Boot from first hard disk
   localboot 0x80
@@ -156,8 +196,9 @@ mount_vm_image (){
 }
 
 make_squash (){
+    distro="$1"
 
-    tmptargetsquashfs="$tmpdir/core-$version-$architecture.squashfs"
+    tmptargetsquashfs="$tmpdir/${distro}.squashfs"
     if [ -f $tmptargetsquashfs ]; then
         return
     fi
@@ -171,7 +212,6 @@ EOfst
 
     echo "Creating squashfs file $tmptargetsquashfs"
     rm -rf $tmptargetsquashdir/tmp
-    mv $tmptargetsquashdir/boot $tmpdir
     chroot $tmptargetsquashdir apt-get clean || exit 1
 
     mkdir -p $tmptargetsquashdir/{proc,dev,tmp}
@@ -179,8 +219,8 @@ EOfst
         -noappend \
         -always-use-fragments 
 
-    mkdir -p $tmptargetisodir/modules
-    cp -f $tmptargetsquashfs $tmptargetisodir/modules
+    mkdir -p $tmptargetisodir/$distro
+    cp -f $tmptargetsquashfs $tmptargetisodir/$distro
 }
 
 various_hacks (){
@@ -276,10 +316,11 @@ if [ -z $1 ]; then
 fi
 
 mount_vm_image
-make_initramfs 
+make_initramfs "freevo"
 various_hacks
 post_specific_stuff "freevo"
-make_squash
-make_iso 
+make_squash "freevo"
+add_grub_config "freevo"
+make_iso "freevo"
 
 umount $tmptargetsquashdir
