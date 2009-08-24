@@ -34,19 +34,10 @@ SYS_RESTART_CMD      = '/sbin/reboot' # aparently not needed/used when SYS_SHUTD
 
 START_FULLSCREEN_X  = 1
 
-EVENTS['video']['1'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='switch_audio')
-EVENTS['video']['4'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='sub_select')
-EVENTS['video']['7'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='sub_remove')
-
-EVENTS['video']['2'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='speed_incr +.10')
-EVENTS['video']['5'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='speed_incr -.10')
-EVENTS['video']['0'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='frame_step')
-
-EVENTS['video']['3'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='panscan +.05')
-EVENTS['video']['6'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='panscan -.05')
-
-EVENTS['video']['8'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='switch_ratio 1.33334')
-EVENTS['video']['9'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='switch_ratio 1.77778')
+EVENTS['video']['r1']     = Event(VIDEO_SEND_MPLAYER_CMD, arg='seek +600')
+EVENTS['video']['l1']     = Event(VIDEO_SEND_MPLAYER_CMD, arg='seek -600')
+EVENTS['video']['SELECT'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='pause')
+EVENTS['video']['UP']     = Event(VIDEO_SEND_MPLAYER_CMD, arg='sub_select')
 
 MPLAYER_ARGS_DEF = '-nojoystick'
 MPLAYER_VERSION = 0.9
@@ -74,8 +65,10 @@ JOY_CMDS = {
    'down'   : 'DOWN',
    'left'   : 'LEFT',
    'right'  : 'RIGHT',
-   'cross'  : 'ENTER',
+   'cross'  : 'SELECT',
    'round'  : 'EXIT',
+   'r1'     : 'r1',
+   'l1'     : 'l1',
 }
 
 
