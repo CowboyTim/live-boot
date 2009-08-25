@@ -1,0 +1,12 @@
+<!DOCTYPE settings SYSTEM 'settings.dtd'>
+<settings>
+  <settings>
+    <setting id="renderer">SDLGL-PP</setting>
+    <setting id="scale_factor">4</setting>
+    <setting id="display_deform">horizontal_stretch</setting>
+    <setting id="deinterlace">true</setting>
+  </settings>
+  <bindings>
+    
+  </bindings>
+</settings>
