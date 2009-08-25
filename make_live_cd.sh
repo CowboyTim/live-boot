@@ -207,9 +207,6 @@ make_squash (){
     /dev/shm	/tmp	tmpfs rw,exec,noatime,nodiratime	0	0
 EOfst
 
-    echo "Running depmod for squashfs"
-    depmod -b $tmptargetsquashdir $kernelversion -a
-
     echo "Creating squashfs file $tmptargetsquashfs"
     rm -rf $tmptargetsquashdir/tmp
     chroot $tmptargetsquashdir apt-get clean || exit 1
