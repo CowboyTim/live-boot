@@ -1,6 +1,5 @@
 vim
 freevo 
-freevo-lirc 
 freevo-data 
 python-freevo 
 python-alsaaudio
@@ -15,7 +14,6 @@ lame
 flac 
 dvdbackup
 unzip 
-lirc-x 
 xmame-x
 openmsx
 scummvm
