@@ -209,7 +209,6 @@ EOfst
 
     echo "Creating squashfs file $tmptargetsquashfs"
     rm -rf $tmptargetsquashdir/tmp
-    chroot $tmptargetsquashdir apt-get clean || exit 1
 
     mkdir -p $tmptargetsquashdir/{proc,dev,tmp}
     mksquashfs $tmptargetsquashdir $tmptargetsquashfs  \
@@ -267,6 +266,18 @@ EOs
 
 }
 
+cleanup_unneeded_packages (){
+    distro="$1"
+    if [ -d $here/$distro ]; then
+        if [ -f $here/$distro/removepackages ]; then
+            list=`cat $here/$distro/removepackages`
+            chroot $tmptargetsquashdir apt-get -y remove $list
+            chroot $tmptargetsquashdir apt-get -y autoremove
+            chroot $tmptargetsquashdir apt-get clean
+        fi
+    fi
+}
+
 make_package_list (){
     distro="$1"
     if [ -d $here/$distro ]; then
@@ -316,6 +327,7 @@ mount_vm_image
 make_initramfs "freevo"
 various_hacks
 post_specific_stuff "freevo"
+cleanup_unneeded_packages "freevo"
 make_squash "freevo"
 add_grub_config "freevo"
 make_iso "freevo"
