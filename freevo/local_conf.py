@@ -6,7 +6,6 @@ CONFIG_VERSION      = 5.24
 
 plugin.remove('mixer')
 plugin.remove('tv')
-plugin.remove('shutdown')
 plugin.remove('xine')
 plugin.remove('ossmixer')
 plugin.remove('image.apod')
@@ -79,7 +78,7 @@ IMAGE_ITEMS = []
 TV_CHANNELS = []
 VIDEO_ITEMS = [ ('Video Archive', '/media') ]
 AUDIO_ITEMS = [ ('MP3 Collection', '/media') ]
-GAMES_ITEMS = [ ('MSX', '/media', ('GENERIC', 'openmsx', '', '', [ 'ROM', 'rom', 'zip', 'ZIP' ] )) ]
+GAMES_ITEMS = [ ('MSX', '/media', ('GENERIC', 'openmsx', '', '', [ 'rom', 'ROM', 'zip', 'ZIP' ] )) ]
 
 ROM_DRIVES  = []
 VIDEO_SHOW_DATA_DIR  = '/media'

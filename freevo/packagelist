@@ -25,3 +25,4 @@ bluez
 bluez-compat
 joystick
 libusb-0.1-4
+x11-xserver-utils
