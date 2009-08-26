@@ -273,9 +273,17 @@ cleanup_unneeded_packages (){
             list=`cat $here/$distro/removepackages`
             chroot $tmptargetsquashdir apt-get -y remove $list
             chroot $tmptargetsquashdir apt-get -y autoremove
-            chroot $tmptargetsquashdir apt-get clean
         fi
     fi
+    chroot $tmptargetsquashdir apt-get clean
+    chroot $tmptargetsquashdir rm -rf /var/cache/apt/*.bin
+    chroot $tmptargetsquashdir bash -c '
+        for f in /var/lib/apt/lists/*; do 
+            if [ -f $f ]; then
+                rm -f $f
+            fi
+        done
+    '
 }
 
 make_package_list (){

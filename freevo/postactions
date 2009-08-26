@@ -45,8 +45,6 @@ for s in    bluetooth \
             glibc.sh \
             hwclock.sh \
             checkfs.sh \
-            klogd \
-            sysklogd \
             console-setup \
             freevo_xserver \
             freevo_recordserver \
@@ -82,18 +80,10 @@ chroot $tmptargetsquashdir chown -R freevo /home/freevo
 #'
 #
 ## hard remove some stuff we never will need ;-)
-#chroot $tmptargetsquashdir rm -rf /var/lib/dkms
-#chroot $tmptargetsquashdir rm -rf /usr/src
-#chroot $tmptargetsquashdir rm -rf /usr/games
-#chroot $tmptargetsquashdir rm -rf /usr/share/doc
-#chroot $tmptargetsquashdir rm -rf /usr/share/man
-#chroot $tmptargetsquashdir rm -rf /usr/share/man-db
-#chroot $tmptargetsquashdir rm -rf /var/cache/apt/*.bin
-#chroot $tmptargetsquashdir rm -rf /lib/modules
-#chroot $tmptargetsquashdir bash -c '
-#    for f in /var/lib/apt/lists/*; do 
-#        if [ -f $f ]; then
-#            rm -f $f
-#        fi
-#    done
-#'
+chroot $tmptargetsquashdir rm -rf /var/lib/dkms
+chroot $tmptargetsquashdir rm -rf /usr/src
+chroot $tmptargetsquashdir rm -rf /usr/games
+chroot $tmptargetsquashdir rm -rf /usr/share/doc
+chroot $tmptargetsquashdir rm -rf /usr/share/man
+chroot $tmptargetsquashdir rm -rf /usr/share/man-db
+chroot $tmptargetsquashdir rm -rf /lib/modules

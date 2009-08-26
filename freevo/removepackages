@@ -6,8 +6,6 @@ fakeroot
 ghostscript 
 smartdimmer 
 ntpdate
-libtimedate-perl 
-libclass-accessor-perl 
 vbetool 
 grub 
 grub-common
@@ -25,3 +23,17 @@ aptitude
 esound-clients 
 esound-common 
 linux-image-generic
+libatk1.0-data
+libatk1.0-0 
+nvidia-settings
+libcwidget3
+libclass-methodmaker-perl
+libterm-progressbar-perl
+libtimedate-perl 
+libclass-accessor-perl 
+liburi-perl
+libio-string-perl
+klogd
+lockfile-progs
+liblockfile1
+patch
