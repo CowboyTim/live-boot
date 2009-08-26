@@ -252,8 +252,12 @@ mountroot() {
     mkdir -p $rootmnt/proc
     mkdir -p $rootmnt/sys
     mkdir -p $rootmnt/tmp
+    mkdir -p $rootmnt/var/run
+    mkdir -p $rootmnt/var/lock
     mkdir -p /dev/pts
     mkdir -p /dev/shm
+
+    mount -t tmpfs /dev/shm $rootmnt/tmp
 
     #done by initramfs-tools:
     #mount -o move /dev $rootmnt/dev
