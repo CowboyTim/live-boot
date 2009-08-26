@@ -1,0 +1,1 @@
+/usr/share/pyshared/freevo/plugins/ps3_controller.py
