@@ -67,6 +67,9 @@ chmod +x $tmptargetsquashdir/etc/freevo_wrapper
 # nasty trick to let freevo shutdown the PC from the user 'freevo'
 chmod o+s $tmptargetsquashdir/sbin/{initctl,shutdown,reboot}
 
+# copy the openmsx settings
+cp -R $here/$distro/openMSX $tmptargetsquashdir/home/freevo/.openMSX
+
 # just make sure freevo has all the permissions
 chroot $tmptargetsquashdir chown -R freevo /home/freevo
 
@@ -80,7 +83,11 @@ chroot $tmptargetsquashdir apt-get -y remove \
     xdg-utils aptitude esound-clients esound-common linux-image-generic \
     || exit 1
 
-chroot $tmptargetsquashdir apt-get -y autoremove || exit 1
+# cleanup stuff
+chroot $tmptargetsquashdir apt-get -y autoremove                || exit 1
+
+# autoremove removes too much, reinstall:
+chroot $tmptargetsquashdir apt-get -y install x11-xserver-utils xmame-x || exit 1
 chroot $tmptargetsquashdir apt-get clean
 
 # remove nvidia related needed build stuff, we're not going to build things on
