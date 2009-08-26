@@ -5,5 +5,5 @@ Section: base
 Maintainer: Tim Aerts <aardbeiplantje@gmail.com>
 Architecture: amd64
 Version: 1.0
-Depends: x11-xserver-utils, freevo, udev, python, openmsx
+Depends: x11-xserver-utils, freevo, udev, python, openmsx, python-gobject, python-dbus, dbus
 Description: Tim's Freevo config
