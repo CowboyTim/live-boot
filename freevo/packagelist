@@ -21,8 +21,7 @@ dgen
 nvidia-180-modaliases
 nvidia-glx-180
 nvidia-180-libvdpau
-bluez
-bluez-compat
 joystick
 libusb-0.1-4
 x11-xserver-utils
+libbluetooth3

@@ -1,33 +1,26 @@
 #!/bin/bash
 
-mkdir -p $tmptargetsquashdir/home/freevo/.freevo
+cp -R $here/$distro/package $tmpdir
 
-# our freevo config
-cp $here/$distro/local_conf.py \
-    $tmptargetsquashdir/home/freevo/.freevo/local_conf.py
+# sixaxis pair-over-usb utility
+gcc -o $tmpdir/package/etc/sixpair $here/$distro/sixpair.c -lusb
 
-chroot $tmptargetsquashdir chown -R freevo /home/freevo
+(
+    cd $tmpdir/package
+    dpkg-deb -b . $tmpdir
+    cp $tmpdir/playfreevoplay*.deb $tmptargetsquashdir/tmp
+)
+chroot $tmptargetsquashdir bash -c 'dpkg -i /tmp/playfreevoplay*' || exit 1
 
-# our own written automounter
-cp $here/../yaams-git/yaams.py $tmptargetsquashdir/etc/ || exit 1
-cat > $tmptargetsquashdir/etc/rc.local <<EO
-python /etc/yaams.py -d
-LD_LIBRARY_PATH=/usr/lib/nvidia /usr/bin/nvidia-xconfig \
-    --use-display-device=DFP \
-    --probe-all-gpus \
-    --dynamic-twinview \
-    --force-generate
-exit 0
-EO
-
-# the hidd patch for the sixaxis auth enable
+# the hidd patch for the sixaxis auth enable. FIXME: should be in the chrooted
+# environment so we would have the correct OS!
 (
     cd $tmpdir
     apt-get source bluez-utils
     apt-get build-dep bluez-utils
     patch bluez-*/compat/hidd.c $here/$distro/patch-hidd-3.19-pabr3
     cd bluez-*
-    dpkg-buildpackage -rfakeroot
+    dpkg-buildpackage -j4 -rfakeroot
     cd ..
     cp bluez-compat*.deb $tmptargetsquashdir/tmp || exit 1
 ) || exit 1
@@ -36,93 +29,71 @@ EO
 # shell, which isn't chrooted, and thus has no /tmp/bluez-compat_*
 chroot $tmptargetsquashdir bash -c 'dpkg -i /tmp/bluez-compat_*' || exit 1
 
-# disable the bluetooth daemon, we're using hidd itself from udev
-chroot $tmptargetsquashdir update-rc.d -f bluetooth remove
-
-# udev rules that goes along with that:
-cp $here/$distro/99-sixaxis.rules $tmptargetsquashdir/etc/udev/rules.d/
-
-# sixaxis pair-over-usb utility
-gcc -o $tmptargetsquashdir/etc/sixpair $here/freevo/sixpair.c -lusb
-
-# PS3 controller plugin
-cp $here/$distro/ps3_controller.py \
-    $tmptargetsquashdir/usr/share/pyshared/freevo/plugins
-chroot $tmptargetsquashdir \
-    ln -s /usr/share/pyshared/freevo/plugins/ps3_controller.py \
-          /usr/lib/python2.6/dist-packages/freevo/plugins/ps3_controller.py
-
 # disable freevo stuff, we're running an upstart script in /etc/event.d
-chroot $tmptargetsquashdir update-rc.d -f freevo_xserver remove
-chroot $tmptargetsquashdir update-rc.d -f freevo_recordserver remove
-chroot $tmptargetsquashdir update-rc.d -f freevo_webserver remove
-chroot $tmptargetsquashdir update-rc.d -f freevo_rssserver remove
-chroot $tmptargetsquashdir update-rc.d -f freevo_encodingserver remove
-
-# copy the upstart scripts
-cp $here/$distro/freevo $tmptargetsquashdir/etc/event.d
-cp $here/$distro/freevo_wrapper $tmptargetsquashdir/etc/
-chmod +x $tmptargetsquashdir/etc/freevo_wrapper
-
+# disable the bluetooth daemon, we're using hidd itself from udev
+for s in    bluetooth \
+            dkms_autoinstaller \
+            policykit \
+            mountoverflowtmp \
+            keyboard-setup \
+            mountall.sh \
+            mountall-bootclean.sh \
+            mountkernfs.sh \
+            mountnfs.sh \
+            mountnfs-bootclean.sh \
+            checkroot.sh \
+            glibc.sh \
+            hwclock.sh \
+            checkfs.sh \
+            klogd \
+            sysklogd \
+            console-setup \
+            freevo_xserver \
+            freevo_recordserver \
+            freevo_webserver \
+            freevo_rssserver \
+            freevo_encodingserver; do
+    chroot $tmptargetsquashdir update-rc.d -f $s remove
+done
 # nasty trick to let freevo shutdown the PC from the user 'freevo'
 chmod o+s $tmptargetsquashdir/sbin/{initctl,shutdown,reboot}
-
-# copy the openmsx settings
-cp -R $here/$distro/openMSX $tmptargetsquashdir/home/freevo/.openMSX
 
 # just make sure freevo has all the permissions
 chroot $tmptargetsquashdir chown -R freevo /home/freevo
 
-# cleanup of unneeded/unwanted stuff, freevo is a black box here
-chroot $tmptargetsquashdir apt-get -y remove \
-    hicolor-icon-theme linux-headers-generic netcat netcat-traditional \
-    fakeroot ghostscript smartdimmer ntpdate \
-    libtimedate-perl libclass-accessor-perl vbetool grub grub-common \
-    hunspell-en-us locales conkeror-spawn-process-helper startup-tasks \
-    xulrunner-1.9 xfonts-encodings sgml-base setserial system-services \
-    xdg-utils aptitude esound-clients esound-common linux-image-generic \
-    || exit 1
-
-# cleanup stuff
-chroot $tmptargetsquashdir apt-get -y autoremove                || exit 1
-
-# autoremove removes too much, reinstall:
-chroot $tmptargetsquashdir apt-get -y install x11-xserver-utils xmame-x || exit 1
-chroot $tmptargetsquashdir apt-get clean
-
-# remove nvidia related needed build stuff, we're not going to build things on
-# the freevo anymore :-). This will break apt-get. We can't remove it with
-# apt-get, however it removed glx, and I want that one for lot's of stuff..
-chroot $tmptargetsquashdir dpkg --force-all -r \
-    gcc gcc-4.3 cpp cpp-4.3 libc6-dev make nvidia-180-kernel-source \
-    dkms linux-libc-dev wireless-crda \
-    libxine1-x xine-ui libxine1-misc-plugins libxine1-ffmpeg \
-    libxine1-console libxine1-bin libxine1 console-terminus console-setup
-
-# perl only used for fontconfig, and even then, only for docs@install as far as
-# I can see?! Having 2 vm's (python and perl) eats diskspace: remove perl, as
-# freevo is made in pygame/python which is cool. Sad to remove my mother tongue
-# though ;-). Also, we remove the kernel + image (modules), as they are
-# allready 'built' for the live iso part.
-chroot $tmptargetsquashdir bash -c '
-    for f in `dpkg -l|grep "^ii"|grep "perl\|linux-headers\|linux-image"|awk "{print \\$2}"`; do 
-        dpkg --force-all -r $f
-    done
-'
-
-# hard remove some stuff we never will need ;-)
-chroot $tmptargetsquashdir rm -rf /var/lib/dkms
-chroot $tmptargetsquashdir rm -rf /usr/src
-chroot $tmptargetsquashdir rm -rf /usr/games
-chroot $tmptargetsquashdir rm -rf /usr/share/doc
-chroot $tmptargetsquashdir rm -rf /usr/share/man
-chroot $tmptargetsquashdir rm -rf /usr/share/man-db
-chroot $tmptargetsquashdir rm -rf /var/cache/apt/*.bin
-chroot $tmptargetsquashdir rm -rf /lib/modules
-chroot $tmptargetsquashdir bash -c '
-    for f in /var/lib/apt/lists/*; do 
-        if [ -f $f ]; then
-            rm -f $f
-        fi
-    done
-'
+## remove nvidia related needed build stuff, we're not going to build things on
+## the freevo anymore :-). This will break apt-get. We can't remove it with
+## apt-get, however it removed glx, and I want that one for lot's of stuff..
+#chroot $tmptargetsquashdir dpkg --force-all -r \
+#    gcc gcc-4.3 cpp cpp-4.3 libc6-dev make nvidia-180-kernel-source \
+#    dkms linux-libc-dev wireless-crda \
+#    libxine1-x xine-ui libxine1-misc-plugins libxine1-ffmpeg \
+#    libxine1-console libxine1-bin libxine1 console-terminus console-setup
+#
+## perl only used for fontconfig, and even then, only for docs@install as far as
+## I can see?! Having 2 vm's (python and perl) eats diskspace: remove perl, as
+## freevo is made in pygame/python which is cool. Sad to remove my mother tongue
+## though ;-). Also, we remove the kernel + image (modules), as they are
+## allready 'built' for the live iso part.
+#chroot $tmptargetsquashdir bash -c '
+#    for f in `dpkg -l|grep "^ii"|grep "perl\|linux-headers\|linux-image"|awk "{print \\$2}"`; do 
+#        dpkg --force-all -r $f
+#    done
+#'
+#
+## hard remove some stuff we never will need ;-)
+#chroot $tmptargetsquashdir rm -rf /var/lib/dkms
+#chroot $tmptargetsquashdir rm -rf /usr/src
+#chroot $tmptargetsquashdir rm -rf /usr/games
+#chroot $tmptargetsquashdir rm -rf /usr/share/doc
+#chroot $tmptargetsquashdir rm -rf /usr/share/man
+#chroot $tmptargetsquashdir rm -rf /usr/share/man-db
+#chroot $tmptargetsquashdir rm -rf /var/cache/apt/*.bin
+#chroot $tmptargetsquashdir rm -rf /lib/modules
+#chroot $tmptargetsquashdir bash -c '
+#    for f in /var/lib/apt/lists/*; do 
+#        if [ -f $f ]; then
+#            rm -f $f
+#        fi
+#    done
+#'
