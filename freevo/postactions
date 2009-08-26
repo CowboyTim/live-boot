@@ -2,6 +2,9 @@
 
 cp -R $here/$distro/package $tmpdir
 
+# Erh, find a better way on doing this..
+cp $here/../yaams-git/yaams.py $tmpdir/package/etc/
+
 # sixaxis pair-over-usb utility
 gcc -o $tmpdir/package/etc/sixpair $here/$distro/sixpair.c -lusb
 
