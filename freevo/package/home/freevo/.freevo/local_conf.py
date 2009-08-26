@@ -58,7 +58,7 @@ MPLAYER_ARGS = {
     'default': ''
 }
 
-SKIN_XML_FILE = 'Tux\'n Tosh TV'
+SKIN_XML_FILE = 'Panorama'
 JOY_CMDS = {
    'select'   : 'HELP',
    'up'       : 'UP',
