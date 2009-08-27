@@ -1,5 +1,25 @@
 #!/bin/bash
 
+# the hidd patch for the sixaxis auth enable.
+cp $here/$distro/patch-hidd-3.19-pabr3 $tmptargetsquashdir/tmp
+chroot $tmptargetsquashdir bash -c '
+    cd /tmp/
+    apt-get -y install dpkg-dev
+    apt-get -y source bluez-utils
+    apt-get -y build-dep bluez-utils
+    patch bluez-*/compat/hidd.c /tmp/patch-hidd-3.19-pabr3
+    cd bluez-*
+    dpkg-buildpackage -j4 -rfakeroot
+    cd ..
+    dpkg -i /tmp/bluez-compat_*.deb /tmp/libbluetooth3_*.deb /tmp/bluez_*.deb
+    echo bluez-compat  hold | dpkg --set-selections
+    echo bluez         hold | dpkg --set-selections
+    echo libbluetooth3 hold | dpkg --set-selections
+    apt-get -y remove dpkg-dev --purge
+    apt-get -y autoremove --purge
+' || exit 1
+
+
 cp -R $here/$distro/package $tmpdir
 
 # sixaxis pair-over-usb utility + our own freevo package
@@ -17,25 +37,6 @@ chroot $tmptargetsquashdir bash -c '
     dpkg -i /tmp/playfreevoplay*
     echo playfreevoplay hold | dpkg --set-selections
     apt-get -y remove libusb-dev --purge
-    apt-get -y autoremove --purge
-' || exit 1
-
-# the hidd patch for the sixaxis auth enable.
-cp $here/$distro/patch-hidd-3.19-pabr3 $tmptargetsquashdir/tmp
-chroot $tmptargetsquashdir bash -c '
-    cd /tmp/
-    apt-get -y install dpkg-dev
-    apt-get -y source bluez-utils
-    apt-get -y build-dep bluez-utils
-    patch bluez-*/compat/hidd.c /tmp/patch-hidd-3.19-pabr3
-    cd bluez-*
-    dpkg-buildpackage -j4 -rfakeroot
-    cd ..
-    dpkg -i /tmp/bluez-compat_*.deb /tmp/libbluetooth3_*.deb /tmp/bluez_*.deb
-    echo bluez-compat  hold | dpkg --set-selections
-    echo bluez         hold | dpkg --set-selections
-    echo libbluetooth3 hold | dpkg --set-selections
-    apt-get -y remove dpkg-dev --purge
     apt-get -y autoremove --purge
 ' || exit 1
 
