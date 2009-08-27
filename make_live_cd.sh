@@ -341,9 +341,27 @@ if [ -z $1 ]; then
         $pkgcmdline \
         -d $tmpdir/vmimage
 
-    echo "Convert to something loop-mountable with qemu"
-    qemu-img convert -f vmdk $tmpdir/vmimage/disk0.vmdk -O raw $tmpdir/loop.raw
+else
+    if [ -d $tmpdir ]; then
+        if [ ! -z `mount|grep $tmptargetsquashdir` ]; then
+            echo "umount $tmptargetsquashdir"
+            umount $tmptargetsquashdir
+        fi
+        echo "Cleaning up $tmpdir"
+        for d in `ls $tmpdir|grep -v vmimage`; do
+            echo "rm -rf $tmpdir/$d"
+            rm -rf $tmpdir/$d
+        done
+        mkdir -p $tmptargetsquashdir
+        mkdir -p $tmptargetisodir
+    else
+        echo "*** NO DIR $tmpdir ***"
+        exit 1
+    fi
 fi
+
+echo "Convert to something loop-mountable with qemu"
+qemu-img convert -f vmdk $tmpdir/vmimage/disk0.vmdk -O raw $tmpdir/loop.raw
 
 mount_vm_image
 make_initramfs "freevo"
