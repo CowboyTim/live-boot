@@ -71,21 +71,35 @@ chroot $tmptargetsquashdir chown -R freevo /home/freevo
 
 cleanup_unneeded_packages "$distro"
 
-# deinstallation of grub doesn't remove those:
-chroot $tmptargetsquashdir rm -rf /etc/event.d/last-good-boot
-chroot $tmptargetsquashdir rm -rf /etc/kernel/prerm.d/last-good-boot
-
-
 # remove nvidia related needed build stuff, we're not going to build things on
 # the freevo anymore :-). This will break apt-get. We can't remove it with
 # apt-get, however it removed glx, and I want that one for lot's of stuff..
-chroot $tmptargetsquashdir dpkg --force-all -r \
-    gcc gcc-4.3 cpp cpp-4.3 libc6-dev make nvidia-180-kernel-source \
-    dkms linux-libc-dev wireless-crda
+chroot $tmptargetsquashdir dpkg --force-all --purge \
+    gcc \
+    gcc-4.3 \
+    cpp \
+    cpp-4.3 \
+    libc6-dev \
+    linux-libc-dev \
+    make \
+    nvidia-180-kernel-source \
+    dkms \
+    wireless-crda
 
-chroot $tmptargetsquashdir dpkg --force-all -r \
-    libxine1-x xine-ui libxine1-misc-plugins libxine1-ffmpeg \
-    libxine1-console libxine1-bin libxine1 console-terminus console-setup
+# who needs xine if there's mplayer..
+chroot $tmptargetsquashdir dpkg --force-all --purge \
+    libxine1-x \
+    xine-ui \
+    libxine1-misc-plugins \
+    libxine1-ffmpeg \
+    libxine1-console \
+    libxine1-bin \
+    libxine1
+
+# general stuff
+chroot $tmptargetsquashdir dpkg --force-all --purge \
+    console-terminus \
+    console-setup
 
 # perl only used for fontconfig, and even then, only for docs@install as far as
 # I can see?! Having 2 vm's (python and perl) eats diskspace: remove perl, as
@@ -94,12 +108,11 @@ chroot $tmptargetsquashdir dpkg --force-all -r \
 # allready 'built' for the live iso part.
 chroot $tmptargetsquashdir bash -c '
     for f in `dpkg -l|grep "^ii"|grep "perl\|linux-headers\|linux-image"|awk "{print \\$2}"`; do 
-        dpkg --force-all -r $f
+        dpkg --force-all --purge $f
     done
 '
 
 # hard remove some stuff we never will need ;-)
-chroot $tmptargetsquashdir rm -rf /var/lib/dkms
 chroot $tmptargetsquashdir rm -rf /usr/src
 chroot $tmptargetsquashdir rm -rf /usr/games
 chroot $tmptargetsquashdir rm -rf /usr/share/doc
