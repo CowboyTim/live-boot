@@ -57,13 +57,6 @@ button_to_abbreviation = {
 }
 
 class JoyImp(Thread):
-    def init_dev(self):
-        _debug_("Trying opening /dev/input/js0")
-        fd = open('/dev/input/js0')
-        p = select.poll()
-        p.register(fd, select.POLLIN)
-        return (p, fd)
-
     def run(self):
 
         JS_EVENT_BUTTON = 0x01  #/* button pressed/released */
@@ -78,14 +71,12 @@ class JoyImp(Thread):
         y = {}
         a = dt /(RC - dt)
 
-        p = None
         fd = None
         while True:
             try:
                 # get events
-                if not p:
-                    p, fd = self.init_dev()
-                e = p.poll()
+                if not fd:
+                    fd = open('/dev/input/js0')
                 evt = fd.read(JS_EVENT_SIZE)
                 ts, value, type, number = struct.unpack(JS_EVENT, evt)
                 evt = type & ~JS_EVENT_INIT
@@ -97,7 +88,7 @@ class JoyImp(Thread):
                 if errno != 19 and errno != 2:
                     print("I/O error({0}): {1}".format(errno, strerror))
                 if fd: fd.close()
-                p = None
+                fd = None
                 time.sleep(1)
             except Exception as e:
                 print(e)
@@ -118,7 +109,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
         self.plugin_name = 'PS3_CONTROLLER'
-        self.poll_interval  = 0
+        self.poll_interval  = 10
         self.poll_menu_only = False
         self.enabled = True
         self.w = JoyImp()
@@ -146,31 +137,24 @@ class PluginInterface(plugin.DaemonPlugin):
             'button' : {} 
         }
 
-        action = q.get()
-        print(str(action))
-        self.ps_controller_started = 1
-        self.last_input_time = time.time()
-        self.state[action[0]][action[1]] = action[2]
-        if action[0] == 'button':
-            if action[2] == 1:
-                value_has_been['button'][action[1]] = 1
+        try:
+            while True:
+                action = q.get_nowait()
+                _debug_(str(action))
+                self.ps_controller_started = 1
+                self.last_input_time = time.time()
+                self.state[action[0]][action[1]] = action[2]
+                if action[0] == 'button':
+                    if action[2] == 1:
+                        value_has_been['button'][action[1]] = 1
+        except Empty, e:
+            pass
+        except e:
+            raise
 
         _debug_(str(self.state))
         _debug_(str(value_has_been))
     
-        #
-        # originally this allowed for buttons that could be held down; the
-        # q.get() call was in fact a "while True: q.get_nowait() + an exeption
-        # on 'Empty'". That didn't work out perfect enough: a button was
-        # pressed and released fast enough to do 1 thing, however, this thread
-        # kept a futex lock on the queue to much such that the read thread from
-        # /dev/input/js0 wasn't able to give the events through to this thread.
-        #
-        # I've made this thread blocking now, could as well use 1 thread with a
-        # poll().... not sure whether the plugin system is able to work with a
-        # blocking plugin (and a timeout of 0 to immediately get back to this
-        # call).
-        #
         for button, value in self.state['button'].iteritems():
             if button in button_to_abbreviation:
                 abbr_button = button_to_abbreviation[button]
