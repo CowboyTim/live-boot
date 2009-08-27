@@ -327,6 +327,18 @@ copy_to_os (){
     cp -R $tmptargetisodir/$distro/* /var/tmp/$distro/
 }
 
+apt_sources_set_correct (){
+    cat > $tmptargetsquashdir/etc/apt/sources.list <<EOapt
+deb http://192.168.2.10:9999/ubuntu jaunty main restricted universe multiverse
+deb http://192.168.2.10:9999/ubuntu jaunty-updates main restricted universe multiverse
+deb http://192.168.2.10:9999/ubuntu jaunty-security main restricted universe multiverse
+deb-src http://192.168.2.10:9999/ubuntu jaunty main restricted universe multiverse
+deb-src http://192.168.2.10:9999/ubuntu jaunty-updates main restricted universe multiverse
+deb-src http://192.168.2.10:9999/ubuntu jaunty-security main restricted universe multiverse
+EOapt
+    chroot $tmptargetsquashdir apt-get update
+}
+
 if [ -z $1 ]; then
 
     make_package_list "freevo"    
@@ -343,11 +355,8 @@ if [ -z $1 ]; then
 
 else
     if [ -d $tmpdir ]; then
-        if [ ! -z `mount|grep $tmptargetsquashdir` ]; then
-            echo "umount $tmptargetsquashdir"
-            umount $tmptargetsquashdir
-        fi
-        echo "Cleaning up $tmpdir"
+        echo "dir $tmpdir will be used, it exists"
+        echo "cleaning up $tmpdir"
         for d in `ls $tmpdir|grep -v vmimage`; do
             echo "rm -rf $tmpdir/$d"
             rm -rf $tmpdir/$d
@@ -365,6 +374,7 @@ qemu-img convert -f vmdk $tmpdir/vmimage/disk0.vmdk -O raw $tmpdir/loop.raw
 
 mount_vm_image
 make_initramfs "freevo"
+apt_sources_set_correct
 various_hacks
 post_specific_stuff "freevo"
 make_squash "freevo"
