@@ -14,6 +14,8 @@ gcc -o $tmpdir/package/etc/sixpair $here/$distro/sixpair.c -lusb
     cp $tmpdir/playfreevoplay*.deb $tmptargetsquashdir/tmp
 )
 chroot $tmptargetsquashdir bash -c 'dpkg -i /tmp/playfreevoplay*' || exit 1
+chroot $tmptargetsquashdir bash -c 'echo playfreevoplay hold | dpkg --set-selections' || exit 1
+
 
 # the hidd patch for the sixaxis auth enable. FIXME: should be in the chrooted
 # environment so we would have the correct OS!
