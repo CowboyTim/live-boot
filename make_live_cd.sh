@@ -266,26 +266,6 @@ EOs
 
 }
 
-cleanup_unneeded_packages (){
-    distro="$1"
-    if [ -d $here/$distro ]; then
-        if [ -f $here/$distro/removepackages ]; then
-            list=`cat $here/$distro/removepackages`
-            chroot $tmptargetsquashdir apt-get -y remove $list
-            chroot $tmptargetsquashdir apt-get -y autoremove
-        fi
-    fi
-    chroot $tmptargetsquashdir apt-get clean
-    chroot $tmptargetsquashdir rm -rf /var/cache/apt/*.bin
-    chroot $tmptargetsquashdir bash -c '
-        for f in /var/lib/apt/lists/*; do 
-            if [ -f $f ]; then
-                rm -f $f
-            fi
-        done
-    '
-}
-
 make_package_list (){
     distro="$1"
     if [ -d $here/$distro ]; then
@@ -303,6 +283,34 @@ make_package_list (){
     echo $pkgcmdline
 }
 
+cleanup_unneeded_packages (){
+    distro="$1"
+    if [ -d $here/$distro ]; then
+        if [ -f $here/$distro/removepackages ]; then
+            if [ -f $here/$distro/packagelist ]; then
+                pkglist=`cat $here/$distro/packagelist`
+                for p in $pkglist; do
+                    chroot $tmptargetsquashdir bash -c '
+                        echo '$p' hold | dpkg --set-selections
+                    ' || exit 1
+                done
+            fi
+            list=`cat $here/$distro/removepackages`
+            chroot $tmptargetsquashdir apt-get -y remove $list --purge || exit 1
+            chroot $tmptargetsquashdir apt-get -y autoremove --purge   || exit 1
+        fi
+    fi
+    chroot $tmptargetsquashdir apt-get clean
+    chroot $tmptargetsquashdir rm -rf /var/cache/apt/*.bin
+    chroot $tmptargetsquashdir bash -c '
+        for f in /var/lib/apt/lists/*; do 
+            if [ -f $f ]; then
+                rm -f $f
+            fi
+        done
+    '
+}
+
 post_specific_stuff (){
     distro="$1"
     if [ -d $here/$distro ]; then
@@ -311,6 +319,12 @@ post_specific_stuff (){
             . $here/$distro/postactions
         fi
     fi
+}
+
+copy_to_os (){
+    distro="$1"
+    mkdir -p /var/tmp/$distro
+    cp -R $tmptargetisodir/$distro/* /var/tmp/$distro/
 }
 
 if [ -z $1 ]; then
@@ -335,9 +349,9 @@ mount_vm_image
 make_initramfs "freevo"
 various_hacks
 post_specific_stuff "freevo"
-cleanup_unneeded_packages "freevo"
 make_squash "freevo"
 add_grub_config "freevo"
 make_iso "freevo"
+copy_to_os "freevo"
 
 umount $tmptargetsquashdir
