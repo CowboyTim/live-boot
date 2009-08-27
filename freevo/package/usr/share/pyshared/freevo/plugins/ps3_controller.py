@@ -107,15 +107,18 @@ class PluginInterface(plugin.DaemonPlugin):
     """
     A control plugin for freevo with PS3 wireless bluetooth controller
 
-    To use this plugin make sure that your joystick is already working properly and
-    then configure JOY_CMDS in your local_conf.py.  You will also need to have 
-    plugin.activate('ps3_controller') in your config as well.
+    To use this plugin make sure that your joystick is already working properly
+    and then configure JOY_CMDS in your local_conf.py.  You will also need to 
+    have plugin.activate('ps3_controller') in your config as well.
+
+    Please read http://www.wiredrevolution.com/ubuntu/setup-ps3-controller-over-bluetooth-on-ubuntu
+    on how to setup your PS3 controller wirelessly.
     """
 
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
         self.plugin_name = 'PS3_CONTROLLER'
-        self.poll_interval  = 15
+        self.poll_interval  = 0
         self.poll_menu_only = False
         self.enabled = True
         self.w = JoyImp()
@@ -126,9 +129,12 @@ class PluginInterface(plugin.DaemonPlugin):
         self.ps_button_time  = 0
         self.last_input_time = time.time()
         self.ps_controller_started = 1
+        self.poweroff_timeout = config.PS3_CONTROLLER_IDLE_POWER_OFF_TIMEOUT
 
     def config(self):
-        return []
+        return [('PS3_CONTROLLER_IDLE_POWER_OFF_TIMEOUT', \
+                 60, \
+                 'PS3 Controller Idle power off timeout')]
 
     def poll(self):
         if not self.enabled:
@@ -140,23 +146,31 @@ class PluginInterface(plugin.DaemonPlugin):
             'button' : {} 
         }
 
-        try:
-            while True:
-                action = q.get_nowait()
-                print(str(action))
-                self.ps_controller_started = 1
-                self.last_input_time = time.time()
-                self.state[action[0]][action[1]] = action[2]
-                if action[0] == 'button':
-                    if action[2] == 1:
-                        value_has_been['button'][action[1]] = 1
-        except Empty, e:
-            pass
-        except:
-            raise
+        action = q.get()
+        print(str(action))
+        self.ps_controller_started = 1
+        self.last_input_time = time.time()
+        self.state[action[0]][action[1]] = action[2]
+        if action[0] == 'button':
+            if action[2] == 1:
+                value_has_been['button'][action[1]] = 1
+
         _debug_(str(self.state))
         _debug_(str(value_has_been))
     
+        #
+        # originally this allowed for buttons that could be held down; the
+        # q.get() call was in fact a "while True: q.get_nowait() + an exeption
+        # on 'Empty'". That didn't work out perfect enough: a button was
+        # pressed and released fast enough to do 1 thing, however, this thread
+        # kept a futex lock on the queue to much such that the read thread from
+        # /dev/input/js0 wasn't able to give the events through to this thread.
+        #
+        # I've made this thread blocking now, could as well use 1 thread with a
+        # poll().... not sure whether the plugin system is able to work with a
+        # blocking plugin (and a timeout of 0 to immediately get back to this
+        # call).
+        #
         for button, value in self.state['button'].iteritems():
             if button in button_to_abbreviation:
                 abbr_button = button_to_abbreviation[button]
@@ -169,8 +183,12 @@ class PluginInterface(plugin.DaemonPlugin):
                         handler = rc.get_singleton()
                         handler.post_event(handler.key_event_mapper(command))
                 if abbr_button == 'ps':
-                    _debug_("PS button state:"+str(self.ps_button_time)+":"+str(value)+":"+str(time.time()))
-                    if self.ps_button_time != 0 and time.time() > self.ps_button_time + 2:
+                    _debug_("PS button state:"\
+                            +str(self.ps_button_time)\
+                            +":"+str(value)\
+                            +":"+str(time.time()))
+                    if self.ps_button_time != 0 \
+                        and time.time() > self.ps_button_time + 2:
                         handler = rc.get_singleton()
                         handler.post_event(handler.key_event_mapper('SHUTDOWN'))
                     elif value == 1 and self.ps_button_time == 0:
@@ -179,7 +197,8 @@ class PluginInterface(plugin.DaemonPlugin):
                         self.ps_button_time = 0
                         self.shutdown_controller()
 
-        if self.ps_controller_started and time.time() - 10 > self.last_input_time:
+        if self.ps_controller_started \
+            and time.time() - self.poweroff_timeout > self.last_input_time:
             self.shutdown_controller()
 
 
