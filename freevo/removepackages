@@ -31,3 +31,10 @@ liburi-perl
 libio-string-perl
 patch
 vim
+libdbus-1-dev
+libusb-dev
+libglib2.0-dev
+libflac-dev
+autotools-dev
+libasound2-dev
+libnl-dev

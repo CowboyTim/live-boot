@@ -23,5 +23,3 @@ nvidia-180-libvdpau
 joystick
 libusb-0.1-4
 x11-xserver-utils
-libbluetooth3
-bluez

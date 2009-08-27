@@ -5,34 +5,38 @@ cp -R $here/$distro/package $tmpdir
 # Erh, find a better way on doing this..
 cp $here/../yaams-git/yaams.py $tmpdir/package/etc/
 
-# sixaxis pair-over-usb utility
-gcc -o $tmpdir/package/etc/sixpair $here/$distro/sixpair.c -lusb
+# sixaxis pair-over-usb utility + our own freevo package
+cp -R $here/$distro/package $tmptargetsquashdir/tmp
+cp -R $here/$distro/sixpair.c $tmptargetsquashdir/tmp
+chroot $tmptargetsquashdir bash -c '
+    apt-get -y install libusb-dev
+    gcc -o /tmp/package/etc/sixpair /tmp/sixpair.c -lusb
+    cd /tmp/package
+    dpkg-deb -b . /tmp
+    dpkg -i /tmp/playfreevoplay*
+    echo playfreevoplay hold | dpkg --set-selections
+    apt-get -y remove libusb-dev --purge
+    apt-get -y autoremove --purge
+' || exit 1
 
-(
-    cd $tmpdir/package
-    dpkg-deb -b . $tmpdir
-    cp $tmpdir/playfreevoplay*.deb $tmptargetsquashdir/tmp
-)
-chroot $tmptargetsquashdir bash -c 'dpkg -i /tmp/playfreevoplay*' || exit 1
-chroot $tmptargetsquashdir bash -c 'echo playfreevoplay hold | dpkg --set-selections' || exit 1
-
-
-# the hidd patch for the sixaxis auth enable. FIXME: should be in the chrooted
-# environment so we would have the correct OS!
-(
-    cd $tmpdir
-    apt-get source bluez-utils
-    apt-get build-dep bluez-utils
-    patch bluez-*/compat/hidd.c $here/$distro/patch-hidd-3.19-pabr3
+# the hidd patch for the sixaxis auth enable.
+cp $here/$distro/patch-hidd-3.19-pabr3 $tmptargetsquashdir/tmp
+chroot $tmptargetsquashdir bash -c '
+    cd /tmp/
+    apt-get -y install dpkg-dev
+    apt-get -y source bluez-utils
+    apt-get -y build-dep bluez-utils
+    patch bluez-*/compat/hidd.c /tmp/patch-hidd-3.19-pabr3
     cd bluez-*
     dpkg-buildpackage -j4 -rfakeroot
     cd ..
-    cp bluez-compat*.deb $tmptargetsquashdir/tmp || exit 1
-) || exit 1
-
-# use bash to do th '*' globbing, don't forget, the '*' is glob-ed by *this*
-# shell, which isn't chrooted, and thus has no /tmp/bluez-compat_*
-chroot $tmptargetsquashdir bash -c 'dpkg -i /tmp/bluez-compat_*' || exit 1
+    dpkg -i /tmp/bluez-compat_*.deb /tmp/libbluetooth3_*.deb /tmp/bluez_*.deb
+    echo bluez-compat  hold | dpkg --set-selections
+    echo bluez         hold | dpkg --set-selections
+    echo libbluetooth3 hold | dpkg --set-selections
+    apt-get -y remove dpkg-dev --purge
+    apt-get -y autoremove --purge
+' || exit 1
 
 # disable freevo stuff, we're running an upstart script in /etc/event.d
 # disable the bluetooth daemon, we're using hidd itself from udev
