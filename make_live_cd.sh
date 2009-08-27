@@ -277,14 +277,6 @@ cleanup_unneeded_packages (){
     distro="$1"
     if [ -d $here/$distro ]; then
         if [ -f $here/$distro/removepackages ]; then
-            if [ -f $here/$distro/packagelist ]; then
-                pkglist=`cat $here/$distro/packagelist`
-                for p in $pkglist; do
-                    chroot $tmptargetsquashdir bash -c '
-                        echo '$p' hold | dpkg --set-selections
-                    ' || exit 1
-                done
-            fi
             list=`cat $here/$distro/removepackages`
             chroot $tmptargetsquashdir apt-get -y remove $list --purge || exit 1
             chroot $tmptargetsquashdir apt-get -y autoremove --purge   || exit 1
