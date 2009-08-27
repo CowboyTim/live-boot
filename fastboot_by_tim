@@ -255,14 +255,6 @@ mountroot() {
 
     mount -t tmpfs /dev/shm $rootmnt/tmp
 
-    #done by initramfs-tools:
-    #mount -o move /dev $rootmnt/dev
-    #mount -o move /proc $rootmnt/proc
-    #mount -o move /sys $rootmnt/sys
-
-    #mkdir -p /lib/modules/`uname -r`/
-
-
     if [ -f $rootmnt/etc/fastboot_by_tim.conf ]; then
         . $rootmnt/etc/fastboot_by_tim.conf
     fi
