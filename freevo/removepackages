@@ -1,5 +1,6 @@
 hicolor-icon-theme
 linux-headers-generic
+linux-image-generic
 netcat
 netcat-traditional
 fakeroot 
@@ -10,16 +11,14 @@ vbetool
 grub 
 grub-common
 hunspell-en-us 
-locales 
+conkeror
 conkeror-spawn-process-helper 
 startup-tasks
 xulrunner-1.9 
 xfonts-encodings 
 sgml-base 
-system-services
 xdg-utils 
 aptitude 
-linux-image-generic
 esound-clients 
 libatk1.0-data
 libcwidget3
@@ -30,7 +29,5 @@ libtimedate-perl
 libclass-accessor-perl 
 liburi-perl
 libio-string-perl
-klogd
-lockfile-progs
-liblockfile1
 patch
+vim
