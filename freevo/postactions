@@ -2,11 +2,12 @@
 
 cp -R $here/$distro/package $tmpdir
 
-# Erh, find a better way on doing this..
-cp $here/../yaams-git/yaams.py $tmpdir/package/etc/
-
 # sixaxis pair-over-usb utility + our own freevo package
 cp -R $here/$distro/package $tmptargetsquashdir/tmp
+
+# FIXME: Erh, find a better way on doing this..
+cp $here/../yaams-git/yaams.py $tmptargetsquashdir/tmp/package/etc/
+
 cp -R $here/$distro/sixpair.c $tmptargetsquashdir/tmp
 chroot $tmptargetsquashdir bash -c '
     apt-get -y install libusb-dev
