@@ -4,7 +4,6 @@
 
 export PATH=/usr/bin:/usr/sbin:/bin:/sbin
 
-export BOOT
 mountpoint=/cdrom
 mkdir -p $mountpoint
 
@@ -211,14 +210,11 @@ mountroot() {
     parse_cmdline
 
     if [ ! -z "$ROOT" ]; then
-        BOOT=$(basename $ROOT)
         i=0
         while [ "$i" -lt 10 ]; do
             echo "udevadm trigger+settle called"
             udevadm trigger
             udevadm settle
-            echo "ls -l /dev/disk/by-label"
-            ls -l /dev/disk/by-label
             if [ -b "$ROOT" ] ; then
                 rootfstype=$(get_fstype $ROOT)
                 mount -t $rootfstype $ROOT $mountpoint
