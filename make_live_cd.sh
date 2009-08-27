@@ -12,7 +12,6 @@ tmpscratchdir="/var/tmp"
 isotarget="/home/tim/test_live_cd.iso"
 isoname="TIMUBUNTU"
 passwd="tubuntu"
-flash_10_file=~/libflashplayer-10.0.d21.1.linux-x86_64.so.tar.gz
 if [ -z $user_id ]; then
     user_id=$(id -u)
     user_name=$(id -nu)
@@ -37,10 +36,6 @@ mkdir -p $tmptargetisodir
 make_initramfs(){
     distro="$1"
     echo "Getting a kernel and an initrd"
-
-    if [ ! -d $tmptargetsquashdir/boot -a -d $tmpdir/boot ]; then
-        mv $tmpdir/boot $tmptargetsquashdir/boot
-    fi
 
     kernelversion=$(basename $(readlink $tmptargetsquashdir/vmlinuz)|sed s/vmlinuz-//)
 
@@ -96,8 +91,6 @@ EOinitramfsconf
     )
     rm -f $targetinitrd
 
-    echo "Moving $tmptargetsquashdir/boot back to $tmpdir/boot"
-    mv $tmptargetsquashdir/boot $tmpdir/boot
 }
 
 get_append_line(){
@@ -197,19 +190,16 @@ mount_vm_image (){
 
 make_squash (){
     distro="$1"
-
     tmptargetsquashfs="$tmpdir/${distro}.squashfs"
-    if [ -f $tmptargetsquashfs ]; then
-        return
-    fi
 
-    cat >> $tmptargetsquashdir/etc/fstab <<EOfst
-    /dev/shm	/tmp	tmpfs rw,exec,noatime,nodiratime	0	0
-EOfst
+    echo "cleaning $tmptargetsquashdir/{tmp,boot,lib/modules}"
+    rm -rf $tmptargetsquashdir/tmp
+    mv $tmptargetsquashdir/boot $tmpdir/boot
+    #mv $tmptargetsquashdir/lib/modules $tmpdir/modules
+    #mkdir -p $tmptargetsquashdir/lib/modules/$kernelversion
+    #depmod  -b $tmptargetsquashdir -a $kernelversion
 
     echo "Creating squashfs file $tmptargetsquashfs"
-    rm -rf $tmptargetsquashdir/tmp
-
     mkdir -p $tmptargetsquashdir/{proc,dev,tmp}
     mksquashfs $tmptargetsquashdir $tmptargetsquashfs  \
         -noappend \
@@ -373,10 +363,10 @@ echo "Convert to something loop-mountable with qemu"
 qemu-img convert -f vmdk $tmpdir/vmimage/disk0.vmdk -O raw $tmpdir/loop.raw
 
 mount_vm_image
-make_initramfs "freevo"
 apt_sources_set_correct
 various_hacks
 post_specific_stuff "freevo"
+make_initramfs "freevo"
 make_squash "freevo"
 add_grub_config "freevo"
 make_iso "freevo"
