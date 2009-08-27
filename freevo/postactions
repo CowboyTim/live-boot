@@ -111,7 +111,7 @@ chroot $tmptargetsquashdir dpkg --force-all --purge \
 # though ;-). Also, we remove the kernel + image (modules), as they are
 # allready 'built' for the live iso part.
 chroot $tmptargetsquashdir bash -c '
-    for f in `dpkg -l|grep "^ii"|grep "perl\|linux-headers\|linux-image"|awk "{print \\$2}"`; do 
+    for f in `dpkg -l|grep "^ii"|grep "perl\|linux-headers"|awk "{print \\$2}"`; do 
         dpkg --force-all --purge $f
     done
 '
@@ -122,4 +122,3 @@ chroot $tmptargetsquashdir rm -rf /usr/games
 chroot $tmptargetsquashdir rm -rf /usr/share/doc
 chroot $tmptargetsquashdir rm -rf /usr/share/man
 chroot $tmptargetsquashdir rm -rf /usr/share/man-db
-chroot $tmptargetsquashdir rm -rf /lib/modules
