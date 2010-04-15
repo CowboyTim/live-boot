@@ -77,6 +77,12 @@ class JoyImp(Thread):
                 # get events
                 if not fd:
                     fd = open('/dev/input/js0')
+                    check_call([\
+                        'jscal', '-s',\
+                        '16,0,0,0,1,0,0,0,1,'+\
+                        '0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0',\
+                        '/dev/input/js0'\
+                    ])
                 evt = fd.read(JS_EVENT_SIZE)
                 ts, value, type, number = struct.unpack(JS_EVENT, evt)
                 evt = type & ~JS_EVENT_INIT
