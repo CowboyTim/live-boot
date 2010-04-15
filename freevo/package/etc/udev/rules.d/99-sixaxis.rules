@@ -15,4 +15,5 @@ KERNEL=="hci[0-9]", SUBSYSTEM=="bluetooth", RUN+="/usr/bin/hidd -i %k --nocheck 
 # the PS3 controller by e.g. checking the 'PS' button and do a hcitool dc
 KERNEL=="hci[0-9]", SUBSYSTEM=="bluetooth", RUN+="/bin/chmod +s /usr/bin/hcitool"
 
-KERNEL=="js[0-9]", SUBSYSTEM=="input", ATTRS{name}=="Sony*Controller", RUN+="/usr/bin/jscal -s 16,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 %k"
+# moved to ps3_controller.py
+#KERNEL=="js[0-9]", SUBSYSTEM=="input", ATTRS{name}=="Sony*Controller", RUN+="/usr/bin/jscal -s 16,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 %k"
