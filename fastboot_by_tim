@@ -4,7 +4,7 @@
 
 export PATH=/usr/bin:/usr/sbin:/bin:/sbin
 
-mountpoint=/cdrom
+mountpoint=/rootfs
 mkdir -p $mountpoint
 
 root_persistence_entity=".root_cow_loop.ext2"
@@ -200,16 +200,16 @@ setup_unionfs() {
 
     # show all the rofs
     for d in $rofslist; do
-        mkdir -p "$rootmnt/boot/${d##*/}"
-        mount -o move $d "${rootmnt}/boot/${d##*/}"
+        mkdir -p "$rootmnt/mnt/${d##*/}"
+        mount -o move $d "${rootmnt}/mnt/${d##*/}"
     done
 
     # shows cow fs on /cow
-    mkdir -p $rootmnt/cow
-    mount -o move /cow $rootmnt/cow
+    mkdir -p $rootmnt/mnt/cow
+    mount -o move /cow $rootmnt/mnt/cow
 
-    mkdir -p $rootmnt/$(basename $livefs_root)
-    mount -o move $livefs_root $rootmnt/$(basename $livefs_root)
+    mkdir -p $rootmnt/mnt/$(basename $livefs_root)
+    mount -o move $livefs_root $rootmnt/mnt/$(basename $livefs_root)
 }
 
 mountroot() {
@@ -252,17 +252,12 @@ mountroot() {
     echo "Making new root with $UNIONFS in $rootmnt"
     setup_unionfs "$livefs_root" "$rootmnt"
 
-    # mksquashfs or debootstrap did this..
-    mkdir -p $rootmnt/dev
-    mkdir -p $rootmnt/proc
-    mkdir -p $rootmnt/sys
-    mkdir -p $rootmnt/tmp
-    mkdir -p $rootmnt/var/run
-    mkdir -p $rootmnt/var/lock
     mkdir -p /dev/pts
     mkdir -p /dev/shm
 
-    mount -t tmpfs /dev/shm $rootmnt/tmp
+    if [ -d $rootmnt/tmp ]; then
+        mount -t tmpfs /dev/shm $rootmnt/tmp
+    fi
 
     if [ -f $rootmnt/etc/fastboot_by_tim.conf ]; then
         . $rootmnt/etc/fastboot_by_tim.conf
