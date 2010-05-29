@@ -1,6 +1,6 @@
-tmp
-boot
-home
+tmp/
+boot/
+home/
 usr/share/doc
 usr/include
 usr/src
@@ -9,8 +9,8 @@ var/backups
 var/cache/apt/*.bin
 var/cache/apt/archives/*.deb
 var/tmp/*
-var/run
-var/lock
+var/run/*
+var/lock/*
 var/mail
 var/crash
 var/spool
@@ -20,7 +20,7 @@ lost+found
 initrd
 cdrom/*
 media/*
-mnt
+mnt/*
 root/*
-dev
+dev/*
 opt
