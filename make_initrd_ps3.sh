@@ -30,6 +30,10 @@ DEVICE=eth0
 NFSROOT=auto
 EOinitramfsconf
     cat > $tmpinitramfs/modules <<EOmodules
+sg
+soundcore
+sd_mod
+sr_mod
 aufs
 squashfs
 loop
