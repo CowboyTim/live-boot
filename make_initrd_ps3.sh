@@ -30,8 +30,22 @@ DEVICE=eth0
 NFSROOT=auto
 EOinitramfsconf
     cat > $tmpinitramfs/modules <<EOmodules
-sg
+snd_pcm_oss
+snd_mixer_oss
+snd_pcm
+snd_seq_dummy
+snd_page_alloc
+snd_seq_oss
+snd_seq_midi
+snd_rawmidi
+snd_seq_midi_event
+snd_seq
+snd_timer
+snd_seq_device
+snd
 soundcore
+btusb
+sg
 sd_mod
 sr_mod
 aufs
@@ -40,7 +54,6 @@ loop
 binfmt_misc
 evdev
 snd_ps3
-snd
 bluetooth
 spufs
 ps3flash
