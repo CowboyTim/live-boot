@@ -1,7 +1,7 @@
 etc/mtab
-tmp/
-boot/
-home/
+tmp/*
+boot/*
+home/*
 usr/share/doc
 usr/include
 usr/src
