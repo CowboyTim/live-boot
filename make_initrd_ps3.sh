@@ -98,13 +98,7 @@ EOmodules
 
 kernelversion=$1
 if [ -z $kernelversion ]; then
-    if [ -e /boot/vmlinux ]; then
-        kernelfile=/boot/vmlinux
-    else
-        echo "No valid kernel found"
-        exit 1
-    fi
-    kernelversion=$(basename $(readlink $kernelfile)|sed "s#$(basename $kernelfile)-##")
+    kernelversion=$(uname -r)
 fi
 
 make_initramfs "timsps3" $kernelversion
