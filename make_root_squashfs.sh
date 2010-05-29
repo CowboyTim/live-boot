@@ -1,9 +1,11 @@
 #!/bin/bash
 
+here=$(readlink -f -- "${0%/*}") 
+
 time nice -n 20 \
-    mksquashfs /*  \
+    mksquashfs /* \
         /var/tmp/root.squashfs.gzip.`date +%s` \
-        -ef exclude.squashfs \
+        -ef $here/exclude.squashfs \
         -processors 1 \
         -wildcards \
         -b 1048576 \
