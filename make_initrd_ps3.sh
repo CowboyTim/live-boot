@@ -67,9 +67,6 @@ EOmodules
         gunzip -c $tmptargetinitrd|cpio -i
         echo "Hacks in initramfs"
     )
-    mkdir -p $tmpdir/initrd.hacks/lib/udev/rules.d
-    cp $here/60-persistent-storage.rules \
-        $tmpdir/initrd.hacks/lib/udev/rules.d/60-persistent-storage.rules
     cp /sbin/losetup $tmpdir/initrd.hacks/sbin
     depmod  -b $tmpdir/initrd.hacks -a $kernelversion
     (
