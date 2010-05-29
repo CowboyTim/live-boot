@@ -105,13 +105,22 @@ setup_unionfs() {
 
     homemount=/home
     if [ -n "$home_persistent" ]; then
-        echo "Mounting homedir $home_persistence_entity to $homemount"
         homecow="/dev/disk/by-label/$home_persistence_entity"
-        if [ -b "$homecow" ]; then
-            echo "$home_persistence_entity is a block device, proceeding"
-            mkdir -p $homemount
-            mount -t $(get_fstype "$homecow") -o rw,noatime,nodiratime "$homecow" $homemount
-        fi
+        i=0
+        while [ "$i" -lt 10 ]; do
+            echo "udevadm trigger+settle called for $homecow"
+            udevadm trigger
+            udevadm settle
+            echo "Try mounting homedir $homecow to $homemount"
+            if [ -b "$homecow" ]; then
+                echo "$home_persistence_entity is a block device, proceeding"
+                mkdir -p $homemount
+                mount -t $(get_fstype "$homecow") -o rw,noatime,nodiratime "$homecow" $homemount
+                break
+            fi
+            sleep 1
+            i="$(($i + 1))"
+        done
     else
         echo "Not mounting a homedir"
     fi
