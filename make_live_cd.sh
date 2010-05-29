@@ -33,6 +33,8 @@ tmptargetisodir="$tmpdir/iso"
 mkdir -p $tmptargetsquashdir
 mkdir -p $tmptargetisodir
 
+export PATH=$PATH:/usr/sbin/
+
 make_initramfs(){
     distro="$1"
     echo "Getting a kernel and an initrd"
