@@ -212,7 +212,7 @@ mountroot() {
     if [ ! -z "$ROOT" ]; then
         i=0
         while [ "$i" -lt 10 ]; do
-            echo "udevadm trigger+settle called"
+            echo "udevadm trigger+settle called for $ROOT"
             udevadm trigger
             udevadm settle
             if [ -b "$ROOT" ] ; then
