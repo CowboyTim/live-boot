@@ -87,8 +87,8 @@ EOmodules
         dd if=/dev/zero of=./empty_ext2_fs bs=1M count=32
         mkfs.ext3 -O dir_index -F -F -L cow ./empty_ext2_fs
         tune2fs -c -1 -i -1 ./empty_ext2_fs
-        gzip ./empty_ext2_fs
-        find . |cpio -ov -H newc|gzip > $targetinitrd
+        gzip -9 ./empty_ext2_fs
+        find . |cpio -ov -H newc|gzip -9 > $targetinitrd
     )
     rm -rf $tmpdir/initrd.{tmp,hacks,gz}
 
