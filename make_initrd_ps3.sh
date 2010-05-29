@@ -18,7 +18,8 @@ make_initramfs(){
 
     echo "Making a new initramfs in $tmpdir"
     tmpinitramfs="$tmpdir/initrd.tmp"
-    targetinitrd="$tmpdir/initrd.gz"
+    tmptargetinitrd="$tmpdir/initrd.gz"
+    targetinitrd=$tmpdir/initrd-$distro-$kernelversion.gz
     mkdir -p $tmpinitramfs/scripts
     cp $here/fastboot_by_tim $tmpinitramfs/scripts
     cat > $tmpinitramfs/initramfs.conf <<EOinitramfsconf
@@ -28,21 +29,43 @@ BOOT=local
 DEVICE=eth0
 NFSROOT=auto
 EOinitramfsconf
+    cat > $tmpinitramfs/modules <<EOmodules
+aufs
+squashfs
+loop
+binfmt_misc
+evdev
+snd_ps3
+snd
+bluetooth
+spufs
+ps3flash
+rtc_ps3
+ps3_lpm
+usbhid
+hid
+usb_storage
+ps3_gelic
+ps3stor_lib
+ps3rom
+ps3vram
+ps3disk
+EOmodules
     mkinitramfs \
-        -v \
+        -v -k \
         -d $tmpinitramfs \
-        -o $targetinitrd \
+        -o $tmptargetinitrd \
         $kernelversion || exit 1
 
     mkdir -p $tmpdir/initrd.hacks
     (
         cd $tmpdir/initrd.hacks
-        gunzip -c $targetinitrd|cpio -i
+        gunzip -c $tmptargetinitrd|cpio -i
         echo "Hacks in initramfs"
     )
-    mkdir -p $tmpdir/initrd.hacks/etc/udev/rules.d
+    mkdir -p $tmpdir/initrd.hacks/lib/udev/rules.d
     cp $here/60-persistent-storage.rules \
-        $tmpdir/initrd.hacks/etc/udev/rules.d/60-persistent-storage.rules
+        $tmpdir/initrd.hacks/lib/udev/rules.d/60-persistent-storage.rules
     cp /sbin/losetup $tmpdir/initrd.hacks/sbin
     depmod  -b $tmpdir/initrd.hacks -a $kernelversion
     (
@@ -51,9 +74,11 @@ EOinitramfsconf
         mkfs.ext3 -O dir_index -F -F -L cow ./empty_ext2_fs
         tune2fs -c -1 -i -1 ./empty_ext2_fs
         gzip ./empty_ext2_fs
-        find . |cpio -ov -H newc|gzip > $tmpdir/initrd-$distro-$kernelversion.gz
+        find . |cpio -ov -H newc|gzip > $targetinitrd
     )
     rm -rf $tmpdir/initrd.{tmp,hacks,gz}
+
+    echo "Created $targetinitrd"
 }
 
 
