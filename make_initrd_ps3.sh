@@ -32,40 +32,18 @@ DEVICE=eth0
 NFSROOT=auto
 EOinitramfsconf
     cat > $tmpinitramfs/modules <<EOmodules
-snd_pcm_oss
-snd_mixer_oss
-snd_pcm
-snd_seq_dummy
-snd_page_alloc
-snd_seq_oss
-snd_seq_midi
-snd_rawmidi
-snd_seq_midi_event
-snd_seq
-snd_timer
-snd_seq_device
-snd
-soundcore
 sg
 sd_mod
 sr_mod
 aufs
 squashfs
 loop
-binfmt_misc
-evdev
-snd_ps3
-spufs
-ps3flash
 rtc_ps3
 ps3_lpm
 usbhid
 hid
 usb_storage
-ps3_gelic
 ps3stor_lib
-ps3rom
-ps3vram
 ps3disk
 EOmodules
     mkinitramfs \
@@ -83,6 +61,7 @@ EOmodules
     rm -rf $tmpdir/initrd.hacks/{init,conf/conf.d,conf/arch.conf,conf/initramfs.conf}
     rm -rf $tmpdir/initrd.hacks/scripts
     rm -rf $tmpdir/initrd.hacks/lib/udev/{ata_id,firmware,edd_id}
+    rm -rf $tmpdir/initrd.hacks/lib/udev/rules/{64-device-mapper,50-firmware,80-drivers,61-persistent-storage-edd}.rules
     rm -rf $tmpdir/initrd.hacks/lib/libntfs-3g.so*
     rm -rf $tmpdir/initrd.hacks/lib/librt*
     rm -rf $tmpdir/initrd.hacks/lib/libext2fs*
@@ -93,7 +72,7 @@ EOmodules
     rm -rf $tmpdir/initrd.hacks/lib/modules/$kernelversion/kernel/fs/fuse
     rm -rf $tmpdir/initrd.hacks/sbin/{hwclock,dumpe2fs,mount.{fuse,ntfs-3g,ntfs},wait-for-root}
     rm -rf $tmpdir/initrd.hacks/etc/{console-setup,default,modprobe.d}
-    rm -rf $tmpdir/initrd.hacks/bin/{cpio,resume,loadkeys,kbd_mode,setfont,poweroff,halt,nfsmount,date,ipconfig,ntfs-3g,sh}
+    rm -rf $tmpdir/initrd.hacks/bin/{cpio,resume,loadkeys,kbd_mode,setfont,poweroff,halt,nfsmount,date,ipconfig,ntfs-3g,sh,dmesg,dd}
     cp $here/fastboot_by_tim $tmpdir/initrd.hacks/
     cp $here/fastboot_by_tim_init $tmpdir/initrd.hacks/init
     cp /sbin/losetup $tmpdir/initrd.hacks/sbin

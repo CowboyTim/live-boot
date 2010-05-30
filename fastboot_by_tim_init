@@ -133,10 +133,10 @@ mountroot
 # Stop udevd, we'll miss a few events while we run init, but we catch up
 pkill udevd
 
-mkdir $rootmnt/dev
-mkdir $rootmnt/sys
-mkdir $rootmnt/proc
-mkdir $rootmnt/tmp
+[-d $rootmnt/dev  ] || mkdir $rootmnt/dev
+[-d $rootmnt/sys  ] || mkdir $rootmnt/sys
+[-d $rootmnt/proc ] || mkdir $rootmnt/proc
+[-d $rootmnt/tmp  ] || mkdir $rootmnt/tmp
 
 # Move /dev to the real filesystem
 mount -n -o move /dev  ${rootmnt}/dev
