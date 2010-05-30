@@ -25,6 +25,7 @@ make_initramfs(){
     targetinitrd=$tmpdir/initrd-$distro-$kernelversion.gz
     mkdir -p $tmpinitramfs/scripts
     cp $here/fastboot_by_tim $tmpinitramfs/scripts
+    mkdir -p $tmpinitramfs/hooks
     cat > $tmpinitramfs/initramfs.conf <<EOinitramfsconf
 MODULES=list
 BUSYBOX=y
@@ -47,7 +48,6 @@ snd_timer
 snd_seq_device
 snd
 soundcore
-btusb
 sg
 sd_mod
 sr_mod
@@ -57,7 +57,6 @@ loop
 binfmt_misc
 evdev
 snd_ps3
-bluetooth
 spufs
 ps3flash
 rtc_ps3
@@ -83,6 +82,31 @@ EOmodules
         gunzip -c $tmptargetinitrd|cpio -i
         echo "Hacks in initramfs"
     )
+    #rm -rf $tmpdir/initrd.hacks/{init,conf/conf.d,conf/arch.conf,conf/initramfs.conf}
+    #rm -rf $tmpdir/initrd.hacks/scripts
+    rm -rf $tmpdir/initrd.hacks/lib/udev/{ata_id,firmware}
+    rm -rf $tmpdir/initrd.hacks/lib/libntfs-3g.so*
+    rm -rf $tmpdir/initrd.hacks/lib/librt*
+    rm -rf $tmpdir/initrd.hacks/lib/libext2fs*
+    rm -rf $tmpdir/initrd.hacks/lib/libcom_err*
+    rm -rf $tmpdir/initrd.hacks/lib/libpthread*
+    rm -rf $tmpdir/initrd.hacks/lib/libe2p*
+    rm -rf $tmpdir/initrd.hacks/lib/libfuse.so*
+    #rm -rf $tmpdir/initrd.hacks/lib/modules/$kernelversion/kernel/fs
+    rm -rf $tmpdir/initrd.hacks/sbin/{hwclock,dumpe2fs,mount.{fuse,ntfs-3g,ntfs},wait-for-root}
+    #rm -rf $tmpdir/initrd.hacks/etc/console-setup
+    #rm -rf $tmpdir/initrd.hacks/etc/default
+    rm -rf $tmpdir/initrd.hacks/bin/{nfsmount,date,ipconfig}
+    #rm -rf $tmpdir/initrd.hacks/bin/setfont
+    rm -rf $tmpdir/initrd.hacks/bin/poweroff
+    rm -rf $tmpdir/initrd.hacks/bin/halt
+    rm -rf $tmpdir/initrd.hacks/bin/ntfs-3g
+    rm -rf $tmpdir/initrd.hacks/bin/cpio
+    #rm -rf $tmpdir/initrd.hacks/bin/busybox
+    #rm -rf $tmpdir/initrd.hacks/bin/loadkeys
+    #rm -rf $tmpdir/initrd.hacks/bin/kbd_mode
+    rm -rf $tmpdir/initrd.hacks/bin/resume
+    cp $here/fastboot_by_tim_init $tmpdir/initrd.hacks/init
     cp /sbin/losetup $tmpdir/initrd.hacks/sbin
     depmod  -b $tmpdir/initrd.hacks -a $kernelversion
     (
@@ -90,8 +114,8 @@ EOmodules
         dd if=/dev/zero of=./empty_ext2_fs bs=1M count=32
         mkfs.ext3 -O dir_index -F -F -L cow ./empty_ext2_fs
         tune2fs -c -1 -i -1 ./empty_ext2_fs
-        gzip ./empty_ext2_fs
-        find . |cpio -ov -H newc|gzip > $targetinitrd
+        gzip -9 ./empty_ext2_fs
+        find . |cpio -ov -H newc|gzip -9 > $targetinitrd
     )
     rm -rf $tmpdir/initrd.{tmp,hacks,gz}
 

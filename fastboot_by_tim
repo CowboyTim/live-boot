@@ -11,12 +11,15 @@ root_persistence_entity=".root_cow_loop.ext2"
 root_persistence_type="loop"
 home_persistence_entity="home-rw"
 
-export UNIONFS="aufs"
-
 if [ ! -x "/bin/fstype" ]; then
     # klibc not in path -> not in initramfs
     export PATH="${PATH}:/usr/lib/klibc/bin"
 fi
+
+panic() {
+	echo $@
+	PS1='(initramfs|panic) ' /bin/sh -i </dev/console >/dev/console 2>&1
+}
 
 get_fstype() {
     local FSTYPE
@@ -125,7 +128,7 @@ setup_unionfs() {
         echo "Not mounting a homedir"
     fi
 
-    modprobe -b $UNIONFS
+    modprobe -b aufs
 
     # run-init can't deal with images in a subdir, but we're going to move all
     # of these away before it runs anyway.  No, we're not, put them in / since
@@ -189,9 +192,9 @@ setup_unionfs() {
     mount -t ${cow_fstype} -o ${cow_mountopt} ${cowdevice} /cow \
         || panic "Can not mount $cowdevice on /cow"
 
-    echo "Mounting the AUFS on $rootmnt"
-    mount -t ${UNIONFS} -o exec,noatime,nodiratime,dirs=/cow=rw:$rofsstring ${UNIONFS} $rootmnt \
-        || panic "${UNIONFS} mount failed"
+    echo "Mounting the aufs on $rootmnt"
+    mount -t aufs -o exec,noatime,nodiratime,dirs=/cow=rw:$rofsstring aufs $rootmnt \
+        || panic "aufs mount failed"
 
     if [ ! -z $homecow ]; then
         mkdir -p $rootmnt/home
@@ -249,15 +252,11 @@ mountroot() {
     udevadm trigger
     udevadm settle
 
-    echo "Making new root with $UNIONFS in $rootmnt"
+    echo "Making new root with aufs in $rootmnt"
     setup_unionfs "$livefs_root" "$rootmnt"
 
     mkdir -p /dev/pts
     mkdir -p /dev/shm
-
-    if [ -d $rootmnt/tmp ]; then
-        mount -t tmpfs /dev/shm $rootmnt/tmp
-    fi
 
     if [ -f $rootmnt/etc/fastboot_by_tim.conf ]; then
         . $rootmnt/etc/fastboot_by_tim.conf
