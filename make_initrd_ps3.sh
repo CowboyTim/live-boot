@@ -1,6 +1,9 @@
 #!/bin/bash
 
 tmpscratchdir=/var/tmp
+if [ -d /mnt/rootfs/var/tmp ]; then
+    tmpscratchdir=/mnt/rootfs/var/tmp
+fi
 here=$(readlink -f -- "${0%/*}") 
 
 trap exit ERR
