@@ -79,8 +79,8 @@ EOmodules
         gunzip -c $tmptargetinitrd|cpio -i
         echo "Hacks in initramfs"
     )
-    rm -rf $tmpdir/initrd.hacks/{init,conf/conf.d,conf/arch.conf,conf/initramfs.conf}
-    rm -rf $tmpdir/initrd.hacks/scripts
+    #rm -rf $tmpdir/initrd.hacks/{init,conf/conf.d,conf/arch.conf,conf/initramfs.conf}
+    #rm -rf $tmpdir/initrd.hacks/scripts
     rm -rf $tmpdir/initrd.hacks/lib/udev/{ata_id,firmware}
     rm -rf $tmpdir/initrd.hacks/lib/libntfs-3g.so*
     rm -rf $tmpdir/initrd.hacks/lib/librt*
@@ -89,19 +89,19 @@ EOmodules
     rm -rf $tmpdir/initrd.hacks/lib/libpthread*
     rm -rf $tmpdir/initrd.hacks/lib/libe2p*
     rm -rf $tmpdir/initrd.hacks/lib/libfuse.so*
-    rm -rf $tmpdir/initrd.hacks/lib/modules/$kernelversion/kernel/fs
+    #rm -rf $tmpdir/initrd.hacks/lib/modules/$kernelversion/kernel/fs
     rm -rf $tmpdir/initrd.hacks/sbin/{hwclock,dumpe2fs,mount.{fuse,ntfs-3g,ntfs},wait-for-root}
-    rm -rf $tmpdir/initrd.hacks/etc/console-setup
-    rm -rf $tmpdir/initrd.hacks/etc/default
+    #rm -rf $tmpdir/initrd.hacks/etc/console-setup
+    #rm -rf $tmpdir/initrd.hacks/etc/default
     rm -rf $tmpdir/initrd.hacks/bin/{nfsmount,date,ipconfig}
-    rm -rf $tmpdir/initrd.hacks/bin/setfont
+    #rm -rf $tmpdir/initrd.hacks/bin/setfont
     rm -rf $tmpdir/initrd.hacks/bin/poweroff
     rm -rf $tmpdir/initrd.hacks/bin/halt
     rm -rf $tmpdir/initrd.hacks/bin/ntfs-3g
     rm -rf $tmpdir/initrd.hacks/bin/cpio
-    rm -rf $tmpdir/initrd.hacks/bin/busybox
-    rm -rf $tmpdir/initrd.hacks/bin/loadkeys
-    rm -rf $tmpdir/initrd.hacks/bin/kbd_mode
+    #rm -rf $tmpdir/initrd.hacks/bin/busybox
+    #rm -rf $tmpdir/initrd.hacks/bin/loadkeys
+    #rm -rf $tmpdir/initrd.hacks/bin/kbd_mode
     rm -rf $tmpdir/initrd.hacks/bin/resume
     cp $here/fastboot_by_tim_init $tmpdir/initrd.hacks/init
     cp /sbin/losetup $tmpdir/initrd.hacks/sbin
