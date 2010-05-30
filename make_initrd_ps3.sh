@@ -34,40 +34,18 @@ DEVICE=eth0
 NFSROOT=auto
 EOinitramfsconf
     cat > $tmpinitramfs/modules <<EOmodules
-snd_pcm_oss
-snd_mixer_oss
-snd_pcm
-snd_seq_dummy
-snd_page_alloc
-snd_seq_oss
-snd_seq_midi
-snd_rawmidi
-snd_seq_midi_event
-snd_seq
-snd_timer
-snd_seq_device
-snd
-soundcore
 sg
 sd_mod
 sr_mod
 aufs
 squashfs
 loop
-binfmt_misc
-evdev
-snd_ps3
-spufs
-ps3flash
 rtc_ps3
-ps3_lpm
 usbhid
 hid
 usb_storage
 ps3_gelic
 ps3stor_lib
-ps3rom
-ps3vram
 ps3disk
 EOmodules
     mkinitramfs \
@@ -84,7 +62,8 @@ EOmodules
     )
     rm -rf $tmpdir/initrd.hacks/{init,conf/conf.d,conf/arch.conf,conf/initramfs.conf}
     rm -rf $tmpdir/initrd.hacks/scripts
-    rm -rf $tmpdir/initrd.hacks/lib/udev/{ata_id,firmware}
+    rm -rf $tmpdir/initrd.hacks/lib/udev/{ata_id,edd_id,firmware}
+    rm -rf $tmpdir/initrd.hacks/lib/udev/rules.d/{50-firmware,64-device-mapper,80-drivers,61-persistent-storage-edd}.rules
     rm -rf $tmpdir/initrd.hacks/lib/libntfs-3g.so*
     rm -rf $tmpdir/initrd.hacks/lib/librt*
     rm -rf $tmpdir/initrd.hacks/lib/libext2fs*
@@ -92,20 +71,12 @@ EOmodules
     rm -rf $tmpdir/initrd.hacks/lib/libpthread*
     rm -rf $tmpdir/initrd.hacks/lib/libe2p*
     rm -rf $tmpdir/initrd.hacks/lib/libfuse.so*
-    #rm -rf $tmpdir/initrd.hacks/lib/modules/$kernelversion/kernel/fs
+    rm -rf $tmpdir/initrd.hacks/lib/modules/$kernelversion/kernel/fs/fuse
     rm -rf $tmpdir/initrd.hacks/sbin/{hwclock,dumpe2fs,mount.{fuse,ntfs-3g,ntfs},wait-for-root}
-    rm -rf $tmpdir/initrd.hacks/etc/console-setup
-    rm -rf $tmpdir/initrd.hacks/etc/default
+    rm -rf $tmpdir/initrd.hacks/etc/{default,console-setup,modprobe.d}
     rm -rf $tmpdir/initrd.hacks/bin/{nfsmount,date,ipconfig}
-    rm -rf $tmpdir/initrd.hacks/bin/setfont
-    rm -rf $tmpdir/initrd.hacks/bin/poweroff
-    rm -rf $tmpdir/initrd.hacks/bin/halt
-    rm -rf $tmpdir/initrd.hacks/bin/ntfs-3g
-    rm -rf $tmpdir/initrd.hacks/bin/cpio
-    #rm -rf $tmpdir/initrd.hacks/bin/busybox
-    rm -rf $tmpdir/initrd.hacks/bin/loadkeys
-    rm -rf $tmpdir/initrd.hacks/bin/kbd_mode
-    rm -rf $tmpdir/initrd.hacks/bin/resume
+    rm -rf $tmpdir/initrd.hacks/bin/{halt,poweroff,dmesg,cpio,ntfs-3g,resume,setfont,kbd_mode,loadkeys}
+    rm -rf $tmpdir/initrd.hacks/bin/busybox
     cp $here/fastboot_by_tim_init $tmpdir/initrd.hacks/init
     cp /sbin/losetup $tmpdir/initrd.hacks/sbin
     depmod  -b $tmpdir/initrd.hacks -a $kernelversion
