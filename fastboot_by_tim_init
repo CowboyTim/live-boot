@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/busybox sh
 
 PATH=$PATH:/sbin:/usr/sbin:/bin:/usr/bin
 export PATH
