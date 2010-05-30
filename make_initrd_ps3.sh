@@ -23,8 +23,6 @@ make_initramfs(){
     tmpinitramfs="$tmpdir/initrd.tmp"
     tmptargetinitrd="$tmpdir/initrd.gz"
     targetinitrd=$tmpdir/initrd-$distro-$kernelversion.gz
-    mkdir -p $tmpinitramfs/scripts
-    cp $here/fastboot_by_tim $tmpinitramfs/scripts
     mkdir -p $tmpinitramfs/hooks
     cat > $tmpinitramfs/initramfs.conf <<EOinitramfsconf
 MODULES=list
@@ -96,6 +94,7 @@ EOmodules
     rm -rf $tmpdir/initrd.hacks/sbin/{hwclock,dumpe2fs,mount.{fuse,ntfs-3g,ntfs},wait-for-root}
     rm -rf $tmpdir/initrd.hacks/etc/{console-setup,default}
     rm -rf $tmpdir/initrd.hacks/bin/{cpio,resume,loadkeys,kbd_mode,setfont,poweroff,halt,nfsmount,date,ipconfig,ntfs-3g}
+    cp $here/fastboot_by_tim $tmpdir/initrd.hacks/
     cp $here/fastboot_by_tim_init $tmpdir/initrd.hacks/init
     cp /sbin/losetup $tmpdir/initrd.hacks/sbin
     depmod  -b $tmpdir/initrd.hacks -a $kernelversion

@@ -3,14 +3,20 @@
 PATH=$PATH:/sbin:/usr/sbin:/bin:/usr/bin
 export PATH
 
+panic(){
+    echo $@
+	PS1='(initramfs|panic) ' /bin/sh -i </dev/console >/dev/console 2>&1
+}
+export panic
+
 # Set modprobe env
 export MODPROBE_OPTIONS="-qb"
 
 # mount /sys and /proc
 [ -d /sys  ] || mkdir /sys
 [ -d /proc ] || mkdir /proc
-mount -t sysfs -o nodev,noexec,nosuid none /sys 
-mount -t proc  -o nodev,noexec,nosuid none /proc 
+mount -t sysfs -o nodev,noexec,nosuid none /sys   || panic "Oeps"
+mount -t proc  -o nodev,noexec,nosuid none /proc  || panic "Oeps"
 mkdir -p /var/lock
 
 # make a rootmnt
@@ -25,14 +31,14 @@ mount -t tmpfs /dev/shm /tmp
 # are used; which they will be, but it's worth pointing out
 [ -d /dev  ] || mkdir -m 0755 /dev
 if ! mount -t devtmpfs -o mode=0755 none /dev; then
-       mount -t tmpfs -o mode=0755 none /dev
+       mount -t tmpfs -o mode=0755 none /dev || panic "Oeps"
        mknod -m 0600 /dev/console c 5 1
        mknod /dev/null c 1 3
 fi
 
 # mount pts
 mkdir /dev/pts
-mount -t devpts -o noexec,nosuid,gid=5,mode=0620 none /dev/pts || true
+mount -t devpts -o noexec,nosuid,gid=5,mode=0620 none /dev/pts || panic "Oeps"
 
 # Export relevant variables
 export init=/sbin/init
@@ -116,14 +122,21 @@ load_modules
   /sbin/udevadm trigger --subsystem-nomatch=block; ) &
 
 # mount the root
-if [ -e /scripts/fastboot_by_tim ]; then
-    . /scripts/fastboot_by_tim
-    mountroot
+if [ -e /fastboot_by_tim ]; then
+    . /fastboot_by_tim
+else
+    panic "No /fastboot_by_tim found"
 fi
+mountroot
 #mount /dev/ps3da1 $rootmnt
 
 # Stop udevd, we'll miss a few events while we run init, but we catch up
 pkill udevd
+
+mkdir $rootmnt/dev
+mkdir $rootmnt/sys
+mkdir $rootmnt/proc
+mkdir $rootmnt/tmp
 
 # Move /dev to the real filesystem
 mount -n -o move /dev  ${rootmnt}/dev
