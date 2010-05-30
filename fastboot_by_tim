@@ -54,7 +54,6 @@ parse_cmdline() {
 setup_loop() {
     local fspath=$1
 
-    modprobe -b loop
     udevadm settle
 
     dev="$(losetup -f)"
@@ -122,8 +121,6 @@ setup_unionfs() {
     else
         echo "Not mounting a homedir"
     fi
-
-    modprobe -b aufs
 
     # run-init can't deal with images in a subdir, but we're going to move all
     # of these away before it runs anyway.  No, we're not, put them in / since
