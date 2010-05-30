@@ -1,0 +1,168 @@
+#!/bin/sh
+
+export init=/sbin/init
+
+# Parse command line options
+for x in $(cat /proc/cmdline); do
+	case $x in
+	init=*)
+		init=${x#init=}
+		;;
+	root=*)
+		ROOT=${x#root=}
+		case $ROOT in
+		LABEL=*)
+			ROOT="${ROOT#LABEL=}"
+
+			# support / in LABEL= paths (escape to \x2f)
+			case "${ROOT}" in
+			*[/]*)
+			if [ -x "$(command -v sed)" ]; then
+				ROOT="$(echo ${ROOT} | sed 's,/,\\x2f,g')"
+			else
+				if [ "${ROOT}" != "${ROOT#/}" ]; then
+					ROOT="\x2f${ROOT#/}"
+				fi
+				if [ "${ROOT}" != "${ROOT%/}" ]; then
+					ROOT="${ROOT%/}\x2f"
+				fi
+				IFS='/'
+				newroot=
+				for s in $ROOT; do
+					if [ -z "${newroot}" ]; then
+						newroot="${s}"
+					else
+						newroot="${newroot}\\x2f${s}"
+					fi
+				done
+				unset IFS
+				ROOT="${newroot}"
+			fi
+			esac
+			ROOT="/dev/disk/by-label/${ROOT}"
+			;;
+		UUID=*)
+			ROOT="/dev/disk/by-uuid/${ROOT#UUID=}"
+			;;
+		esac
+		;;
+	esac
+done
+
+# make a rootmnt
+export rootmnt=/root
+[ -d $rootmnt ] || mkdir -m 0700 $rootmnt
+
+# mount a tmpfs
+[ -d /tmp  ] || mkdir /tmp
+mount -t tmpfs /dev/shm /tmp
+
+# mount /sys and /proc
+[ -d /sys  ] || mkdir /sys
+[ -d /proc ] || mkdir /proc
+mount -t sysfs -o nodev,noexec,nosuid none /sys 
+mount -t proc  -o nodev,noexec,nosuid none /proc 
+mkdir -p /var/lock
+
+# Note that this only becomes /dev on the real filesystem if udev's scripts
+# are used; which they will be, but it's worth pointing out
+[ -d /dev  ] || mkdir -m 0755 /dev
+if ! mount -t devtmpfs -o mode=0755 none /dev; then
+	mount -t tmpfs -o mode=0755 none /dev
+	mknod -m 0600 /dev/console c 5 1
+	mknod /dev/null c 1 3
+fi
+
+# mount pts
+mkdir /dev/pts
+mount -t devpts -o noexec,nosuid,gid=5,mode=0620 none /dev/pts || true
+
+# Start the udev daemon to process events
+/sbin/udevd --daemon --resolve-names=never
+
+# Iterate sysfs and fire off everything; if we include a rule for it then
+# it'll get handled; otherwise it'll get handled later when we do this again
+# in the main boot sequence.
+( /sbin/udevadm trigger --subsystem-match=block; \
+  /sbin/udevadm trigger --subsystem-nomatch=block; ) &
+
+# The options part of the kernel "video=" argument (i.e. everyting
+# after "video=<fbdriver>:") has very inconsistent rules.
+#
+# Generally the following applies:
+# 1) options are comma-separated
+# 2) options can be in either of these three forms:
+#    <arg>=<value>, <arg>:<value>, <boolean-arg>.
+# 3) the "mode" option has the form <xres>x<yres>[M][R][-<bpp>][@<refresh>][i][m]
+#    and may or may not start with "mode="
+#
+# When the options are used with modules, they need to be space-separated
+# and the following conversions are needed:
+#	<arg>:<value> -> <arg>=<value>
+#	<boolean-arg> -> <boolean-arg>=1
+#	<modevalue>   -> mode=<modevalue>
+parse_video_opts()
+{
+	local OPTS="$1"
+	local IFS=","
+
+	# Must be a line like video=<fbdriver>:<opt1>,[opt2]...
+	if [ "${OPTS}" = "${OPTS%%:*}" ]; then
+		return
+	fi
+	OPTS="${OPTS#*:}"
+	for opt in ${OPTS}; do
+		# Already in the "<arg>=<value>" form
+		if [ "${opt}" != "${opt#*=}" ]; then
+			echo -n "$opt "
+		# In the "<arg>:<value>" form
+		elif [ "${opt}" != "${opt#*:}" ]; then
+			echo -n "${opt%:*}=${opt#*:} "
+		# Presumably a modevalue without the "mode=" prefix
+		elif [ "${opt}" != "${opt#[0-9]*x[0-9]}" ]; then
+			echo -n "mode=$opt "
+		# Presumably a boolean
+		else
+			echo -n "${opt}=1 "
+		fi
+	done
+}
+
+FB=""
+OPTS=""
+
+for x in $(cat /proc/cmdline); do
+	case ${x} in
+	video=*)
+		FB=${x#*=}
+		FB="${FB%%:*}"
+		OPTS="$(parse_video_opts "${x}")"
+	esac
+done
+
+# If we have no graphics devices yet, wait for udev to settle
+[ -d /sys/class/graphics/fbcon ] || udevadm settle
+[ -d /sys/class/graphics/fb0 ] || udevadm settle
+[ -d /sys/class/drm/card0 ] || udevadm settle
+
+
+# mount the root
+if [ -e fastboot_by_tim ]; then
+    . fastboot_by_tim
+    mountroot
+fi
+#mount /dev/ps3da1 $rootmnt
+
+# Stop udevd, we'll miss a few events while we run init, but we catch up
+pkill udevd
+
+# Move /dev to the real filesystem
+mount -n -o move /dev  ${rootmnt}/dev
+# Move virtual filesystems over to the real filesystem
+mount -n -o move /sys  ${rootmnt}/sys
+mount -n -o move /proc ${rootmnt}/proc
+# move the tmpfs
+mount -n -o move /tmp  ${rootmnt}/tmp
+
+# init
+exec run-init ${rootmnt} ${init} "$@" <${rootmnt}/dev/console >${rootmnt}/dev/console 2>&1
