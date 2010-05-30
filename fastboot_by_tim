@@ -192,9 +192,9 @@ setup_unionfs() {
     mount -t ${cow_fstype} -o ${cow_mountopt} ${cowdevice} /cow \
         || panic "Can not mount $cowdevice on /cow"
 
-    echo "Mounting the AUFS on $rootmnt"
-    mount -t ${UNIONFS} -o exec,noatime,nodiratime,dirs=/cow=rw:$rofsstring ${UNIONFS} $rootmnt \
-        || panic "${UNIONFS} mount failed"
+    echo "Mounting the aufs on $rootmnt"
+    mount -t aufs -o exec,noatime,nodiratime,dirs=/cow=rw:$rofsstring aufs $rootmnt \
+        || panic "aufs mount failed"
 
     if [ ! -z $homecow ]; then
         mkdir -p $rootmnt/home
