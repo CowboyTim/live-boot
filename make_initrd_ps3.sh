@@ -80,6 +80,7 @@ EOmodules
         echo "Hacks in initramfs"
     )
     rm -rf $tmpdir/initrd.hacks/{init,conf/conf.d,conf/arch.conf,conf/initramfs.conf}
+    rm -rf $tmpdir/initrd.hacks/scripts
     rm -rf $tmpdir/initrd.hacks/lib/udev/{ata_id,firmware}
     rm -rf $tmpdir/initrd.hacks/lib/libntfs-3g.so*
     rm -rf $tmpdir/initrd.hacks/lib/librt*
