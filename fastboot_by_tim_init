@@ -1,5 +1,8 @@
 #!/bin/sh
 
+PATH=$PATH:/sbin:/usr/sbin:/bin:/usr/bin
+export PATH
+
 export init=/sbin/init
 
 # Parse command line options
@@ -167,8 +170,8 @@ done
 
 
 # mount the root
-if [ -e fastboot_by_tim ]; then
-    . fastboot_by_tim
+if [ -e /scripts/fastboot_by_tim ]; then
+    . /scripts/fastboot_by_tim
     mountroot
 fi
 #mount /dev/ps3da1 $rootmnt
