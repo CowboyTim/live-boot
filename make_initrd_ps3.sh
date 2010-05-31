@@ -69,9 +69,10 @@ EOmodules
     rm -rf $tmpdir/initrd.hacks/lib/libcom_err*
     rm -rf $tmpdir/initrd.hacks/lib/libpthread*
     rm -rf $tmpdir/initrd.hacks/lib/libe2p*
+    rm -rf $tmpdir/initrd.hacks/lib/libproc**
     rm -rf $tmpdir/initrd.hacks/lib/libfuse.so*
     rm -rf $tmpdir/initrd.hacks/lib/modules/$kernelversion/kernel/fs/fuse
-    rm -rf $tmpdir/initrd.hacks/sbin/{hwclock,dumpe2fs,mount.{fuse,ntfs-3g,ntfs},depmod,rmmod,wait-for-root}
+    rm -rf $tmpdir/initrd.hacks/sbin/{hwclock,dumpe2fs,mount.{fuse,ntfs-3g,ntfs},depmod,rmmod,wait-for-root,pkill}
     rm -rf $tmpdir/initrd.hacks/etc/{console-setup,default,modprobe.d}
     rm -rf $tmpdir/initrd.hacks/bin/{cpio,resume,loadkeys,kbd_mode,setfont,poweroff,halt,nfsmount,date,ipconfig,ntfs-3g,sh,dmesg,dd,sleep,mount,insmod,pivot_root}
     cp $here/fastboot_by_tim $tmpdir/initrd.hacks/
