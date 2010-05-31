@@ -113,7 +113,8 @@ load_modules()
 load_modules
 
 # Start the udev daemon to process events
-/sbin/udevd --daemon --resolve-names=never
+/sbin/udevd --resolve-names=never &
+udevdpid=$!
 
 # Iterate sysfs and fire off everything; if we include a rule for it then
 # it'll get handled; otherwise it'll get handled later when we do this again
@@ -131,7 +132,7 @@ mountroot
 #mount /dev/ps3da1 $rootmnt
 
 # Stop udevd, we'll miss a few events while we run init, but we catch up
-pkill udevd
+kill $udevdpid
 
 [ -d $rootmnt/dev  ] || mkdir $rootmnt/dev
 [ -d $rootmnt/sys  ] || mkdir $rootmnt/sys
