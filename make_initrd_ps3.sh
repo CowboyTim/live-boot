@@ -23,6 +23,7 @@ make_initramfs(){
     tmpinitramfs="$tmpdir/initrd.tmp"
     tmptargetinitrd="$tmpdir/initrd.gz"
     targetinitrd=$tmpdir/initrd-$distro-$kernelversion.gz
+    mkdir -p $tmpinitramfs/scripts
     mkdir -p $tmpinitramfs/hooks
     cat > $tmpinitramfs/initramfs.conf <<EOinitramfsconf
 MODULES=list
@@ -61,7 +62,7 @@ EOmodules
     rm -rf $tmpdir/initrd.hacks/{init,conf/conf.d,conf/arch.conf,conf/initramfs.conf}
     rm -rf $tmpdir/initrd.hacks/scripts
     rm -rf $tmpdir/initrd.hacks/lib/udev/{ata_id,firmware,edd_id}
-    rm -rf $tmpdir/initrd.hacks/lib/udev/rules/{64-device-mapper,50-firmware,80-drivers,61-persistent-storage-edd}.rules
+    #rm -rf $tmpdir/initrd.hacks/lib/udev/rules.d/{50-firmware,61-persistent-storage-edd}.rules
     rm -rf $tmpdir/initrd.hacks/lib/libntfs-3g.so*
     rm -rf $tmpdir/initrd.hacks/lib/librt*
     rm -rf $tmpdir/initrd.hacks/lib/libext2fs*
@@ -72,10 +73,9 @@ EOmodules
     rm -rf $tmpdir/initrd.hacks/lib/modules/$kernelversion/kernel/fs/fuse
     rm -rf $tmpdir/initrd.hacks/sbin/{hwclock,dumpe2fs,mount.{fuse,ntfs-3g,ntfs},depmod,rmmod,wait-for-root}
     rm -rf $tmpdir/initrd.hacks/etc/{console-setup,default,modprobe.d}
-    rm -rf $tmpdir/initrd.hacks/bin/{cpio,resume,loadkeys,kbd_mode,setfont,poweroff,halt,nfsmount,date,ipconfig,ntfs-3g,sh,dmesg,dd,sleep,mount,insmod}
+    rm -rf $tmpdir/initrd.hacks/bin/{cpio,resume,loadkeys,kbd_mode,setfont,poweroff,halt,nfsmount,date,ipconfig,ntfs-3g,sh,dmesg,dd,sleep,mount,insmod,pivot_root}
     cp $here/fastboot_by_tim $tmpdir/initrd.hacks/
     cp $here/fastboot_by_tim_init $tmpdir/initrd.hacks/init
-    cp /usr/lib/klibc/bin/losetup $tmpdir/initrd.hacks/sbin
     depmod  -b $tmpdir/initrd.hacks -a $kernelversion
     (
         cd $tmpdir/initrd.hacks
@@ -87,8 +87,8 @@ EOmodules
     )
     rm -rf $tmpdir/initrd.{tmp,hacks,gz}
 
-    echo "Created $targetinitrd"
     cp $targetinitrd $tmpscratchdir/
+    echo "Created $tmpscratchdir/$(basename $targetinitrd)"
     rm -rf $tmpdir
 }
 
