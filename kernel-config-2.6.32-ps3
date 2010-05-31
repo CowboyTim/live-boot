@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.32.11+drm33.2
-# Mon May 31 20:37:10 2010
+# Mon May 31 22:52:49 2010
 #
 CONFIG_PPC64=y
 
@@ -688,13 +688,13 @@ CONFIG_BLK_DEV_SD=y
 # CONFIG_CHR_DEV_ST is not set
 # CONFIG_CHR_DEV_OSST is not set
 # CONFIG_BLK_DEV_SR is not set
-# CONFIG_CHR_DEV_SG is not set
+CONFIG_CHR_DEV_SG=y
 # CONFIG_CHR_DEV_SCH is not set
 # CONFIG_SCSI_MULTI_LUN is not set
 # CONFIG_SCSI_CONSTANTS is not set
 # CONFIG_SCSI_LOGGING is not set
 # CONFIG_SCSI_SCAN_ASYNC is not set
-# CONFIG_SCSI_WAIT_SCAN is not set
+CONFIG_SCSI_WAIT_SCAN=m
 
 #
 # SCSI Transports
@@ -1342,7 +1342,7 @@ CONFIG_BITREVERSE=y
 CONFIG_GENERIC_FIND_LAST_BIT=y
 # CONFIG_CRC_CCITT is not set
 CONFIG_CRC16=y
-# CONFIG_CRC_T10DIF is not set
+CONFIG_CRC_T10DIF=y
 CONFIG_CRC_ITU_T=y
 CONFIG_CRC32=y
 # CONFIG_CRC7 is not set
