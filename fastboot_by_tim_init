@@ -7,6 +7,7 @@ panic(){
     echo $@
     while [ ! -f /resume ]; do
 	    PS1='(initramfs|panic) ' /bin/busybox sh -i </dev/console >/dev/console 2>&1
+        echo "exit! $?"
     done
 }
 export panic
