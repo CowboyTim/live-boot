@@ -118,6 +118,7 @@ setup_unionfs() {
             sleep 1
             i="$(($i + 1))"
         done
+        [ $i == 10 ] && panic "No $homecow mounted to $homemount"
     else
         echo "Not mounting a homedir"
     fi
@@ -235,6 +236,7 @@ mountroot() {
             sleep 1
             i="$(($i + 1))"
         done
+        [ $i == 10 ] && panic "No $ROOT or $homecow"
     fi
 
     if [ -z "$livefs_root" ]; then
