@@ -61,7 +61,7 @@ EOmodules
     )
     rm -rf $tmpdir/initrd.hacks/{init,conf/conf.d,conf/arch.conf,conf/initramfs.conf}
     rm -rf $tmpdir/initrd.hacks/scripts
-    rm -rf $tmpdir/initrd.hacks/lib/udev/{ata_id,firmware,edd_id}
+    rm -rf $tmpdir/initrd.hacks/lib/udev/{ata_id,firmware,edd_id,blkid}
     rm -rf $tmpdir/initrd.hacks/lib/udev/rules.d/{50-firmware,61-persistent-storage-edd}.rules
     rm -rf $tmpdir/initrd.hacks/lib/libntfs-3g.so*
     rm -rf $tmpdir/initrd.hacks/lib/librt*
