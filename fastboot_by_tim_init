@@ -33,11 +33,9 @@ mount -t tmpfs /dev/shm /tmp
 # Note that this only becomes /dev on the real filesystem if udev's scripts
 # are used; which they will be, but it's worth pointing out
 [ -d /dev  ] || mkdir -m 0755 /dev
-if ! mount -t devtmpfs -o mode=0755 none /dev; then
-       mount -t tmpfs -o mode=0755 none /dev || panic "Oeps"
-       mknod -m 0600 /dev/console c 5 1
-       mknod /dev/null c 1 3
-fi
+mount -t tmpfs -o mode=0755 none /dev || panic "Oeps"
+mknod -m 0600 /dev/console c 5 1
+mknod /dev/null c 1 3
 
 # mount pts
 mkdir /dev/pts
