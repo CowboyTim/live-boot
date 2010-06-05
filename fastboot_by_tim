@@ -217,9 +217,6 @@ mountroot() {
     if [ ! -z "$ROOT" ]; then
         i=0
         while [ "$i" -lt 10 ]; do
-            echo "udevadm trigger+settle called for $ROOT"
-            udevadm trigger
-            udevadm settle
             if [ -b "$ROOT" ] ; then
                 rootfstype=$(get_fstype $ROOT)
                 mount -t $rootfstype $ROOT $mountpoint
@@ -233,29 +230,28 @@ mountroot() {
                     break   
                 fi
             fi
-            sleep 1
+            echo "udevadm trigger+settle called for $ROOT"
+            udevadm trigger
+            udevadm settle
             i="$(($i + 1))"
         done
         [ $i == 10 ] && panic "No $ROOT or $homecow"
     fi
 
-    if [ -z "$livefs_root" ]; then
+    if [ -z $livefs_root ]; then
         panic "Unable to find a medium containing a live file system"
     fi
 
-    udevadm trigger
-    udevadm settle
+    if [ -f $mountpoint/etc/fastboot_by_tim.conf ]; then
+        . $mountpoint/etc/fastboot_by_tim.conf
+    fi
 
-    echo "Making new root with aufs in $rootmnt"
-    setup_unionfs "$livefs_root" "$rootmnt"
-
-    mkdir -p /dev/pts
-    mkdir -p /dev/shm
-
-    if [ -f $rootmnt/etc/fastboot_by_tim.conf ]; then
-        . $rootmnt/etc/fastboot_by_tim.conf
+    if [ ! -z "$home_persistent" -o ! -z "$root_persistent" ]; then
+        echo "Making new root with aufs in $rootmnt"
+        setup_unionfs "$livefs_root" "$rootmnt"
+    else
+        mount -o move $livefs_root $rootmnt
     fi
 
     echo "FASTBOOT's mountroot done"
-
 }

@@ -132,7 +132,6 @@ else
     panic "No /fastboot_by_tim found"
 fi
 mountroot
-#mount /dev/ps3da1 $rootmnt
 
 # Stop udevd, we'll miss a few events while we run init, but we catch up
 kill $udevdpid
