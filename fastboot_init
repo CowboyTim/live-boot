@@ -47,11 +47,7 @@ mount -t devpts -o noexec,nosuid,gid=5,mode=0620 none /dev/pts || panic "Oeps"
 export init=/sbin/init
 
 # Parse command line options
-cmdline=$(cat /proc/cmdline)
-if [ -z $cmdline ]; then
-    cmdline="root=/dev/ps3da1 noquiet nosplash video=ps3fb:mode:2189"
-fi
-for x in $cmdline; do
+for x in $(cat /proc/cmdline); do
 	case $x in
     rfsfile=*)
         rfsfile="${x#rfsfile=}"
