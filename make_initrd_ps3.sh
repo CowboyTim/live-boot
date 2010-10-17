@@ -22,7 +22,7 @@ make_initramfs(){
     echo "Making a new initramfs in $tmpdir"
     tmpinitramfs="$tmpdir/initrd.tmp"
     tmptargetinitrd="$tmpdir/initrd.gz"
-    targetinitrd=$tmpdir/initrd-$distro-$kernelversion.gz
+    targetinitrd=$tmpdir/initrd-$distro-$kernelversion.lzma
     mkdir -p $tmpinitramfs/scripts
     mkdir -p $tmpinitramfs/hooks
     cat > $tmpinitramfs/initramfs.conf <<EOinitramfsconf
@@ -85,7 +85,7 @@ EOmodules
         mkfs.ext3 -O dir_index -F -F -L cow ./empty_ext2_fs
         tune2fs -c -1 -i -1 ./empty_ext2_fs
         gzip -9 ./empty_ext2_fs
-        find . |cpio -ov -H newc|gzip -9 > $targetinitrd
+        find . |cpio -ov -H newc|lzma > $targetinitrd
     )
     rm -rf $tmpdir/initrd.{tmp,hacks,gz}
 
