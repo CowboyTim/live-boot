@@ -129,7 +129,7 @@ udevdpid=$!
   /sbin/udevadm trigger --subsystem-nomatch=block; ) &
 
 # mount the root
-. /fastboot_by_tim
+. /fastboot
 mountroot
 
 # Stop udevd, we'll miss a few events while we run init, but we catch up

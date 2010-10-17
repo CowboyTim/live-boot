@@ -76,8 +76,8 @@ EOmodules
     rm -rf $tmpdir/initrd.hacks/sbin/{hwclock,dumpe2fs,mount.{fuse,ntfs-3g,ntfs},depmod,rmmod,wait-for-root,pkill}
     rm -rf $tmpdir/initrd.hacks/etc/{console-setup,default,modprobe.d}
     rm -rf $tmpdir/initrd.hacks/bin/{cpio,resume,loadkeys,kbd_mode,setfont,poweroff,halt,nfsmount,date,ipconfig,ntfs-3g,sh,dmesg,dd,sleep,mount,insmod,pivot_root}
-    cp $here/fastboot_by_tim $tmpdir/initrd.hacks/
-    cp $here/fastboot_by_tim_init $tmpdir/initrd.hacks/init
+    cp $here/fastboot $tmpdir/initrd.hacks/
+    cp $here/fastboot_init $tmpdir/initrd.hacks/init
     depmod  -b $tmpdir/initrd.hacks -a $kernelversion
     (
         cd $tmpdir/initrd.hacks

@@ -58,7 +58,7 @@ DEVICE=eth0
 NFSROOT=auto
 EOinitramfsconf
     mkdir -p $tmpinitramfs/scripts
-    cp $here/fastboot_by_tim $tmpinitramfs/scripts
+    cp $here/fastboot $tmpinitramfs/scripts
     chmod +x $tmptargetsquashdir/usr/share/initramfs-tools/init
     chroot $tmptargetsquashdir \
         mkinitramfs \
@@ -97,7 +97,7 @@ EOinitramfsconf
 
 get_append_line(){
     distro="$1"
-    echo "boot=fastboot_by_tim root=LABEL=${isoname} rfsfile=${distro}/${distro}.squashfs noquiet nosplash toram"
+    echo "boot=fastboot root=LABEL=${isoname} rfsfile=${distro}/${distro}.squashfs noquiet nosplash toram"
     return
 }
 

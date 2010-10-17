@@ -242,8 +242,8 @@ mountroot() {
         panic "Unable to find a medium containing a live file system"
     fi
 
-    if [ -f $mountpoint/etc/fastboot_by_tim.conf ]; then
-        . $mountpoint/etc/fastboot_by_tim.conf
+    if [ -f $mountpoint/etc/fastboot.conf ]; then
+        . $mountpoint/etc/fastboot.conf
     fi
 
     if [ ! -z "$home_persistent" -o ! -z "$root_persistent" ]; then
