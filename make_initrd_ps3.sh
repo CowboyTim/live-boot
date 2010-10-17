@@ -46,6 +46,7 @@ hid
 usb_storage
 ps3stor_lib
 ps3disk
+ps3vram
 EOmodules
     mkinitramfs \
         -v -k \

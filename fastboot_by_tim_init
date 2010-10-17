@@ -15,11 +15,20 @@ export panic
 # Set modprobe env
 export MODPROBE_OPTIONS="-qb"
 
+# Note that this only becomes /dev on the real filesystem if udev's scripts
+# are used; which they will be, but it's worth pointing out
+[ -d /dev  ] || mkdir -m 0755 /dev
+mount -t tmpfs -o mode=0755 none /dev
+mknod -m 0600 /dev/console c 5 1
+mknod /dev/null c 1 3
+
+# from here on, panic is possible, as /dev/console exists
+
 # mount /sys and /proc
 [ -d /sys  ] || mkdir /sys
 [ -d /proc ] || mkdir /proc
-mount -t sysfs -o nodev,noexec,nosuid none /sys   || panic "Oeps"
-mount -t proc  -o nodev,noexec,nosuid none /proc  || panic "Oeps"
+mount -t sysfs -o nodev,noexec,nosuid none /sys
+mount -t proc  -o nodev,noexec,nosuid none /proc
 mkdir -p /var/lock
 
 # make a rootmnt
@@ -29,13 +38,6 @@ export rootmnt=/root
 # mount a tmpfs
 [ -d /tmp  ] || mkdir /tmp
 mount -t tmpfs /dev/shm /tmp
-
-# Note that this only becomes /dev on the real filesystem if udev's scripts
-# are used; which they will be, but it's worth pointing out
-[ -d /dev  ] || mkdir -m 0755 /dev
-mount -t tmpfs -o mode=0755 none /dev || panic "Oeps"
-mknod -m 0600 /dev/console c 5 1
-mknod /dev/null c 1 3
 
 # mount pts
 mkdir /dev/pts
@@ -127,13 +129,8 @@ udevdpid=$!
   /sbin/udevadm trigger --subsystem-nomatch=block; ) &
 
 # mount the root
-if [ ! -z $rfsfile ]; then
-    . /fastboot_by_tim
-    mountroot
-else
-    echo "Plain mount of $ROOT for /"
-    mount $ROOT $rootmnt
-fi
+. /fastboot_by_tim
+mountroot
 
 # Stop udevd, we'll miss a few events while we run init, but we catch up
 kill $udevdpid
