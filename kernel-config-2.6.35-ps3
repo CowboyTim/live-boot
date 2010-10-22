@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.35
-# Mon Oct 18 00:27:44 2010
+# Mon Oct 18 23:24:06 2010
 #
 CONFIG_PPC64=y
 
@@ -347,7 +347,7 @@ CONFIG_FORCE_MAX_ZONEORDER=13
 # CONFIG_SCHED_SMT is not set
 CONFIG_PROC_DEVICETREE=y
 CONFIG_CMDLINE_BOOL=y
-CONFIG_CMDLINE="noquiet nosplash video=ps3fb:mode:2189"
+CONFIG_CMDLINE="root=/dev/ps3da1 noquiet nosplash video=ps3fb:mode:2189"
 CONFIG_EXTRA_TARGETS=""
 # CONFIG_PM is not set
 # CONFIG_SECCOMP is not set
@@ -475,7 +475,8 @@ CONFIG_BT_HCIBTUSB=m
 # Generic Driver Options
 #
 CONFIG_UEVENT_HELPER_PATH="/sbin/hotplug"
-# CONFIG_DEVTMPFS is not set
+CONFIG_DEVTMPFS=y
+CONFIG_DEVTMPFS_MOUNT=y
 CONFIG_STANDALONE=y
 CONFIG_PREVENT_FIRMWARE_BUILD=y
 # CONFIG_FW_LOADER is not set
