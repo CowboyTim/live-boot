@@ -49,7 +49,7 @@ aptitude upgrade
 aptitude clean
 
 groupadd users -g 1000
-useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom -f -1
+useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo -f -1
 EOc
 
 fn=$tmp/root.squashfs.$datestr
