@@ -31,10 +31,10 @@ aptitude install \
     wpasupplicant time p7zip-full socat \
     nmap ntpdate lua5.1 lua5.1-doc lzma m4 make \
     luarocks luasocket luasocket-dev liblua5.1-posix-dev  \
-    liblua5.1-posix1 liblua5.1-dev
+    liblua5.1-posix1 liblua5.1-dev \
     tcpdump ttf-bitstream-vera xfonts-100dpi console-terminus \
     xfonts-terminus xinit rpm perltidy  netcat llvm llvm-dev \
-    pwgen gtk2-engines-murrine gtk-chtheme luadoc numactl
+    pwgen gtk2-engines-murrine gtk-chtheme luadoc numactl \
     fbpanel dnsutils device-tree-compiler deborphan debootstrap dzen2 ethtool \
     evtest exiv2 ftp g++-4.4  gcc-4.4-multilib gccxml genisoimage git-svn \
     curl dcraw ddclient dc bison flex autoconf automake bluez bluez-hcidump \
