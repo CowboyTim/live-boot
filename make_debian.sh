@@ -39,16 +39,21 @@ aptitude install \
     evtest exiv2 ftp g++-4.4  gcc-4.4-multilib gccxml genisoimage git-svn \
     curl dcraw ddclient dc bison flex autoconf automake bluez bluez-hcidump \
     build-essential dhcp3-client fakechroot fakeroot perl-doc \
-    joystick oprofile mscompress cabextract xrestop squashfs-tools
-
+    joystick oprofile mscompress cabextract xrestop squashfs-tools \
+    pike7.8-core ruby \
+    fuse-utils python-fuse python2.6-fuse pike7.8-fuse libfuse2 libfuse-dev \
+    libfuse-perl libfusefs-ruby1.8 fuse-utils 
 
 
 aptitude upgrade
 aptitude clean
+
+groupadd users -g 1000
+useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom -f -1
 EOc
 
 fn=$tmp/root.squashfs.$datestr
-time nice -n 20 mksquashfs $tmpdir/* $fn -e $tmpdir/{proc,tmp,var/tmp,sys,mnt,media,home,dev,boot}
+time nice -n 20 mksquashfs $tmpdir/* $fn -e $tmpdir/{proc,tmp,var/tmp,sys,mnt,media,home,dev,boot}/*
 
 echo
 echo $fn
