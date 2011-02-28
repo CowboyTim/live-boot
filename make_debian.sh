@@ -4,6 +4,7 @@
 tmp=/var/tmp
 datestr=`date +%s`
 tmpdir=$tmp/squeeze.$datestr
+fn=$tmp/squashfs.$datestr
 
 debootstrap squeeze $tmpdir http://ftp.be.debian.org/debian
 
@@ -52,11 +53,14 @@ groupadd users -g 1000
 useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo -f -1
 EOc
 
-fn=$tmp/root.squashfs.$datestr
 time nice -n 20 mksquashfs \
     $tmpdir/* \
-    $fn \
-    -e $tmpdir/{proc,tmp,var/{run,lock,tmp},sys,mnt,media,home,dev,boot}/*
+    $fn.root \
+    -e $tmpdir/{proc,tmp,sys,mnt,media,home,dev,boot,var}/*
+time nice -n 20 mksquashfs \
+    $tmpdir/var \
+    $fn.var \
+    -e $tmpdir/{var/run,var/lock,var/tmp}/*
 
 echo
 echo $fn
