@@ -53,7 +53,10 @@ useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo -f -1
 EOc
 
 fn=$tmp/root.squashfs.$datestr
-time nice -n 20 mksquashfs $tmpdir/* $fn -e $tmpdir/{proc,tmp,var/tmp,sys,mnt,media,home,dev,boot}/*
+time nice -n 20 mksquashfs \
+    $tmpdir/* \
+    $fn \
+    -e $tmpdir/{proc,tmp,var/{run,lock,tmp},sys,mnt,media,home,dev,boot}/*
 
 echo
 echo $fn
