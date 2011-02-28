@@ -43,7 +43,8 @@ aptitude install \
     joystick oprofile mscompress cabextract xrestop squashfs-tools \
     pike7.8-core ruby \
     fuse-utils python-fuse python2.6-fuse pike7.8-fuse libfuse2 libfuse-dev \
-    libfuse-perl libfusefs-ruby1.8 fuse-utils  emesene
+    libfuse-perl libfusefs-ruby1.8 fuse-utils  emesene \
+    x11-utils x11-server-utils
 
 
 aptitude upgrade
