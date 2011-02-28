@@ -53,6 +53,8 @@ groupadd users -g 1000
 useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo -f -1
 EOc
 
+mkdir -p $tmpdir/cgroup
+
 time nice -n 20 mksquashfs \
     $tmpdir/* \
     $fn.root \
