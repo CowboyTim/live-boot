@@ -1,0 +1,9 @@
+# udev rules to automatically enable swap on /dev/ps3vram
+# Copy this file to /etc/udev/rules.d/10-ps3vram-swap.rules
+# Choose only one of the rules below
+
+# Initialize and enable swap unconditionally
+KERNEL=="ps3vram", ACTION=="add", RUN+="/sbin/mkswap /dev/ps3vram", RUN+="/sbin/swapon -p 10 /dev/ps3vram"
+
+# Initialize using /etc/fstab and standard init scripts
+# KERNEL=="ps3vram", ACTION=="add", RUN+="/bin/bash -c '/bin/grep -q ^/dev/ps3vram[[:space:]]*swap /etc/fstab && /sbin/mkswap /dev/ps3vram'"

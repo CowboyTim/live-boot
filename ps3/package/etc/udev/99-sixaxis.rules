@@ -1,0 +1,19 @@
+# hopefully hci0 exists: FIXME: make sure it is, and make sure multiple
+# bluetooth devices work too, if being the case that some has multiple ones...
+# :-)
+#
+# idVendor 054c is Sony, idProduct 0268 is Sony's wireless controller sixaxis
+# original version (without rumble). Other ones aren't going to work (if being
+# the case).
+DRIVER=="usb", SUBSYSTEM=="usb", ATTR{idVendor}=="054c", ATTR{idProduct}=="0268", RUN+="/etc/sixpair"
+
+# Bluetooth stuff
+KERNEL=="hci[0-9]", SUBSYSTEM=="bluetooth", RUN+="/usr/sbin/hciconfig %k up pscan"
+KERNEL=="hci[0-9]", SUBSYSTEM=="bluetooth", RUN+="/usr/bin/hidd -i %k --nocheck --server"
+
+# FIXME: hack: hcitool setuid: freevo user can shutdown the connection now to
+# the PS3 controller by e.g. checking the 'PS' button and do a hcitool dc
+KERNEL=="hci[0-9]", SUBSYSTEM=="bluetooth", RUN+="/bin/chmod +s /usr/bin/hcitool"
+
+# moved to ps3_controller.py
+#KERNEL=="js[0-9]", SUBSYSTEM=="input", ATTRS{name}=="Sony*Controller", RUN+="/usr/bin/jscal -s 16,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 %k"
