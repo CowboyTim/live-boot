@@ -44,12 +44,14 @@ aptitude install \
     pike7.8-core ruby \
     fuse-utils python-fuse python2.6-fuse pike7.8-fuse libfuse2 libfuse-dev \
     libfuse-perl libfusefs-ruby1.8 fuse-utils  emesene \
-    x11-utils x11-server-utils xserver-xorg-input-kbd mplayer ps3-utils
+    x11-utils x11-server-utils xserver-xorg-input-kbd mplayer ps3-utils \
+    alsa-base alsa-utils linux-sound-base
 
 
 aptitude remove gconf2 gconf2-common libgconf2-4 console-setup \
     libcanberra-gtk-module libvorbisfile3 libtdb1 libwnck-common libwnck22 \
-    libidl0 libcanberra-gtk0 libcanberra0 liborbit2 dbus-x11
+    libidl0 libcanberra-gtk0 libcanberra0 liborbit2 dbus-x11 \
+    python-gst0.10 
 aptitude upgrade
 aptitude clean
 
