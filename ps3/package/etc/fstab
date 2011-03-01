@@ -1,0 +1,12 @@
+# /etc/fstab: static file system information.
+#
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+proc            /proc           proc    defaults        0       0
+/dev/ps3da1	/               ext3    nodiratime,noatime,errors=remount-ro,commit=1 0       1
+/dev/ps3da2	none            swap    sw,defaults	0       0
+/dev/shm	/tmp		tmpfs	rw,exec,suid	0	0
+spufs		/spu		spufs 	defaults 	0 	0
+hugetlbfs	/huge           hugetlbfs defaults	0	0
+mycpu		/cgroup/cpu		cgroup	cpu,release_agent=/home/tim/cgroup_clean  0 0
+myblkio		/cgroup/blkio		cgroup	blkio,release_agent=/home/tim/cgroup_clean  0 0
+mymemory	/cgroup/memory		cgroup	memory,release_agent=/home/tim/cgroup_clean  0 0
