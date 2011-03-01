@@ -56,6 +56,8 @@ aptitude clean
 
 groupadd users -g 1000
 useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo -f -1
+
+echo "Europe/Brussels" > /etc/timezone 
 EOc
 
 mkdir -p $tmpdir/{huge,cgroup,spu}
