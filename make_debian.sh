@@ -44,7 +44,7 @@ aptitude install \
     pike7.8-core ruby \
     fuse-utils python-fuse python2.6-fuse pike7.8-fuse libfuse2 libfuse-dev \
     libfuse-perl libfusefs-ruby1.8 fuse-utils  emesene \
-    x11-utils x11-server-utils xserver-xorg-input-kbd mplayer
+    x11-utils x11-server-utils xserver-xorg-input-kbd mplayer ps3-utils
 
 
 aptitude remove gconf2 gconf2-common libgconf2-4 console-setup \
