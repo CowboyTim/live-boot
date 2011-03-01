@@ -41,8 +41,7 @@ aptitude install \
     curl dcraw ddclient dc bison flex autoconf automake bluez bluez-hcidump \
     build-essential dhcp3-client fakechroot fakeroot perl-doc \
     joystick oprofile mscompress cabextract xrestop squashfs-tools \
-    pike7.8-core ruby \
-    fuse-utils python-fuse python2.6-fuse pike7.8-fuse libfuse2 libfuse-dev \
+    fuse-utils python-fuse python2.6-fuse ruby libfuse2 libfuse-dev \
     libfuse-perl libfusefs-ruby1.8 fuse-utils  emesene \
     x11-utils x11-server-utils xserver-xorg-input-kbd mplayer ps3-utils \
     alsa-base alsa-utils linux-sound-base
