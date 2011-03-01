@@ -37,7 +37,7 @@ case "$1" in
 		exit 0
 	fi
 
-	start-stop-daemon --start -m -N 20 -c $WM_USER --name wm --pidfile /var/run/wm.pid -b --exec /bin/bash -- --login -c "exec xinit"
+	start-stop-daemon --start -m -N 20 --name wm --pidfile /var/run/wm.pid -b --exec /bin/su -- -l $WM_USER  -c 'exec bash --login -c "exec xinit" >> /var/tmp/Xerr.log'
 	log_progress_msg "$DESC"
 
 	log_end_msg 0
