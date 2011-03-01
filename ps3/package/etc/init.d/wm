@@ -1,0 +1,71 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides: wm
+# Required-Start:    $local_fs
+# Required-Stop:     $local_fs
+# Default-Start:     2
+# Default-Stop:      0 1 6
+# Short-Description: Start window manager
+### END INIT INFO
+
+if [ -e /cgroup/cpu/tasks ]; then
+    mkdir -pm 0777 /cgroup/cpu/user
+fi
+if [ -e /cgroup/memory/tasks ]; then
+    mkdir -pm 0777 /cgroup/memory/user
+fi
+if [ -e /cgroup/blkio/tasks ]; then
+    chmod o+rw /cgroup/blkio
+fi
+
+DESC="Window Manager"
+
+test -f /etc/default/wm && . /etc/default/wm
+test -f /etc/default/rcS && . /etc/default/rcS
+
+. /lib/lsb/init-functions
+
+set -e
+
+case "$1" in
+  start)
+	log_daemon_msg "Starting $DESC"
+
+	if test "$WM_ENABLED" = "0"; then
+		log_progress_msg "disabled. see /etc/default/wm"
+		log_end_msg 0
+		exit 0
+	fi
+
+	start-stop-daemon --start -m -N 20 -c $WM_USER --name wm --pidfile /var/run/wm.pid -b --exec /bin/bash -- --login -c "exec xinit"
+	log_progress_msg "$DESC"
+
+	log_end_msg 0
+  ;;
+  stop)
+	log_daemon_msg "Stopping $DESC"
+	if test "$WM_ENABLED" = "0"; then
+		log_progress_msg "disabled."
+		log_end_msg 0
+		exit 0
+	fi
+	start-stop-daemon --stop --pidfile /var/run/wm.pid
+	log_progress_msg "$DESC"
+	log_end_msg 0
+  ;;
+  restart|force-reload)
+	$0 stop
+	$0 start
+  ;;
+  status)
+	status_of_proc -p /var/run/wm.pid /var/run/wm "$DESC" && exit 0 || exit $?
+  ;;
+  *)
+	N=/etc/init.d/wm
+	# echo "Usage: $N {start|stop|restart|reload|force-reload|status}" >&2
+	echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
+	exit 1
+	;;
+esac
+
+exit 0
