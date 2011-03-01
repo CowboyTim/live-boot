@@ -47,6 +47,9 @@ aptitude install \
     x11-utils x11-server-utils xserver-xorg-input-kbd mplayer
 
 
+aptitude remove gconf2 gconf2-common libgconf2-4 console-setup \
+    libcanberra-gtk-module libvorbisfile3 libtdb1 libwnck-common libwnck22 \
+    libidl0 libcanberra-gtk0 libcanberra0 liborbit2 dbus-x11
 aptitude upgrade
 aptitude clean
 
