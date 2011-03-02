@@ -1,0 +1,1 @@
+KERNEL=="ps3vram", ACTION=="add", RUN+="/sbin/mkswap /dev/ps3vram", RUN+="/sbin/swapon -p 10 /dev/ps3vram", RUN+="/bin/bash -c 'mkdir -p /spu /huge && mount -t spufs spu /spu && mount -t hugetlbfs hugetlbfs /huge'"
