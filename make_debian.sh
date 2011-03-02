@@ -24,7 +24,7 @@ aptitude install \
     openbox obconf  \
     xserver-xorg-input-evdev xserver-xorg-input-mouse \
     xserver-xorg-video-fbdev \
-    iceweasel python3 gcc-4.4-spu lib64gcc1 gcc-spu gcc-avr spu-gcc \
+    iceweasel python3 gcc-4.4-spu lib64gcc1 gcc-spu gcc-avr spu-gcc spu-tools \
     avr-libc bc bzip2  \
     git zip p7zip rxvt-unicode screen sudo xpdf \
     zlib1g-dev vim vim-runtime \
