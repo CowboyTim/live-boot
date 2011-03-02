@@ -1,0 +1,1 @@
+KERNEL=="spufs", ACTION=="add", RUN+="mkdir -p /spu", RUN+="mount -t spufs spu /spu"
