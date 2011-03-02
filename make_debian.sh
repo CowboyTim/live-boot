@@ -17,9 +17,10 @@ deb http://security.debian.org/ squeeze/updates main contrib non-free
 deb-src http://security.debian.org/ squeeze/updates main contrib non-free
 deb http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
 Eol
-chroot $tmpdir /bin/bash -c <<EOc
+chroot $tmpdir /bin/bash -c '
 dpkg -r yaboot powerpc-utils powerpc-ibm-utils
 aptitude update
+apt-get update
 aptitude install \
     openbox obconf  \
     xserver-xorg-input-evdev xserver-xorg-input-mouse \
@@ -59,7 +60,7 @@ groupadd users -g 1000
 useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo -f -1
 
 echo "Europe/Brussels" > /etc/timezone 
-EOc
+'
 
 mkdir -p $tmpdir/cgroup
 
