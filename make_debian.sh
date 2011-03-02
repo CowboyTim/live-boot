@@ -5,6 +5,7 @@ tmp=/var/tmp
 datestr=`date +%s`
 tmpdir=$tmp/squeeze.$datestr
 fn=$tmp/squashfs.$datestr
+here=$(readlink -f -- "${0%/*}") 
 
 debootstrap squeeze $tmpdir http://ftp.be.debian.org/debian
 
@@ -49,20 +50,20 @@ aptitude install \
     alsa-base alsa-utils linux-sound-base dropbear tint2
 
 
-aptitude remove gconf2 gconf2-common libgconf2-4 console-setup \
+aptitude -y remove gconf2 gconf2-common libgconf2-4 console-setup \
     libcanberra-gtk-module libvorbisfile3 libtdb1 libwnck-common libwnck22 \
     libidl0 libcanberra-gtk0 libcanberra0 liborbit2 dbus-x11 \
     python-gst0.10 
-aptitude upgrade
+aptitude -y upgrade
 aptitude clean
 
-groupadd users -g 1000
 useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo -f -1
 
 echo "Europe/Brussels" > /etc/timezone 
 '
 
 mkdir -p $tmpdir/cgroup
+cp -a $here/ps3/package/* $tmpdir/
 
 time nice -n 20 mksquashfs \
     $tmpdir/* \
