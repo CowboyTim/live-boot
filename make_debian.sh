@@ -46,7 +46,7 @@ aptitude install \
     fuse-utils python-fuse python2.6-fuse ruby libfuse2 libfuse-dev \
     libfuse-perl libfusefs-ruby1.8 fuse-utils  emesene \
     x11-utils x11-server-utils xserver-xorg-input-kbd mplayer ps3-utils \
-    alsa-base alsa-utils linux-sound-base dropbear
+    alsa-base alsa-utils linux-sound-base dropbear tint2
 
 
 aptitude remove gconf2 gconf2-common libgconf2-4 console-setup \
