@@ -19,7 +19,6 @@ deb-src http://security.debian.org/ squeeze/updates main contrib non-free
 deb http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
 Eol
 chroot $tmpdir /bin/bash -c '
-dpkg -r yaboot powerpc-utils powerpc-ibm-utils
 aptitude update
 apt-get update
 aptitude install \
@@ -57,19 +56,20 @@ aptitude -y remove gconf2 gconf2-common libgconf2-4 console-setup \
     python-gst0.10 kbd libgstreamer0.10-0 libmimic0 libpython2.6 \
     python-libmimic iso-codes python2.5 python2.5-minimal \
     console-tools console-data libconsole  python3.1 python3.1-minimal \
-    python3 python3-minimal
+    python3 python3-minimal yaboot  powerpc-utils powerpc-ibm-utils
 aptitude -y upgrade
 aptitude -y `deborphan`
 aptitude clean
 dpkg -P `dpkg -l |grep ^rc|awk "{print $2}"`
+'
 
+cp -a $here/ps3/package/etc/{skel,alsa,sysctl.d,init.d,X11,udev,kboot*} $tmpdir/etc/
+chroot $tmpdir /bin/bash -c '
 useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo -f -1
-
 echo "Europe/Brussels" > /etc/timezone 
 '
 
 mkdir -p $tmpdir/cgroup
-cp -a $here/ps3/package/etc/{sysctl.d,init.d,X11,udev,kboot*} $tmpdir/etc/
 
 time nice -n 20 mksquashfs \
     $tmpdir/* \
