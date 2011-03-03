@@ -40,7 +40,7 @@ aptitude install \
     pwgen gtk2-engines-murrine gtk-chtheme luadoc numactl \
     fbpanel dnsutils device-tree-compiler deborphan debootstrap dzen2 ethtool \
     evtest exiv2 ftp g++-4.4  gcc-4.4-multilib gccxml genisoimage git-svn \
-    curl dcraw ddclient dc bison flex autoconf automake bluez bluez-hcidump \
+    curl dcraw dc bison flex autoconf automake bluez bluez-hcidump \
     build-essential dhcp3-client fakechroot fakeroot perl-doc \
     joystick oprofile mscompress cabextract xrestop squashfs-tools \
     fuse-utils python-fuse python2.6-fuse ruby libfuse2 libfuse-dev \
