@@ -1,0 +1,50 @@
+URxvt*font:              -*-terminus-medium-*-*-*-12-*-*-*-*-*-iso8859-*
+!URxvt*font:              xft:BitStream Vera Sans Mono:size=8
+!URxvt*font:              xft:monospace:size=8:autohint=false
+URxvt*visualBell:        false
+URxvt*scrollbarStyle:    rxvt
+!URxvt*background:        LightYellow
+!URxvt*background:        snow
+!URxvt*background:        white
+URxvt*background:        snow
+URxvt*foreground:        black
+URxvt*reverseVideo:        1
+!URxvt*foreground:        DodgerBlue4
+!URxvt*foreground:        #533B5B
+!URxvt*color10:           DarkOliveGreen3
+URxvt*geometry:          120x30
+URxvt*saveLines:         0
+!URxvt*internalBorder:    2
+!URxvt*externalBorder:    1
+URxvt*borderless:        1
+URxvt*scrollBar_right:   1
+URxvt*perl-ext:          
+URxvt*perl-ext-common:   
+URxvt*secondaryScroll: true
+
+
+Xft.antialias:           1
+!Xft.dpi:                 96.000000
+Xft.hintstyle:           hintfull
+Xft.hinting:             1
+Xft.autohint:            1
+Xft.rgba:                rgb
+!Xft.lcdfilter:           lcdfilterlegacy
+
+*color0:      #000000
+*color1:      #9e1828
+*color2:      #aece92
+*color3:      #968a38
+!*color4:      #0000a8
+*color4:      #535d6c
+*color5:      #963c59
+*color6:      #418179
+*color7:      #bebebe
+*color8:      #666666
+*color9:      #cf6171
+*color10:     #c5f779
+*color11:     #fff796
+*color12:     #4186be
+*color13:     #cf9ebe
+*color14:     #71bebe
+*color15:     #ffffff
