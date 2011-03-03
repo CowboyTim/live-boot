@@ -26,7 +26,7 @@ aptitude install \
     openbox obconf  \
     xserver-xorg-input-evdev xserver-xorg-input-mouse \
     xserver-xorg-video-fbdev \
-    iceweasel python3 gcc-4.4-spu lib64gcc1 gcc-spu gcc-avr spu-gcc spu-tools \
+    iceweasel gcc-4.4-spu lib64gcc1 gcc-spu gcc-avr spu-gcc spu-tools \
     avr-libc bc bzip2  \
     git zip p7zip rxvt-unicode screen sudo xpdf \
     zlib1g-dev vim vim-runtime \
@@ -56,7 +56,8 @@ aptitude -y remove gconf2 gconf2-common libgconf2-4 console-setup \
     libidl0 libcanberra-gtk0 libcanberra0 liborbit2 dbus-x11 \
     python-gst0.10 kbd libgstreamer0.10-0 libmimic0 libpython2.6 \
     python-libmimic iso-codes python2.5 python2.5-minimal \
-    console-tools console-data libconsole
+    console-tools console-data libconsole  python3.1 python3.1-minimal \
+    python3 python3-minimal
 aptitude -y upgrade
 aptitude -y `deborphan`
 aptitude clean
