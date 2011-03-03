@@ -1,0 +1,2 @@
+#!/usr/bin/bash
+exec X -nolisten tcp :0 vt7

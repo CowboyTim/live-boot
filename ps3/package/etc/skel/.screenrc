@@ -1,0 +1,10 @@
+bind R screen -t '# |root:' sudo su -
+bind T screen -t '# |htop:' htop
+shelltitle '$|'
+screen 0
+#hardstatus alwayslastline '%-Lw%50> %n%f* %t%+Lw%< %-=%H:%l %c:%s%{-}'
+hardstatus alwayslastline '%{= kG}[ %{G}%H %{R}%l %{g}][%{W}%-Lw%50> %{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{W} %d/%m %{W}%c %{g}]'
+defmonitor on
+defscrollback 1000
+altscreen on
+vbell off
