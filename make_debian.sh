@@ -68,7 +68,7 @@ echo "Europe/Brussels" > /etc/timezone
 '
 
 mkdir -p $tmpdir/cgroup
-cp -a $here/ps3/package/* $tmpdir/
+cp -a $here/ps3/package/etc/{sysctl.d,init.d,X11,udev,kboot*} $tmpdir/etc/
 
 time nice -n 20 mksquashfs \
     $tmpdir/* \
