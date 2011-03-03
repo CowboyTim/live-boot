@@ -47,15 +47,20 @@ aptitude install \
     fuse-utils python-fuse python2.6-fuse ruby libfuse2 libfuse-dev \
     libfuse-perl libfusefs-ruby1.8 fuse-utils  emesene \
     x11-utils x11-server-utils xserver-xorg-input-kbd mplayer ps3-utils \
-    alsa-base alsa-utils linux-sound-base dropbear tint2
+    alsa-base alsa-utils linux-sound-base dropbear tint2 x11-xserver-utils \
+    ttf-dejavu-core ttf-liberation ttf-mscorefonts-installer
 
 
 aptitude -y remove gconf2 gconf2-common libgconf2-4 console-setup \
     libcanberra-gtk-module libvorbisfile3 libtdb1 libwnck-common libwnck22 \
     libidl0 libcanberra-gtk0 libcanberra0 liborbit2 dbus-x11 \
-    python-gst0.10 
+    python-gst0.10 kbd libgstreamer0.10-0 libmimic0 libpython2.6 \
+    python-libmimic iso-codes python2.5 python2.5-minimal \
+    console-tools console-data libconsole
 aptitude -y upgrade
+aptitude -y `deborphan`
 aptitude clean
+dpkg -P `dpkg -l |grep ^rc|awk "{print $2}"`
 
 useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo -f -1
 
