@@ -21,7 +21,7 @@ Eol
 chroot $tmpdir /bin/bash -c '
 aptitude update
 apt-get update
-aptitude install \
+aptitude -y install \
     openbox obconf  \
     xserver-xorg-input-evdev xserver-xorg-input-mouse \
     xserver-xorg-video-fbdev \
