@@ -22,8 +22,11 @@
   <menu id="client-list-menu" />
   <separator />
 -->
-  <item label="ObConf">
+  <item label="openbox preferences">
     <action name="Execute"><execute>obconf</execute></action>
+  </item>
+  <item label="menu themes">
+    <action name="Execute"><execute>gtk-chtheme</execute></action>
   </item>
   <item label="Reconfigure">
     <action name="Reconfigure" />
