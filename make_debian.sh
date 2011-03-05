@@ -199,7 +199,9 @@ aptitude -y install \
     zip \
     zlib1g-dev
 '
-
+chroot $tmpdir /bin/bash -c '
+aptitude -y upgrade
+'
 chroot $tmpdir /bin/bash -c '
 aptitude -y remove gconf2 gconf2-common libgconf2-4 console-setup \
     libcanberra-gtk-module libvorbisfile3 libtdb1 libwnck-common libwnck22 \
@@ -209,7 +211,6 @@ aptitude -y remove gconf2 gconf2-common libgconf2-4 console-setup \
     console-tools console-data libconsole  python3.1 python3.1-minimal \
     python3 python3-minimal yaboot  powerpc-utils powerpc-ibm-utils \
     console-common console-data
-aptitude -y upgrade
 aptitude -y `deborphan`
 aptitude clean
 dpkg -P `dpkg -l |grep ^rc|awk "{print $2}"`
