@@ -46,7 +46,7 @@ aptitude -y install \
     fuse-utils python-fuse python2.6-fuse ruby libfuse2 libfuse-dev \
     libfuse-perl libfusefs-ruby1.8 fuse-utils  emesene \
     x11-utils x11-server-utils xserver-xorg-input-kbd mplayer ps3-utils \
-    alsa-base alsa-utils linux-sound-base dropbear tint2 x11-xserver-utils \
+    alsa-base alsa-utils linux-sound-base tint2 x11-xserver-utils \
     ttf-dejavu-core ttf-liberation ttf-mscorefonts-installer
 
 
@@ -61,12 +61,17 @@ aptitude -y upgrade
 aptitude -y `deborphan`
 aptitude clean
 dpkg -P `dpkg -l |grep ^rc|awk "{print $2}"`
+
+for f in dbus; do
+    update-rc.d $f disable
+done
 '
 
-cp -a $here/ps3/package/etc/{skel,alsa,sysctl.d,init.d,X11,udev,kboot*} $tmpdir/etc/
+cp -a $here/ps3/package/etc/{skel,alsa,sysctl.d,init.d,X11,udev,kboot.*} $tmpdir/etc/
 chroot $tmpdir /bin/bash -c '
 useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo -f -1
 echo "Europe/Brussels" > /etc/timezone 
+update-rc.d wm defaults
 '
 
 mkdir -p $tmpdir/cgroup
