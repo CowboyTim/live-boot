@@ -15,16 +15,10 @@ export MOZ_DISABLE_PANGO=1
 xrdb -merge ~/.Xresources
 xset m 1/1
 setxkbmap -option terminate:ctrl_alt_bksp
-#xsetroot -solid SlateGray
-#~/local/bin/lxpanel &
-xsetroot -solid DimGray
-#pulseaudio --daemon --start
-#exec wmii-lua
 pkill -9 -f ssh-agent
 eval `ssh-agent -s`
-#export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
-#exec /usr/local/bin/awesome
-#fbpanel &
 tint2 &
+#xsetroot -solid DimGray
+xsetbg 137784-2560-1600-clean.jpg
+rox --rox-session &
 exec openbox-session
-#exec dbus-launch --exit-with-session openbox
