@@ -60,38 +60,145 @@ console-setup   console-setup/fontsize-fb47     select  16
 console-setup   console-setup/fontsize  string  16
 EOc
 
-echo 'console-setup hold' |dpkg --set-selections
+dpkg --set-selections <<EOhold
+console-setup hold
+console-data hold
+console-common hold
+console-tools hold
+kbd           hold
+EOhold
 "
 chroot $tmpdir /bin/bash -c '
 aptitude -y install \
-    openbox obconf  \
-    xserver-xorg-input-evdev xserver-xorg-input-mouse \
-    xserver-xorg-video-fbdev \
-    console-common console-data \
+    alsa-base \
+    alsa-utils \
+    autoconf \
+    automake \
+    avr-libc \
+    bc \
+    bison \
+    bluez \
+    bluez-hcidump \
+    build-essential \
+    bzip2 \
+    cabextract \
+    colordiff \
+    console-terminus \
+    curl \
+    dc \
+    dcraw \
+    debootstrap \
+    deborphan \
+    device-tree-compiler \
+    dhcp3-client \
+    dnsutils \
     dropbear \
-    iceweasel gcc-4.4-spu lib64gcc1 gcc-spu gcc-avr spu-gcc spu-tools \
-    avr-libc bc bzip2  \
-    git zip p7zip unrar rxvt-unicode screen sudo xpdf \
-    zlib1g-dev vim vim-runtime \
-    lsof ltrace strace \
-    colordiff wireless-tools wmctrl  uuid-runtime usbutils  \
-    wpasupplicant time p7zip-full socat \
-    nmap ntpdate lua5.1 lua5.1-doc lzma m4 make \
-    luarocks luasocket luasocket-dev liblua5.1-posix-dev  \
-    liblua5.1-posix1 liblua5.1-dev \
-    tcpdump ttf-bitstream-vera xfonts-100dpi console-terminus \
-    xfonts-terminus xinit rpm perltidy  netcat llvm llvm-dev \
-    pwgen gtk2-engines-murrine gtk-chtheme luadoc numactl \
-    fbpanel dnsutils device-tree-compiler deborphan debootstrap dzen2 ethtool \
-    evtest exiv2 ftp g++-4.4  gcc-4.4-multilib gccxml genisoimage git-svn \
-    curl dcraw dc bison flex autoconf automake bluez bluez-hcidump \
-    build-essential dhcp3-client fakechroot fakeroot perl-doc \
-    joystick oprofile mscompress cabextract xrestop squashfs-tools \
-    fuse-utils python-fuse python2.6-fuse ruby libfuse2 libfuse-dev \
-    libfuse-perl libfusefs-ruby1.8 fuse-utils  emesene \
-    x11-utils x11-server-utils xserver-xorg-input-kbd mplayer ps3-utils \
-    alsa-base alsa-utils linux-sound-base tint2 x11-xserver-utils \
-    ttf-dejavu-core ttf-liberation ttf-mscorefonts-installer htop rox-filer xloadimage
+    dzen2 \
+    emesene \
+    ethtool \
+    evtest \
+    exiv2 \
+    fakechroot \
+    fakeroot \
+    fbpanel \
+    flex \
+    ftp \
+    fuse-utils \
+    fuse-utils \
+    g++-4.4 \
+    gcc-4.4-multilib \
+    gcc-4.4-spu \
+    gcc-avr \
+    gcc-spu \
+    gccxml \
+    genisoimage \
+    git \
+    git-svn \
+    gtk-chtheme \
+    gtk2-engines-murrine \
+    htop \
+    iceweasel \
+    joystick \
+    lib64gcc1 \
+    libfuse-dev \
+    libfuse-perl \
+    libfuse2 \
+    libfusefs-ruby1.8 \
+    liblua5.1-dev \
+    liblua5.1-posix-dev \
+    liblua5.1-posix1 \
+    linux-sound-base \
+    llvm \
+    llvm-dev \
+    lsof \
+    ltrace \
+    lua5.1 \
+    lua5.1-doc \
+    luadoc \
+    luarocks \
+    luasocket \
+    luasocket-dev \
+    lzma \
+    m4 \
+    make \
+    mplayer \
+    mscompress \
+    netcat \
+    nmap \
+    ntpdate \
+    numactl \
+    obconf \
+    openbox \
+    oprofile \
+    p7zip \
+    p7zip-full \
+    perl-doc \
+    perltidy \
+    ps3-utils \
+    pwgen \
+    python-fuse \
+    python2.6-fuse \
+    rox-filer \
+    rpm \
+    ruby \
+    rxvt-unicode \
+    screen \
+    socat \
+    spu-gcc \
+    spu-tools \
+    squashfs-tools \
+    strace \
+    sudo \
+    tcpdump \
+    time \
+    tint2 \
+    ttf-bitstream-vera \
+    ttf-dejavu-core \
+    ttf-liberation \
+    ttf-mscorefonts-installer \
+    unrar \
+    usbutils \
+    uuid-runtime \
+    vim \
+    vim-runtime \
+    wireless-tools \
+    wmctrl \
+    wpasupplicant \
+    x11-server-utils \
+    x11-utils \
+    x11-xserver-utils \
+    xfonts-100dpi \
+    xfonts-terminus \
+    xinit \
+    xloadimage \
+    xpdf \
+    xrestop \
+    xserver-xorg-input-evdev \
+    xserver-xorg-input-kbd \
+    xserver-xorg-input-mouse \
+    xserver-xorg-video-fbdev \
+    zip \
+    zlib1g-dev
 '
 
 chroot $tmpdir /bin/bash -c '
