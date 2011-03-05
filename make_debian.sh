@@ -184,7 +184,6 @@ aptitude -y install \
     wireless-tools \
     wmctrl \
     wpasupplicant \
-    x11-server-utils \
     x11-utils \
     x11-xserver-utils \
     xfonts-100dpi \
