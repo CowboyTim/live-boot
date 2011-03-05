@@ -91,7 +91,7 @@ aptitude -y install \
     libfuse-perl libfusefs-ruby1.8 fuse-utils  emesene \
     x11-utils x11-server-utils xserver-xorg-input-kbd mplayer ps3-utils \
     alsa-base alsa-utils linux-sound-base tint2 x11-xserver-utils \
-    ttf-dejavu-core ttf-liberation ttf-mscorefonts-installer htop rox-filer feh
+    ttf-dejavu-core ttf-liberation ttf-mscorefonts-installer htop rox-filer xloadimage
 '
 
 chroot $tmpdir /bin/bash -c '
