@@ -20,5 +20,4 @@ eval `ssh-agent -s`
 tint2 &
 #xsetroot -solid DimGray
 xsetbg 137784-2560-1600-clean.jpg
-rox --rox-session &
 exec openbox-session
