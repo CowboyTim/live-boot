@@ -667,6 +667,16 @@
           <menu>root-menu</menu>
         </action>
       </mousebind>
+      <mousebind button="Right" action="Click">
+        <action name="ShowMenu">
+          <menu>root-menu</menu>
+        </action>
+      </mousebind>
+      <mousebind button="W-Right" action="Click">
+        <action name="ShowMenu">
+          <menu>root-menu</menu>
+        </action>
+      </mousebind>
     </context>
     <context name="MoveResize">
       <mousebind button="Up" action="Click">
