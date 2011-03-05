@@ -71,7 +71,7 @@ aptitude -y install \
     dropbear \
     iceweasel gcc-4.4-spu lib64gcc1 gcc-spu gcc-avr spu-gcc spu-tools \
     avr-libc bc bzip2  \
-    git zip p7zip rxvt-unicode screen sudo xpdf \
+    git zip p7zip unrar rxvt-unicode screen sudo xpdf \
     zlib1g-dev vim vim-runtime \
     lsof ltrace strace \
     colordiff wireless-tools wmctrl  uuid-runtime usbutils  \
