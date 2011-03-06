@@ -4,6 +4,8 @@ timezone_area="Europe"
 timezone_city="Brussels"
 username="tim"
 password="xxx"
+wireless_essid=""
+hostname="wihiie"
 
 tmp=/var/tmp
 datestr=`date +%s`
@@ -256,6 +258,31 @@ WM_USER=$username
 Eou
 update-rc.d wm defaults
 EOpost
+
+cat >> $tmpdir/etc/network/interfaces <<EOnetwork
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# WiFi om the PS3
+auto wlan0
+iface wlan0 inet dhcp
+    wireless-essid $wireless_essid
+
+# The primary network interface
+auto eth0
+iface eth0 inet dhcp
+    metric 50
+EOnetwork
+
+cat >> $tmpdir/etc/hosts <<EOhosts
+127.0.1.1     $hostname
+EOhosts
+
+cat >> $tmpdir/hostname <<EOhosts
+$hostname
+EOhosts
 
 rm $tmpdir/usr/sbin/policy-rc.d
 
