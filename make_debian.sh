@@ -2,6 +2,8 @@
 
 timezone_area="Europe"
 timezone_city="Brussels"
+username="tim"
+password="xxx"
 
 tmp=/var/tmp
 datestr=`date +%s`
@@ -243,7 +245,15 @@ EOrm
 
 cp -a $here/ps3/package/etc/{skel,alsa,sysctl.d,init.d,X11,udev,kboot.*} $tmpdir/etc/
 chroot $tmpdir /bin/bash <<EOpost
-useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo -f -1
+userdel tim
+useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo,bluetooth -f -1
+passwd -e tim <<Eop
+$password
+$password
+Eop
+cat >/etc/default/wm <<Eou
+WM_USER=$username
+Eou
 update-rc.d wm defaults
 EOpost
 
