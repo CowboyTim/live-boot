@@ -3,12 +3,13 @@
 timezone_area="Europe"
 timezone_city="Brussels"
 
-
 tmp=/var/tmp
 datestr=`date +%s`
 tmpdir=$tmp/squeeze.$datestr
 fn=$tmp/squashfs.$datestr
 here=$(readlink -f -- "${0%/*}") 
+
+renice -n +20 -p $$
 
 debootstrap squeeze $tmpdir http://ftp.be.debian.org/debian
 
@@ -25,51 +26,80 @@ deb http://security.debian.org/ squeeze/updates main contrib non-free
 deb-src http://security.debian.org/ squeeze/updates main contrib non-free
 deb http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
 Eol
-chroot $tmpdir /bin/bash -c "
-aptitude update
+chroot $tmpdir /bin/bash <<EOinstallSetup
+apt-get update
 apt-get update
 apt-get -y install debconf-utils
 debconf-set-selections <<EOc
-tzdata  tzdata/Zones/$timezone_area     select  $timezone_city
-tzdata  tzdata/Areas select  $timezone_area
-keyboard-configuration  keyboard-configuration/ctrl_alt_bksp    boolean true
-keyboard-configuration  keyboard-configuration/modelcode        string  pc105
-keyboard-configuration  keyboard-configuration/unsupported_layout       boolean true
-keyboard-configuration  keyboard-configuration/unsupported_config_options boolean true
-keyboard-configuration  keyboard-configuration/variantcode      string  
-keyboard-configuration  keyboard-configuration/unsupported_config_layout boolean true
-keyboard-configuration  keyboard-configuration/toggle   select  No toggling
-keyboard-configuration  keyboard-configuration/model    select  Generic 105-key (Intl) PC
-keyboard-configuration  keyboard-configuration/compose  select  No compose key
-keyboard-configuration  keyboard-configuration/layout   select  
-keyboard-configuration  keyboard-configuration/xkb-keymap       select  us
-keyboard-configuration  keyboard-configuration/layoutcode       string  us
-keyboard-configuration  keyboard-configuration/variant  select  USA
-keyboard-configuration  keyboard-configuration/switch   select  No temporary switch
-keyboard-configuration  keyboard-configuration/unsupported_options      boolean true
-keyboard-configuration  keyboard-configuration/store_defaults_in_debconf_db boolean true
-keyboard-configuration  keyboard-configuration/altgr    select  The default for the keyboard layout
-keyboard-configuration  keyboard-configuration/optionscode      string terminate:ctrl_alt_bksp
-console-setup   console-setup/codeset47 select  # Latin1 and Latin5 - western Europe and Turkic languages
-console-setup   console-setup/codesetcode       string  Lat15
-console-setup   console-setup/fontface47        select  Fixed
-console-setup   console-setup/fontsize-text47   select  16
-console-setup   console-setup/store_defaults_in_debconf_db      boolean true
-console-setup   console-setup/charmap47 select  UTF-8
-console-setup   console-setup/fontsize-fb47     select  16
-console-setup   console-setup/fontsize  string  16
+tzdata                  tzdata/Zones/$timezone_area                         select   $timezone_city
+tzdata                  tzdata/Areas                                        select   $timezone_area
+keyboard-configuration  keyboard-configuration/ctrl_alt_bksp                boolean  true
+keyboard-configuration  keyboard-configuration/modelcode                    string   pc105
+keyboard-configuration  keyboard-configuration/unsupported_layout           boolean  true
+keyboard-configuration  keyboard-configuration/unsupported_config_options   boolean  true
+keyboard-configuration  keyboard-configuration/variantcode                  string
+keyboard-configuration  keyboard-configuration/unsupported_config_layout    boolean  true
+keyboard-configuration  keyboard-configuration/toggle                       select   No toggling
+keyboard-configuration  keyboard-configuration/model                        select   Generic 105-key (Intl) PC
+keyboard-configuration  keyboard-configuration/compose                      select   No compose key
+keyboard-configuration  keyboard-configuration/layout                       select
+keyboard-configuration  keyboard-configuration/xkb-keymap                   select   us
+keyboard-configuration  keyboard-configuration/layoutcode                   string   us
+keyboard-configuration  keyboard-configuration/variant                      select   USA
+keyboard-configuration  keyboard-configuration/switch                       select   No temporary switch
+keyboard-configuration  keyboard-configuration/unsupported_options          boolean  true
+keyboard-configuration  keyboard-configuration/store_defaults_in_debconf_db boolean  true
+keyboard-configuration  keyboard-configuration/altgr                        select   The default for the keyboard layout
+keyboard-configuration  keyboard-configuration/optionscode                  string   terminate:ctrl_alt_bksp
+console-setup           console-setup/codeset47                             select   # Latin1 and Latin5 - western Europe and Turkic languages
+console-setup           console-setup/codesetcode                           string   Lat15
+console-setup           console-setup/fontface47                            select   Fixed
+console-setup           console-setup/fontsize-text47                       select   16
+console-setup           console-setup/store_defaults_in_debconf_db          boolean  true
+console-setup           console-setup/charmap47                             select   UTF-8
+console-setup           console-setup/fontsize-fb47                         select   16
+console-setup           console-setup/fontsize                              string   16
 EOc
 
 dpkg --set-selections <<EOhold
-console-setup hold
-console-data hold
-console-common hold
-console-tools hold
-kbd           hold
+console-setup          hold 
+console-data           hold 
+console-common         hold 
+console-tools          hold 
+kbd                    hold 
+python3                hold 
+python3-minimal        hold 
+python3.1              hold 
+python3.1-minimal      hold 
+python2.5              hold 
+python2.5-minimal      hold 
+python-gst0.10         hold 
+python-dbus            hold 
+python-notify          hold 
+libmimic0              hold 
+gconf2                 hold 
+gconf2-common          hold 
+dbus-x11               hold 
+iso-codes              hold 
+libgconf2-4            hold 
+libcanberra-gtk-module hold 
+libvorbisfile3         hold 
+libtdb1                hold 
+libwnck-common         hold 
+libwnck22              hold 
+libdbus-glib-1-2       hold 
+libnotify1             hold 
+libpython2.6           hold 
+libidl0                hold 
+libcanberra-gtk0       hold 
+libcanberra0           hold 
+liborbit2              hold 
+libgstreamer0.10-0     hold
+libconsole             hold
 EOhold
-"
-chroot $tmpdir /bin/bash -c '
-aptitude -y install \
+EOinstallSetup
+chroot $tmpdir /bin/bash <<EOinstall 
+apt-get -y install \
     alsa-base \
     alsa-utils \
     autoconf \
@@ -155,6 +185,7 @@ aptitude -y install \
     perl-doc \
     perltidy \
     ps3-utils \
+    psmisc \
     pwgen \
     python-fuse \
     python2.6-fuse \
@@ -164,7 +195,6 @@ aptitude -y install \
     rxvt-unicode \
     screen \
     socat \
-    spu-gcc \
     spu-tools \
     squashfs-tools \
     strace \
@@ -198,37 +228,31 @@ aptitude -y install \
     xserver-xorg-video-fbdev \
     zip \
     zlib1g-dev
-'
-chroot $tmpdir /bin/bash -c '
-aptitude -y upgrade
-'
-chroot $tmpdir /bin/bash -c '
-aptitude -y remove gconf2 gconf2-common libgconf2-4 console-setup \
-    libcanberra-gtk-module libvorbisfile3 libtdb1 libwnck-common libwnck22 \
-    libidl0 libcanberra-gtk0 libcanberra0 liborbit2 dbus-x11 \
-    python-gst0.10 kbd libgstreamer0.10-0 libmimic0 libpython2.6 \
-    python-libmimic iso-codes python2.5 python2.5-minimal \
-    console-tools console-data libconsole  python3.1 python3.1-minimal \
-    python3 python3-minimal yaboot  powerpc-utils powerpc-ibm-utils \
-    console-common console-data
-aptitude -y `deborphan`
-aptitude clean
-dpkg -P `dpkg -l |grep ^rc|awk "{print $2}"`
+EOinstall
+chroot $tmpdir /bin/bash <<'EOrm'
+apt-get -y upgrade
+apt-get -y remove yaboot powerpc-utils powerpc-ibm-utils
+apt-get -y remove `deborphan`
+apt-get clean
+dpkg -P `dpkg -l |grep ^rc|awk '{print $2}'`
 
 for f in dropbear dbus; do
     update-rc.d $f disable
 done
-'
+EOrm
 
 cp -a $here/ps3/package/etc/{skel,alsa,sysctl.d,init.d,X11,udev,kboot.*} $tmpdir/etc/
-chroot $tmpdir /bin/bash -c '
+chroot $tmpdir /bin/bash <<EOpost
 useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo -f -1
 update-rc.d wm defaults
-'
+EOpost
 
 rm $tmpdir/usr/sbin/policy-rc.d
 
 mkdir -p $tmpdir/cgroup
+
+umount $tmpdir/proc
+umount $tmpdir/sys
 
 time nice -n 20 mksquashfs \
     $tmpdir/* \
