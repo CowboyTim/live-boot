@@ -100,6 +100,7 @@ libcanberra0           hold
 liborbit2              hold 
 libgstreamer0.10-0     hold
 libconsole             hold
+geoip-database         hold
 EOhold
 EOinstallSetup
 chroot $tmpdir /bin/bash <<EOinstall 
@@ -291,14 +292,20 @@ mkdir -p $tmpdir/cgroup
 umount $tmpdir/proc
 umount $tmpdir/sys
 
-time nice -n 20 mksquashfs \
-    $tmpdir/* \
-    $fn.root \
-    -e $tmpdir/{proc,tmp,sys,mnt,media,home,dev,boot,var}/*
-time nice -n 20 mksquashfs \
-    $tmpdir/var \
-    $fn.var \
-    -e $tmpdir/{var/run,var/lock,var/tmp}/*
+(
+    cd $tmpdir
+    tar cvf - * --exclude={dev,proc,sys,tmp,var}/* \
+        |lzma > ../$(basename $tmpdir).tar.lzma
+)
+
+#time nice -n 20 mksquashfs \
+#    $tmpdir/* \
+#    $fn.root \
+#    -e $tmpdir/{proc,tmp,sys,mnt,media,home,dev,boot,var}/*
+#time nice -n 20 mksquashfs \
+#    $tmpdir/var \
+#    $fn.var \
+#    -e $tmpdir/{var/run,var/lock,var/tmp}/*
 
 echo
 echo $fn
