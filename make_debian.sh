@@ -100,7 +100,14 @@ libcanberra0           hold
 liborbit2              hold 
 libgstreamer0.10-0     hold
 libconsole             hold
+libpci3                hold
 geoip-database         hold
+dictionaries-common    hold
+hunspell-en-us         hold
+mac-fdisk              hold
+xdg-utils              hold
+zeroinstall-injector   hold
+pciutils               hold
 EOhold
 EOinstallSetup
 chroot $tmpdir /bin/bash <<EOinstall 
@@ -236,8 +243,13 @@ apt-get -y install \
 EOinstall
 chroot $tmpdir /bin/bash <<'EOrm'
 apt-get -y upgrade
-apt-get -y remove yaboot powerpc-utils powerpc-ibm-utils
-apt-get -y remove `deborphan`
+apt-get -y remove yaboot powerpc-utils powerpc-ibm-utils aptitude mac-fdisk
+l=`deborphan`
+while [ "$l" ]; do
+    apt-get -y remove $l
+    echo $l
+    l=`deborphan`
+done
 apt-get clean
 dpkg -P `dpkg -l |grep ^rc|awk '{print $2}'`
 
