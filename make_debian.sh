@@ -312,11 +312,11 @@ if [ ! -z "$compresswith" ]; then
 (
     cd $tmpdir
     tar cvf - * --exclude={dev,proc,sys,tmp,var}/* \
-        |$compresswith > $tmp/$(basename $tmpdir).$datestr.tar.$compresswith
+        |$compresswith > $tmp/$(basename $tmpdir).tar.$compresswith
 )
 fi
 
-fn=$tmp/$(basename $tmpdir).$datestr.squashfs.gzip
+fn=$tmp/$(basename $tmpdir).squashfs.gzip
 time nice -n 20 mksquashfs \
     $tmpdir/* \
     $fn.root \
