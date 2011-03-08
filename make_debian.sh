@@ -272,6 +272,10 @@ Eou
 update-rc.d wm defaults
 EOpost
 
+cat > $tmpdir/etc/timezone <<EOtz
+$timezone_area/$timezone_city
+EOtz
+
 cat >> $tmpdir/etc/network/interfaces <<EOnetwork
 
 # The loopback network interface
@@ -293,7 +297,7 @@ cat >> $tmpdir/etc/hosts <<EOhosts
 127.0.1.1     $hostname
 EOhosts
 
-cat >> $tmpdir/hostname <<EOhosts
+cat > $tmpdir/hostname <<EOhosts
 $hostname
 EOhosts
 
