@@ -11,7 +11,7 @@ tmp=/var/tmp
 datestr=`date +%s`
 tmpdir=$tmp/squeeze.$datestr
 fn=$tmp/squashfs.$datestr
-here=$(readlink -f -- "${0%/*}") 
+srcloc=$(readlink -f -- "${0%/*}") 
 
 renice -n +20 -p $$
 
@@ -258,7 +258,7 @@ for f in dropbear dbus; do
 done
 EOrm
 
-cp -a $here/ps3/package/etc/{skel,alsa,sysctl.d,init.d,X11,udev,kboot.*} $tmpdir/etc/
+cp -a $srcloc/ps3/package/etc/{skel,alsa,sysctl.d,init.d,X11,udev,kboot.*} $tmpdir/etc/
 chroot $tmpdir /bin/bash <<EOpost
 userdel tim
 useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo,bluetooth -f -1
