@@ -3,7 +3,7 @@
 # Provides: wm
 # Required-Start:    $local_fs
 # Required-Stop:     $local_fs
-# Default-Start:     2
+# Default-Start:     2 3
 # Default-Stop:      0 1 6
 # Short-Description: Start window manager
 ### END INIT INFO

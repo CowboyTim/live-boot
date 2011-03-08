@@ -254,7 +254,7 @@ apt-get clean
 dpkg -P `dpkg -l |grep ^rc|awk '{print $2}'`
 
 for f in dropbear dbus; do
-    update-rc.d $f disable
+    update-rc.d -f $f remove
 done
 EOrm
 
