@@ -6,11 +6,11 @@ username="tim"
 password="xxx"
 wireless_essid=""
 hostname="wihiie"
+compresswith="gzip"
 
 tmp=/var/tmp
 datestr=`date +%s`
 tmpdir=$tmp/squeeze.$datestr
-fn=$tmp/squashfs.$datestr
 srcloc=$(readlink -f -- "${0%/*}") 
 
 renice -n +20 -p $$
@@ -101,6 +101,8 @@ liborbit2              hold
 libgstreamer0.10-0     hold
 libconsole             hold
 libpci3                hold
+libdrm-radeon1         hold
+libgl1-mesa-dri        hold
 geoip-database         hold
 dictionaries-common    hold
 hunspell-en-us         hold
@@ -170,8 +172,6 @@ apt-get -y install \
     liblua5.1-posix-dev \
     liblua5.1-posix1 \
     linux-sound-base \
-    llvm \
-    llvm-dev \
     lsof \
     ltrace \
     lua5.1 \
@@ -308,16 +308,19 @@ mkdir -p $tmpdir/cgroup
 umount $tmpdir/proc
 umount $tmpdir/sys
 
+if [ ! -z "$compresswith" ]; then
 (
     cd $tmpdir
     tar cvf - * --exclude={dev,proc,sys,tmp,var}/* \
-        |lzma > ../$(basename $tmpdir).tar.lzma
+        |$compresswith > $tmp/$(basename $tmpdir).$datestr.tar.$compresswith
 )
+fi
 
-#time nice -n 20 mksquashfs \
-#    $tmpdir/* \
-#    $fn.root \
-#    -e $tmpdir/{proc,tmp,sys,mnt,media,home,dev,boot,var}/*
+fn=$tmp/$(basename $tmpdir).$datestr.squashfs.gzip
+time nice -n 20 mksquashfs \
+    $tmpdir/* \
+    $fn.root \
+    -e $tmpdir/{dev,proc,sys,tmp,var}/*
 #time nice -n 20 mksquashfs \
 #    $tmpdir/var \
 #    $fn.var \
