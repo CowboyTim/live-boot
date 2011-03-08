@@ -297,7 +297,7 @@ cat >> $tmpdir/etc/hosts <<EOhosts
 127.0.1.1     $hostname
 EOhosts
 
-cat > $tmpdir/hostname <<EOhosts
+cat > $tmpdir/etc/hostname <<EOhosts
 $hostname
 EOhosts
 
