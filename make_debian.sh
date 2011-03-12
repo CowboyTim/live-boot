@@ -221,6 +221,7 @@ apt-get -y --force-yes install \
     rox-filer \
     rpm \
     ruby \
+    rtorrent \
     rxvt-unicode \
     screen \
     socat \
