@@ -63,10 +63,10 @@ console-setup	console-setup/store_defaults_in_debconf_db	boolean	true
 console-setup	console-setup/charmap47	select	UTF-8
 console-setup	console-setup/fontsize-fb47	select	16
 console-setup	console-setup/fontsize	string	16
-localepurge     localepurge/remove_no   note    
+localepurge     localepurge/remove_no   note       
 localepurge     localepurge/verbose     boolean true
+localepurge     localepurge/dontbothernew       boolean false
 localepurge     localepurge/nopurge     multiselect     
-localepurge     localepurge/dontbothernew       boolean true
 localepurge     localepurge/quickndirtycalc     boolean true
 localepurge     localepurge/mandelete   boolean true
 localepurge     localepurge/showfreedspace      boolean true
