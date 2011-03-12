@@ -74,6 +74,10 @@ localepurge     localepurge/none_selected       boolean true
 EOc
 
 dpkg --set-selections <<EOhold
+libatk1.0-data         hold
+whiptail               hold
+openssh-blacklist-extra     hold
+openssh-blacklist      hold
 xfonts-base            hold
 xfonts-100dpi          hold
 console-setup          hold 
@@ -159,7 +163,6 @@ apt-get -y install \
     exiv2 \
     fakechroot \
     fakeroot \
-    fbpanel \
     flex \
     ftp \
     fuse-utils \
