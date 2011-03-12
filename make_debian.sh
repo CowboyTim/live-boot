@@ -274,6 +274,8 @@ dpkg -P `dpkg -l |grep ^rc|awk '{print $2}'`
 
 localepurge
 
+chmod +s /usr/sbin/ps3-flash-util /sbin/reboot /sbin/shutdown
+
 for f in dropbear dbus; do
     update-rc.d -f $f remove
 done
