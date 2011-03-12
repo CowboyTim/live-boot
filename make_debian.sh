@@ -133,7 +133,7 @@ nano                   hold
 EOhold
 EOinstallSetup
 chroot $tmpdir /bin/bash <<EOinstall 
-apt-get -y install \
+apt-get -y --force-yes install \
     alsa-base \
     alsa-utils \
     autoconf \
@@ -260,11 +260,11 @@ apt-get -y install \
     localepurge debconf-english
 EOinstall
 chroot $tmpdir /bin/bash <<'EOrm'
-apt-get -y upgrade
+apt-get -y --force-yes upgrade
 apt-get -y --force-yes remove yaboot powerpc-utils powerpc-ibm-utils aptitude mac-fdisk
 l=`deborphan`
 while [ "$l" ]; do
-    apt-get -y remove $l
+    apt-get -y --force-yes remove $l
     echo $l
     l=`deborphan`
 done
