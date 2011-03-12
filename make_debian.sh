@@ -74,10 +74,14 @@ localepurge     localepurge/none_selected       boolean true
 EOc
 
 dpkg --set-selections <<EOhold
+xfonts-base            hold
+xfonts-100dpi          hold
 console-setup          hold 
 console-data           hold 
 console-common         hold 
 console-tools          hold 
+gsfonts                hold
+gsfonts-x11            hold
 kbd                    hold 
 python3                hold 
 python3-minimal        hold 
@@ -139,7 +143,6 @@ apt-get -y install \
     bzip2 \
     cabextract \
     colordiff \
-    console-terminus \
     curl \
     dc \
     dcraw \
@@ -325,7 +328,7 @@ umount $tmpdir/sys
 if [ ! -z "$compresswith" ]; then
 (
     cd $tmpdir
-    tar cvf - * --exclude={dev,proc,sys,tmp,var}/* \
+    tar cvf - * --exclude={dev,proc,sys,tmp}/* \
         |$compresswith > $tmp/$(basename $tmpdir).tar.$compresswith
 )
 fi
