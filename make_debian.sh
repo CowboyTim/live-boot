@@ -63,6 +63,14 @@ console-setup	console-setup/store_defaults_in_debconf_db	boolean	true
 console-setup	console-setup/charmap47	select	UTF-8
 console-setup	console-setup/fontsize-fb47	select	16
 console-setup	console-setup/fontsize	string	16
+localepurge     localepurge/remove_no   note    
+localepurge     localepurge/verbose     boolean true
+localepurge     localepurge/nopurge     multiselect     
+localepurge     localepurge/dontbothernew       boolean true
+localepurge     localepurge/quickndirtycalc     boolean true
+localepurge     localepurge/mandelete   boolean true
+localepurge     localepurge/showfreedspace      boolean true
+localepurge     localepurge/none_selected       boolean true
 EOc
 
 dpkg --set-selections <<EOhold
@@ -103,13 +111,17 @@ libconsole             hold
 libpci3                hold
 libdrm-radeon1         hold
 libgl1-mesa-dri        hold
+libcupsimage2          hold
 geoip-database         hold
 dictionaries-common    hold
 hunspell-en-us         hold
-mac-fdisk              hold
 xdg-utils              hold
 zeroinstall-injector   hold
 pciutils               hold
+poppler-data           hold
+sgml-base              hold
+xml-core               hold
+nano                   hold
 EOhold
 EOinstallSetup
 chroot $tmpdir /bin/bash <<EOinstall 
@@ -199,7 +211,6 @@ apt-get -y install \
     ps3-utils \
     psmisc \
     pwgen \
-    python-fuse \
     python2.6-fuse \
     rox-filer \
     rpm \
@@ -239,11 +250,12 @@ apt-get -y install \
     xserver-xorg-input-mouse \
     xserver-xorg-video-fbdev \
     zip \
-    zlib1g-dev
+    zlib1g-dev \
+    localepurge debconf-english
 EOinstall
 chroot $tmpdir /bin/bash <<'EOrm'
 apt-get -y upgrade
-apt-get -y remove yaboot powerpc-utils powerpc-ibm-utils aptitude mac-fdisk
+apt-get -y --force-yes remove yaboot powerpc-utils powerpc-ibm-utils aptitude mac-fdisk
 l=`deborphan`
 while [ "$l" ]; do
     apt-get -y remove $l
@@ -252,6 +264,8 @@ while [ "$l" ]; do
 done
 apt-get clean
 dpkg -P `dpkg -l |grep ^rc|awk '{print $2}'`
+
+localepurge
 
 for f in dropbear dbus; do
     update-rc.d -f $f remove
@@ -316,11 +330,11 @@ if [ ! -z "$compresswith" ]; then
 )
 fi
 
-fn=$tmp/$(basename $tmpdir).squashfs.gzip
-time nice -n 20 mksquashfs \
-    $tmpdir/* \
-    $fn.root \
-    -e $tmpdir/{dev,proc,sys,tmp,var}/*
+#fn=$tmp/$(basename $tmpdir).squashfs.gzip
+#time nice -n 20 mksquashfs \
+#    $tmpdir/* \
+#    $fn.root \
+#    -e $tmpdir/{dev,proc,sys,tmp,var}/*
 #time nice -n 20 mksquashfs \
 #    $tmpdir/var \
 #    $fn.var \
