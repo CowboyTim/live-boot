@@ -74,13 +74,6 @@ localepurge     localepurge/none_selected       boolean true
 EOc
 
 dpkg --set-selections <<EOhold
-libatk1.0-data         hold
-libnewt0.52            holf
-whiptail               hold
-openssh-blacklist-extra     hold
-openssh-blacklist      hold
-xfonts-base            hold
-xfonts-100dpi          hold
 console-setup          hold 
 console-data           hold 
 console-common         hold 
@@ -127,9 +120,6 @@ hunspell-en-us         hold
 xdg-utils              hold
 zeroinstall-injector   hold
 pciutils               hold
-poppler-data           hold
-sgml-base              hold
-xml-core               hold
 nano                   hold
 EOhold
 EOinstallSetup
@@ -278,7 +268,17 @@ apt-get -y --force-yes remove \
     yaboot powerpc-utils powerpc-ibm-utils aptitude mac-fdisk
 apt-get -y --force-yes remove \
     nano whiptail xfonts-base xfonts-100dpi python-central python-fuse \
-    dictionaries-common hunspell-en-us libgl1-mesa-dri
+    dictionaries-common hunspell-en-us libgl1-mesa-dri \
+    libatk1.0-data \
+    libnewt0.52 \
+    whiptail \
+    openssh-blacklist-extra \
+    openssh-blacklist \
+    xfonts-base \
+    xfonts-100dpi \
+    poppler-data \
+    sgml-base \
+    xml-core
 apt-get -y --force-yes autoremove
 l=`deborphan`
 while [ "$l" ]; do
