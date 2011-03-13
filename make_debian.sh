@@ -75,6 +75,7 @@ EOc
 
 dpkg --set-selections <<EOhold
 libatk1.0-data         hold
+libnewt0.52            holf
 whiptail               hold
 openssh-blacklist-extra     hold
 openssh-blacklist      hold
@@ -140,6 +141,7 @@ apt-get -y --force-yes install \
     automake \
     avr-libc \
     bc \
+    binfmt-support \
     bison \
     bluez \
     bluez-hcidump \
@@ -163,6 +165,7 @@ apt-get -y --force-yes install \
     exiv2 \
     fakechroot \
     fakeroot \
+    fbset \
     flex \
     ftp \
     fuse-utils \
@@ -171,6 +174,7 @@ apt-get -y --force-yes install \
     gcc-4.4-multilib \
     gcc-4.4-spu \
     gcc-avr \
+    gcc-doc \
     gcc-spu \
     gccxml \
     genisoimage \
@@ -189,6 +193,7 @@ apt-get -y --force-yes install \
     liblua5.1-dev \
     liblua5.1-posix-dev \
     liblua5.1-posix1 \
+    libvpx-dev \
     linux-sound-base \
     lsof \
     ltrace \
@@ -198,8 +203,14 @@ apt-get -y --force-yes install \
     luarocks \
     luasocket \
     luasocket-dev \
+    libx11-dev \
+    libxext-dev \
+    libxv-dev \
+    libxvmc-dev \
     lzma \
     m4 \
+    manpages-posix-dev \
+    manpages-posix \
     make \
     mplayer \
     mscompress \
@@ -246,6 +257,7 @@ apt-get -y --force-yes install \
     wpasupplicant \
     x11-utils \
     x11-xserver-utils \
+    x11proto-xext-dev
     xfonts-100dpi \
     xfonts-terminus \
     xinit \
@@ -262,7 +274,11 @@ apt-get -y --force-yes install \
 EOinstall
 chroot $tmpdir /bin/bash <<'EOrm'
 apt-get -y --force-yes upgrade
-apt-get -y --force-yes remove yaboot powerpc-utils powerpc-ibm-utils aptitude mac-fdisk
+apt-get -y --force-yes remove \
+    yaboot powerpc-utils powerpc-ibm-utils aptitude mac-fdisk
+apt-get -y --force-yes remove \
+     nano whiptail xfonts-100dpi python-central python-fuse
+apt-get -y --force-yes autoremove
 l=`deborphan`
 while [ "$l" ]; do
     apt-get -y --force-yes remove $l
