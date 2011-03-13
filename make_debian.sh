@@ -257,8 +257,7 @@ apt-get -y --force-yes install \
     wpasupplicant \
     x11-utils \
     x11-xserver-utils \
-    x11proto-xext-dev
-    xfonts-100dpi \
+    x11proto-xext-dev \
     xfonts-terminus \
     xinit \
     xloadimage \
@@ -270,14 +269,16 @@ apt-get -y --force-yes install \
     xserver-xorg-video-fbdev \
     zip \
     zlib1g-dev \
-    localepurge debconf-english
+    localepurge \
+    debconf-english
 EOinstall
 chroot $tmpdir /bin/bash <<'EOrm'
 apt-get -y --force-yes upgrade
 apt-get -y --force-yes remove \
     yaboot powerpc-utils powerpc-ibm-utils aptitude mac-fdisk
 apt-get -y --force-yes remove \
-     nano whiptail xfonts-100dpi python-central python-fuse
+    nano whiptail xfonts-base xfonts-100dpi python-central python-fuse \
+    dictionaries-common hunspell-en-us libgl1-mesa-dri
 apt-get -y --force-yes autoremove
 l=`deborphan`
 while [ "$l" ]; do
@@ -344,8 +345,7 @@ rm $tmpdir/usr/sbin/policy-rc.d
 
 mkdir -p $tmpdir/cgroup
 
-umount $tmpdir/proc
-umount $tmpdir/sys
+umount -l $tmpdir/{proc,sys}
 
 if [ ! -z "$compresswith" ]; then
 (
