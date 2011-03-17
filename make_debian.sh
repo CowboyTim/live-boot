@@ -230,6 +230,7 @@ apt-get -y --force-yes install \
     squashfs-tools \
     strace \
     sudo \
+    sysklogd \
     tcpdump \
     time \
     tint2 \
