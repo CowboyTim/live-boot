@@ -30,6 +30,8 @@ deb http://security.debian.org/ squeeze/updates main contrib non-free
 deb-src http://security.debian.org/ squeeze/updates main contrib non-free
 deb http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
 Eol
+cat > $tmpdir/etc/apt/sources.list <<Eoe
+Eoe
 chroot $tmpdir /bin/bash <<EOinstallSetup
 apt-get update
 apt-get update
