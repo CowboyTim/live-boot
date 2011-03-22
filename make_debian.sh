@@ -28,7 +28,7 @@ cat >> $tmpdir/etc/apt/sources.list.d/ps3.extra.list <<Eol
 deb http://ftp.be.debian.org/debian squeeze main contrib non-free
 deb http://security.debian.org/ squeeze/updates main contrib non-free
 deb-src http://security.debian.org/ squeeze/updates main contrib non-free
-deb http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
+deb http://ftp.be.debian.org/debian-backports squeeze-backports main contrib non-free
 Eol
 cat > $tmpdir/etc/apt/sources.list <<Eoe
 Eoe
