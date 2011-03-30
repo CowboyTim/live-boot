@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux/powerpc 2.6.38 Kernel Configuration
-# Sat Mar 19 12:51:29 2011
+# Sat Mar 19 22:58:33 2011
 #
 CONFIG_PPC64=y
 
@@ -814,7 +814,7 @@ CONFIG_WLAN=y
 # Input device support
 #
 CONFIG_INPUT=y
-CONFIG_INPUT_FF_MEMLESS=m
+# CONFIG_INPUT_FF_MEMLESS is not set
 # CONFIG_INPUT_POLLDEV is not set
 # CONFIG_INPUT_SPARSEKMAP is not set
 
