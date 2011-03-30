@@ -31,3 +31,11 @@ LUA_PATH=~/.luarocks/share/lua/5.1/?.lua
 LUA_CPATH=~/.luarocks/lib/lua/5.1/?.so
 
 export PERL5LIB MANPATH PYTHONPATH LUA_PATH LUA_CPATH
+
+function play (){
+    url="$1"
+    shift
+    python ~/youtube-dl "$url" -o /dev/stdout -q|mplayer - -cache 8000 $*
+}
+
+export -f play
