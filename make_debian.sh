@@ -231,6 +231,7 @@ apt-get -y --force-yes install \
     spu-tools \
     squashfs-tools \
     strace \
+    subversion \
     sudo \
     sysklogd \
     tcpdump \
