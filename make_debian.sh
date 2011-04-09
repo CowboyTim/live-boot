@@ -127,6 +127,7 @@ EOhold
 EOinstallSetup
 chroot $tmpdir /bin/bash <<EOinstall 
 apt-get -y --force-yes install \
+    alien \
     alsa-base \
     alsa-utils \
     autoconf \
