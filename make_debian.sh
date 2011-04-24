@@ -7,11 +7,14 @@ password="xxx"
 wireless_essid=""
 hostname="wihiie"
 compresswith="gzip"
+what="ps3"
 
 tmp=/var/tmp
 datestr=`date +%s`
 tmpdir=$tmp/squeeze.$datestr
 srcloc=$(readlink -f -- "${0%/*}") 
+
+export LANG=C
 
 renice -n +20 -p $$
 
@@ -24,7 +27,7 @@ cat >> $tmpdir/usr/sbin/policy-rc.d <<EOh
 exit 101
 EOh
 chmod +x $tmpdir/usr/sbin/policy-rc.d
-cat >> $tmpdir/etc/apt/sources.list.d/ps3.extra.list <<Eol
+cat >> $tmpdir/etc/apt/sources.list.d/extra.list <<Eol
 deb http://ftp.be.debian.org/debian squeeze main contrib non-free
 deb http://security.debian.org/ squeeze/updates main contrib non-free
 deb-src http://security.debian.org/ squeeze/updates main contrib non-free
@@ -33,7 +36,6 @@ Eol
 cat > $tmpdir/etc/apt/sources.list <<Eoe
 Eoe
 chroot $tmpdir /bin/bash <<EOinstallSetup
-export LANG=C
 apt-get update
 apt-get update
 apt-get -y install debconf-utils
@@ -297,7 +299,7 @@ done
 EOrm
 
 
-cp -a $srcloc/ps3/package/etc/{skel,alsa,sysctl.d,init.d,X11,udev,kboot.*} $tmpdir/etc/
+cp -a $srcloc/$what/package/etc/{skel,alsa,sysctl.d,init.d,X11,udev,kboot.*} $tmpdir/etc/
 chroot $tmpdir /bin/bash <<EOpost
 userdel tim
 useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo,bluetooth -f -1
@@ -338,25 +340,9 @@ rm $tmpdir/usr/sbin/policy-rc.d
 
 mkdir -p $tmpdir/cgroup
 
-chroot $tmpdir /bin/bash <<EOinstall
-apt-get -y --force-yes install \
-    gcc-4.4-spu \
-    gcc-spu \
-    spu-tools \
-    ps3-utils \
-    lib64gcc1
-apt-get -y --force-yes remove \
-    yaboot powerpc-utils powerpc-ibm-utils mac-fdisk
-chmod +s /usr/sbin/ps3-flash-util /sbin/reboot /sbin/shutdown
-
-cat >> ./etc/network/interfaces <<EOwifi
-# WiFi om the PS3
-auto wlan0
-iface wlan0 inet dhcp
-    wireless-essid $wireless_essid
-EOwifi
-EOinstall
-
+if [ -e $srcloc/$what/post.sh ]; then
+    . $srcloc/$what/post.sh
+fi
 
 umount -l $tmpdir/{proc,sys}
 
