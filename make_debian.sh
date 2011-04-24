@@ -297,18 +297,6 @@ done
 EOrm
 
 
-chroot $tmpdir /bin/bash <<EOinstall
-apt-get -y --force-yes install \
-    gcc-4.4-spu \
-    gcc-spu \
-    spu-tools \
-    ps3-utils \
-    lib64gcc1
-apt-get -y --force-yes remove \
-    yaboot powerpc-utils powerpc-ibm-utils mac-fdisk
-chmod +s /usr/sbin/ps3-flash-util /sbin/reboot /sbin/shutdown
-EOinstall
-
 cp -a $srcloc/ps3/package/etc/{skel,alsa,sysctl.d,init.d,X11,udev,kboot.*} $tmpdir/etc/
 chroot $tmpdir /bin/bash <<EOpost
 userdel tim
@@ -328,15 +316,9 @@ $timezone_area/$timezone_city
 EOtz
 
 cat >> $tmpdir/etc/network/interfaces <<EOnetwork
-
 # The loopback network interface
 auto lo
 iface lo inet loopback
-
-# WiFi om the PS3
-auto wlan0
-iface wlan0 inet dhcp
-    wireless-essid $wireless_essid
 
 # The primary network interface
 auto eth0
@@ -355,6 +337,26 @@ EOhosts
 rm $tmpdir/usr/sbin/policy-rc.d
 
 mkdir -p $tmpdir/cgroup
+
+chroot $tmpdir /bin/bash <<EOinstall
+apt-get -y --force-yes install \
+    gcc-4.4-spu \
+    gcc-spu \
+    spu-tools \
+    ps3-utils \
+    lib64gcc1
+apt-get -y --force-yes remove \
+    yaboot powerpc-utils powerpc-ibm-utils mac-fdisk
+chmod +s /usr/sbin/ps3-flash-util /sbin/reboot /sbin/shutdown
+
+cat >> ./etc/network/interfaces <<EOwifi
+# WiFi om the PS3
+auto wlan0
+iface wlan0 inet dhcp
+    wireless-essid $wireless_essid
+EOwifi
+EOinstall
+
 
 umount -l $tmpdir/{proc,sys}
 
