@@ -33,6 +33,7 @@ Eol
 cat > $tmpdir/etc/apt/sources.list <<Eoe
 Eoe
 chroot $tmpdir /bin/bash <<EOinstallSetup
+export LANG=C
 apt-get update
 apt-get update
 apt-get -y install debconf-utils
@@ -165,10 +166,8 @@ apt-get -y --force-yes install \
     fuse-utils \
     g++-4.4 \
     gcc-4.4-multilib \
-    gcc-4.4-spu \
     gcc-avr \
     gcc-doc \
-    gcc-spu \
     gccxml \
     genisoimage \
     git \
@@ -178,7 +177,6 @@ apt-get -y --force-yes install \
     htop \
     iceweasel \
     joystick \
-    lib64gcc1 \
     libfuse-dev \
     libfuse-perl \
     libfuse2 \
@@ -218,7 +216,6 @@ apt-get -y --force-yes install \
     p7zip-full \
     perl-doc \
     perltidy \
-    ps3-utils \
     psmisc \
     pwgen \
     python2.6-fuse \
@@ -229,7 +226,6 @@ apt-get -y --force-yes install \
     rxvt-unicode \
     screen \
     socat \
-    spu-tools \
     squashfs-tools \
     strace \
     subversion \
@@ -270,8 +266,7 @@ EOinstall
 chroot $tmpdir /bin/bash <<'EOrm'
 apt-get -y --force-yes upgrade
 apt-get -y --force-yes remove \
-    yaboot powerpc-utils powerpc-ibm-utils aptitude mac-fdisk
-apt-get -y --force-yes remove \
+    aptitude \
     nano whiptail xfonts-base xfonts-100dpi python-central python-fuse \
     dictionaries-common hunspell-en-us libgl1-mesa-dri \
     libatk1.0-data \
@@ -296,12 +291,23 @@ dpkg -P `dpkg -l |grep ^rc|awk '{print $2}'`
 
 localepurge
 
-chmod +s /usr/sbin/ps3-flash-util /sbin/reboot /sbin/shutdown
-
 for f in dropbear dbus; do
     update-rc.d -f $f remove
 done
 EOrm
+
+
+chroot $tmpdir /bin/bash <<EOinstall
+apt-get -y --force-yes install \
+    gcc-4.4-spu \
+    gcc-spu \
+    spu-tools \
+    ps3-utils \
+    lib64gcc1
+apt-get -y --force-yes remove \
+    yaboot powerpc-utils powerpc-ibm-utils mac-fdisk
+chmod +s /usr/sbin/ps3-flash-util /sbin/reboot /sbin/shutdown
+EOinstall
 
 cp -a $srcloc/ps3/package/etc/{skel,alsa,sysctl.d,init.d,X11,udev,kboot.*} $tmpdir/etc/
 chroot $tmpdir /bin/bash <<EOpost
