@@ -1145,10 +1145,11 @@ CONFIG_SCSI_PROC_FS=y
 #
 # SCSI support type (disk, tape, CD-ROM)
 #
-# CONFIG_BLK_DEV_SD is not set
+CONFIG_BLK_DEV_SD=y
 # CONFIG_CHR_DEV_ST is not set
 # CONFIG_CHR_DEV_OSST is not set
-# CONFIG_BLK_DEV_SR is not set
+CONFIG_BLK_DEV_SR=y
+# CONFIG_BLK_DEV_SR_VENDOR is not set
 CONFIG_CHR_DEV_SG=y
 # CONFIG_CHR_DEV_SCH is not set
 CONFIG_SCSI_MULTI_LUN=y
@@ -1181,8 +1182,8 @@ CONFIG_SATA_PMP=y
 #
 # Controllers with non-SFF native interface
 #
-# CONFIG_SATA_AHCI is not set
-# CONFIG_SATA_AHCI_PLATFORM is not set
+CONFIG_SATA_AHCI=y
+CONFIG_SATA_AHCI_PLATFORM=y
 # CONFIG_SATA_INIC162X is not set
 # CONFIG_SATA_ACARD_AHCI is not set
 # CONFIG_SATA_SIL24 is not set
@@ -1300,7 +1301,7 @@ CONFIG_NETDEVICES=y
 # CONFIG_VETH is not set
 # CONFIG_NET_SB1000 is not set
 # CONFIG_ARCNET is not set
-CONFIG_MII=m
+CONFIG_MII=y
 CONFIG_PHYLIB=y
 
 #
@@ -1315,7 +1316,7 @@ CONFIG_PHYLIB=y
 # CONFIG_SMSC_PHY is not set
 # CONFIG_BROADCOM_PHY is not set
 # CONFIG_ICPLUS_PHY is not set
-# CONFIG_REALTEK_PHY is not set
+CONFIG_REALTEK_PHY=y
 # CONFIG_NATIONAL_PHY is not set
 # CONFIG_STE10XP is not set
 # CONFIG_LSI_ET1011C_PHY is not set
@@ -1349,26 +1350,25 @@ CONFIG_NET_PCI=y
 # CONFIG_FEALNX is not set
 # CONFIG_NATSEMI is not set
 # CONFIG_NE2K_PCI is not set
-# CONFIG_8139CP is not set
+CONFIG_8139CP=y
 # CONFIG_8139TOO is not set
 # CONFIG_R6040 is not set
 # CONFIG_SIS900 is not set
 # CONFIG_EPIC100 is not set
 # CONFIG_SMSC9420 is not set
-CONFIG_SUNDANCE=m
-# CONFIG_SUNDANCE_MMIO is not set
+# CONFIG_SUNDANCE is not set
 # CONFIG_TLAN is not set
 # CONFIG_KS8842 is not set
 # CONFIG_KS8851_MLL is not set
 # CONFIG_VIA_RHINE is not set
-CONFIG_SC92031=m
+# CONFIG_SC92031 is not set
 # CONFIG_ATL2 is not set
 CONFIG_NETDEV_1000=y
 # CONFIG_ACENIC is not set
-CONFIG_DL2K=m
-CONFIG_E1000=m
+# CONFIG_DL2K is not set
+# CONFIG_E1000 is not set
 CONFIG_E1000E=m
-CONFIG_IP1000=m
+# CONFIG_IP1000 is not set
 # CONFIG_IGB is not set
 # CONFIG_IGBVF is not set
 # CONFIG_NS83820 is not set
@@ -1389,29 +1389,7 @@ CONFIG_IP1000=m
 # CONFIG_JME is not set
 # CONFIG_STMMAC_ETH is not set
 # CONFIG_PCH_GBE is not set
-CONFIG_NETDEV_10000=y
-# CONFIG_CHELSIO_T1 is not set
-# CONFIG_CHELSIO_T3 is not set
-# CONFIG_CHELSIO_T4 is not set
-# CONFIG_CHELSIO_T4VF is not set
-# CONFIG_ENIC is not set
-# CONFIG_IXGBE is not set
-# CONFIG_IXGBEVF is not set
-# CONFIG_IXGB is not set
-# CONFIG_S2IO is not set
-# CONFIG_VXGE is not set
-# CONFIG_MYRI10GE is not set
-# CONFIG_NETXEN_NIC is not set
-# CONFIG_NIU is not set
-# CONFIG_MLX4_EN is not set
-# CONFIG_MLX4_CORE is not set
-# CONFIG_TEHUTI is not set
-# CONFIG_BNX2X is not set
-# CONFIG_QLCNIC is not set
-# CONFIG_QLGE is not set
-# CONFIG_BNA is not set
-# CONFIG_SFC is not set
-# CONFIG_BE2NET is not set
+# CONFIG_NETDEV_10000 is not set
 # CONFIG_TR is not set
 # CONFIG_WLAN is not set
 
