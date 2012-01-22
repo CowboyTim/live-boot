@@ -14,6 +14,7 @@ fi
 export MOZ_DISABLE_PANGO=1
 xrdb -merge ~/.Xresources
 xset m 1/1
+xset b off
 setxkbmap -option terminate:ctrl_alt_bksp
 pkill -9 -f ssh-agent
 eval `ssh-agent -s`
@@ -22,5 +23,13 @@ if [ ! -z "$WM_BACKDROP" -a -e "$WM_BACKDROP" ]; then
     xsetbg "$WM_BACKDROP" &
 else
     xsetroot -solid DimGray
+fi
+if [ -x ~/dropbox.py ]; then
+    (
+        ~/dropbox.py running
+        if [ $? = 0 ]; then
+            ~/dropbox.py start
+        fi
+    )&
 fi
 exec openbox-session
