@@ -8,7 +8,6 @@ wireless_essid=""
 hostname="wihiie"
 compresswith="gzip"
 what="ps3"
-arch="powerpc"
 
 tmp=/var/tmp
 datestr=`date +%s`
@@ -19,7 +18,7 @@ export LANG=C
 
 renice -n +20 -p $$
 
-debootstrap --arch=$arch squeeze $tmpdir http://ftp.be.debian.org/debian
+debootstrap squeeze $tmpdir http://ftp.be.debian.org/debian
 
 mount proc $tmpdir/proc -t proc
 mount sysfs $tmpdir/sys -t sysfs
