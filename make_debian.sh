@@ -12,6 +12,7 @@ compresswith="gzip"
 what="ps3"
 arch="armel"
 baseurl="http://ftp.be.debian.org/"
+debootstrapurl="file:///media/cdrom"
 
 tmp=/var/tmp
 datestr=`date +%s`
@@ -23,7 +24,7 @@ export LANG=C
 
 renice -n +20 -p $$
 
-qemu-debootstrap --arch=$arch --foreign squeeze $tmpdir $baseurl/debian
+qemu-debootstrap --arch=$arch --foreign squeeze --no-check-gpg $tmpdir $debootstrapurl/debian
 
 cp $srcloc/install_packages.sh $tmpdir/
 chroot $tmpdir /bin/bash ./install_packages.sh $baseurl $timezone_area $timezone_city || exit 1
