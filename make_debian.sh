@@ -31,6 +31,7 @@ mkdir -p $tmpdir/media/cdrom
 mount --bind /media/cdrom $tmpdir/media/cdrom
 chroot $tmpdir /bin/bash ./install_packages.sh $debootstrapurl $timezone_area $timezone_city || exit 1
 umount $tmpdir/media/cdrom
+rm $tmpdir/install_packages.sh
 
 cp -a $srcloc/$what/package/etc/{skel,sysctl.d,init.d,X11,udev,kboot.*} $tmpdir/etc/
 chroot $tmpdir /bin/bash <<EOpost
@@ -87,15 +88,15 @@ if [ ! -z "$compresswith" ]; then
 )
 fi
 
-#fn=$tmp/$(basename $tmpdir).squashfs.gzip
-#time nice -n 20 mksquashfs \
-#    $tmpdir/* \
-#    $fn.root \
-#    -e $tmpdir/{dev,proc,sys,tmp,var}/*
-#time nice -n 20 mksquashfs \
-#    $tmpdir/var \
-#    $fn.var \
-#    -e $tmpdir/{var/run,var/lock,var/tmp}/*
+fn=$tmp/$(basename $tmpdir).squashfs.gzip
+time nice -n 20 mksquashfs \
+    $tmpdir/* \
+    $fn.root \
+    -e $tmpdir/{dev,proc,sys,tmp,var}/*
+time nice -n 20 mksquashfs \
+    $tmpdir/var \
+    $fn.var \
+    -e $tmpdir/{var/run,var/lock,var/tmp}/*
 
 echo
 echo $fn
