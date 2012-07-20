@@ -27,7 +27,9 @@ renice -n +20 -p $$
 qemu-debootstrap --arch=$arch --foreign squeeze --no-check-gpg $tmpdir $debootstrapurl/debian
 
 cp $srcloc/install_packages.sh $tmpdir/
-chroot $tmpdir /bin/bash ./install_packages.sh $baseurl $timezone_area $timezone_city || exit 1
+mkdir -p $tmpdir/media/cdrom
+mount --bind /media/cdrom $tmpdir/media/cdrom
+chroot $tmpdir /bin/bash ./install_packages.sh $debootstrapurl $timezone_area $timezone_city || exit 1
 
 cp -a $srcloc/$what/package/etc/{skel,sysctl.d,init.d,X11,udev,kboot.*} $tmpdir/etc/
 chroot $tmpdir /bin/bash <<EOpost

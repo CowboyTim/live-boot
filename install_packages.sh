@@ -13,14 +13,15 @@ EOh
 chmod +x /usr/sbin/policy-rc.d
 cat >> /etc/apt/sources.list.d/extra.list <<Eol
 deb $baseurl/debian squeeze main contrib non-free
-deb http://security.debian.org/ squeeze/updates main contrib non-free
-deb-src http://security.debian.org/ squeeze/updates main contrib non-free
+#deb http://security.debian.org/ squeeze/updates main contrib non-free
+#deb-src http://security.debian.org/ squeeze/updates main contrib non-free
 Eol
 cat > /etc/apt/sources.list <<Eoe
 Eoe
 
+gpg --keyserver keyserver.ubuntu.com --recv-key ABF5BD827BD9BF62
+
 apt-get update
-apt-get -y install debconf-utils
 debconf-set-selections <<EOc
 tzdata	tzdata/Zones/$timezone_area	select	$timezone_city
 tzdata	tzdata/Areas	select	$timezone_area
@@ -60,4 +61,5 @@ localepurge     localepurge/showfreedspace      boolean true
 localepurge     localepurge/none_selected       boolean true
 EOc
 
-tasksel install desktop
+#tasksel install desktop
+aptitude -y --allow-untrusted install desktop
