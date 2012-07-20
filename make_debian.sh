@@ -30,6 +30,7 @@ cp $srcloc/install_packages.sh $tmpdir/
 mkdir -p $tmpdir/media/cdrom
 mount --bind /media/cdrom $tmpdir/media/cdrom
 chroot $tmpdir /bin/bash ./install_packages.sh $debootstrapurl $timezone_area $timezone_city || exit 1
+umount $tmpdir/media/cdrom
 
 cp -a $srcloc/$what/package/etc/{skel,sysctl.d,init.d,X11,udev,kboot.*} $tmpdir/etc/
 chroot $tmpdir /bin/bash <<EOpost
