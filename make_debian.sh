@@ -97,6 +97,10 @@ time nice -n 20 mksquashfs \
     $tmpdir/var \
     $fn.var \
     -e $tmpdir/{var/run,var/lock,var/tmp}/*
+time nice -n 20 mksquashfs \
+    $tmpdir/* \
+    $fn.all \
+    -e $tmpdir/{dev,proc,sys,tmp,var/run,var/lock,var/tmp}/*
 
 echo
 echo $fn
