@@ -34,6 +34,7 @@ mkdir -p $tmpinitramfs/{sbin,lib/udev/rules.d}
         ./sbin/blkid \
         ./sbin/udevd \
         ./sbin/udevadm \
+        ./sbin/modprobe \
         $tmpinitramfs/sbin/
     cp -a \
         ./lib/libc.so.6 \
