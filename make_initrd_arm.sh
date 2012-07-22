@@ -53,7 +53,7 @@ mkdir -p $tmpinitramfs/{sbin,lib/udev/rules.d}
         ./lib/udev/rules.d/50-udev-default.rules \
         ./lib/udev/rules.d/91-permissions.rules \
         $tmpinitramfs/lib/udev/rules.d/
-        
+    ln -s ./sbin $tmpinitramfs/bin
 )
 #depmod  -b $tmpinitramfs -a $kernelversion
 
