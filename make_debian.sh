@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# apt-get install fakeroot fakechroot qemu binfmt-support qemu-user qemu-user-static
+# apt-get install fakeroot fakechroot qemu binfmt-support qemu-user \
+#    qemu-user-static xz-utils squashfs-tools
 
 timezone_area="Europe"
 timezone_city="Brussels"
