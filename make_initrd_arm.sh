@@ -22,10 +22,9 @@ exec 2>&1
 mkdir -p $tmpdir
 
 echo "Making a new initramfs in $tmpdir"
-tmpinitramfs="$tmpdir/initrd.tmp"
-targetinitrd=$tmpdir/initrd-$kernelversion.cpio
+targetinitrd=$tmpscratchdir/initrd-$kernelversion.cpio
 # general stuff
-mkdir -p $tmpinitramfs/{sbin,lib/udev/rules.d}
+mkdir -p $tmpdir/{sbin,lib/udev/rules.d}
 (
     cd $sourcedirtmp;
     cp -a \
@@ -34,8 +33,8 @@ mkdir -p $tmpinitramfs/{sbin,lib/udev/rules.d}
         ./sbin/blkid \
         ./sbin/udevd \
         ./sbin/udevadm \
-        ./sbin/modprobe \
-        $tmpinitramfs/sbin/
+        ./sbin/{lsmod,rmmod,modprobe} \
+        $tmpdir/sbin/
     cp -a \
         ./lib/libc.so.6 \
         ./lib/ld-linux.so.3 \
@@ -45,24 +44,24 @@ mkdir -p $tmpinitramfs/{sbin,lib/udev/rules.d}
         ./lib/libblkid.so.1 \
         ./lib/libuuid.so.1 \
         ./lib/libgcc_s.so.1 \
-        $tmpinitramfs/lib/
+        $tmpdir/lib/
     cp -a \
         ./lib/udev/{usb,scsi,path,edd,ata}_id \
-        $tmpinitramfs/lib/udev/
+        $tmpdir/lib/udev/
     cp -a \
         ./lib/udev/rules.d/60-persistent-storage.rules \
         ./lib/udev/rules.d/50-udev-default.rules \
         ./lib/udev/rules.d/91-permissions.rules \
-        $tmpinitramfs/lib/udev/rules.d/
-    ln -s ./sbin $tmpinitramfs/bin
+        $tmpdir/lib/udev/rules.d/
+    ln -s ./sbin $tmpdir/bin
 )
-#depmod  -b $tmpinitramfs -a $kernelversion
+#depmod  -b $tmpdir -a $kernelversion
 
 # my stuff + build
-cp $here/fastboot $tmpinitramfs
-cp $here/fastboot_init $tmpinitramfs/init
+cp $here/fastboot $tmpdir
+cp $here/fastboot_init $tmpdir/init
 (
-    cd $tmpinitramfs
+    cd $tmpdir
     dd if=/dev/zero of=./empty_ext2_fs bs=1M count=32
     mkfs.ext2 -O dir_index -F -F -L cow ./empty_ext2_fs
     tune2fs -c -1 -i -1 ./empty_ext2_fs
@@ -70,6 +69,4 @@ cp $here/fastboot_init $tmpinitramfs/init
     find . |cpio -ov -H newc > $targetinitrd
 )
 
-cp $targetinitrd $tmpscratchdir/
-echo "Created $tmpscratchdir/$(basename $targetinitrd)"
-rm -rf $tmpdir
+echo "Created $targetinitrd $tmpdir"
