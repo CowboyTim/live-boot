@@ -54,5 +54,6 @@ console-setup	console-setup/fontsize	string	16
 EOc
 
 aptitude -y --allow-untrusted install desktop
+aptitude -y --allow-untrusted install busybox libklibc klibc-utils
 apt-get clean
 apt-get autoclean
