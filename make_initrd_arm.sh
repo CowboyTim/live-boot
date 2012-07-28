@@ -1,10 +1,7 @@
 #!/bin/bash
 
 squashfile="$1"
-kernelversion="$2"
-if [ -z $kernelversion ]; then
-    kernelversion=$(uname -r)
-fi
+moddir="$2"
 
 tmpscratchdir=/var/tmp
 if [ -d /mnt/rootfs/var/tmp ]; then
@@ -19,9 +16,7 @@ tmpdir=$(mktemp -d -p $tmpscratchdir initrd_XXXXXX)
 echo "tempdir to use $tmpdir"
 mkdir -p $tmpdir
 
-echo "Making a new initramfs in $tmpdir"
-targetinitrd=$tmpscratchdir/initrd-$kernelversion.cpio
-
+echo "unsquashfs busybox stuff to $tmpdir"
 unsquashfs -i -f -d $tmpdir $squashfile \
     /usr/lib/klibc/bin \
     /bin/busybox \
@@ -42,11 +37,19 @@ unsquashfs -i -f -d $tmpdir $squashfile \
     /lib/udev/rules.d/50-udev-default.rules \
     /lib/udev/rules.d/91-permissions.rules \
     || exit 1
-#depmod  -b $tmpdir -a $kernelversion
 
-# my stuff + build
+echo "taking the kernel modules from $moddir"
+mkdir -p $tmpdir/lib/modules/
+kernelversion=$(basename $(ls $moddir/lib/modules/|grep '\-ct'))
+cp -a $moddir/lib/modules/*-ct $tmpdir/lib/modules
+depmod  -b $tmpdir -a $kernelversion
+
+echo "copying fastboot and fastboot_init"
 cp $here/fastboot $tmpdir/
 cp $here/fastboot_init $tmpdir/init
+
+echo "making the cpio"
+targetinitrd=$tmpscratchdir/initrd-$kernelversion.cpio
 (
     cd $tmpdir
     dd if=/dev/zero of=./empty_ext2_fs bs=1M count=32
@@ -56,4 +59,4 @@ cp $here/fastboot_init $tmpdir/init
     find . |cpio -ov -H newc > $targetinitrd
 )
 
-echo "Created $targetinitrd $tmpdir"
+echo "created $targetinitrd $tmpdir"
