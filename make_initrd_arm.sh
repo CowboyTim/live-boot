@@ -25,12 +25,15 @@ unsquashfs -i -f -d $tmpdir $squashfile \
     /sbin/udevadm \
     /sbin/{lsmod,rmmod,modprobe} \
     /lib/libc.so.6 \
+    /lib/libc-*.so \
     /lib/ld-linux.so.3 \
+    /lib/ld-*.so \
     /lib/libselinux.so.1 \
     /lib/libm.so.6 \
-    /lib/libdl.so.2 \
-    /lib/libblkid.so.1 \
-    /lib/libuuid.so.1 \
+    /lib/libm-*.so \
+    /lib/libdl*.so* \
+    /lib/libblkid.so.1* \
+    /lib/libuuid.so.* \
     /lib/libgcc_s.so.1 \
     /lib/udev/{usb,scsi,path,edd,ata}_id \
     /lib/udev/rules.d/60-persistent-storage.rules \
@@ -49,14 +52,14 @@ cp $here/fastboot $tmpdir/
 cp $here/fastboot_init $tmpdir/init
 
 echo "making the cpio"
-targetinitrd=$tmpscratchdir/initrd-$kernelversion.cpio.xz
+targetinitrd=$tmpscratchdir/initrd-$kernelversion.cpio.gz
 (
     cd $tmpdir
     dd if=/dev/zero of=./empty_ext2_fs bs=1M count=32
     mkfs.ext2 -O dir_index -F -F -L cow ./empty_ext2_fs
     tune2fs -c -1 -i -1 ./empty_ext2_fs
     gzip -9 ./empty_ext2_fs
-    find . |cpio -ov -H newc|xz -c --check=crc32 -9e > $targetinitrd
+    find . |cpio -ov -H newc|gzip -c -9 > $targetinitrd
 )
 
 echo "created $targetinitrd $tmpdir"
