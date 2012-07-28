@@ -49,14 +49,14 @@ cp $here/fastboot $tmpdir/
 cp $here/fastboot_init $tmpdir/init
 
 echo "making the cpio"
-targetinitrd=$tmpscratchdir/initrd-$kernelversion.cpio
+targetinitrd=$tmpscratchdir/initrd-$kernelversion.cpio.xz
 (
     cd $tmpdir
     dd if=/dev/zero of=./empty_ext2_fs bs=1M count=32
     mkfs.ext2 -O dir_index -F -F -L cow ./empty_ext2_fs
     tune2fs -c -1 -i -1 ./empty_ext2_fs
     gzip -9 ./empty_ext2_fs
-    find . |cpio -ov -H newc > $targetinitrd
+    find . |cpio -ov -H newc|xz -c --check=crc32 -9e > $targetinitrd
 )
 
 echo "created $targetinitrd $tmpdir"
