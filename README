@@ -1,0 +1,39 @@
+1. install needed packages
+--------------------------
+
+    $ sudo apt-get install fakeroot fakechroot qemu binfmt-support qemu-user \
+        qemu-user-static xz-utils squashfs-tools \
+        binutils-arm-linux-gnueabi \
+        gcc-4.4-arm-linux-gnueabi 
+
+2. make a kernel
+----------------
+    
+    $ wget http://www.kernel.org/pub/linux/kernel/v3.0/linux-3.5.tar.bz2 -O - \
+        |tar xvjf -
+    $ cd linux-3.5
+    $ cp <live-boot>/kernel-config-3.5-arm-versatile .config
+    $ CROSS_COMPILE=/usr/bin/arm-linux-gnueabi-
+    $ ARCH=arm
+    $ make -j10 zImage
+    $ make INSTALL_MOD_PATH=/tmp/abc -j10 modules_install
+
+3. make the squashfs/initrd image
+---------------------------------
+
+    $ sudo bash make_debian.sh /tmp/squeeze.squashfs.xz
+    $ make_initrd_arm.sh /var/tmp/squeeze.squashfs.xz /tmp/abc
+    $ cp -a /tmp/squeeze.squashfs.xz /var/tmp/
+    
+
+4. run a test
+-------------
+    $ dd if=/dev/zero of=/var/tmp/usb.img bs=1M count=1024
+    $ mkfs.vfat /var/tmp/usb.img
+    $ mkdir -p /tmp/fake_usb
+    $ sudo mount -o loop,rw,umask=0000 /var/tmp/usb.img /tmp/fake_usb
+    $ cp /var/tmp/squeeze.squashfs.xz /tmp/fake_usb/
+    $ qemu-system-arm -kernel ~/linux.git/arch/arm/boot/zImage  \
+        -m 512 -M versatilepb \
+        -append "boot=fastboot root=LABEL=USBStickie rfsfile=/squeeze.squashfs.xz noquiet nosplash toram" \
+        -usbdevice disk:format=raw:/var/tmp/usb.img
