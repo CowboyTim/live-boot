@@ -92,7 +92,7 @@ fi
 fn=$tmp/$(basename $tmpdir).squashfs.$compresswith
 time nice -n 20 mksquashfs \
     $tmpdir/* \
-    $fn.all \
+    $fn \
     -comp $compresswith \
     -e $tmpdir/{dev,proc,sys,tmp,var/run,var/lock,var/tmp}/*
 
