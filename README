@@ -33,7 +33,7 @@
     $ mkdir -p /tmp/fake_usb
     $ sudo mount -o loop,rw,umask=0000 /var/tmp/usb.img /tmp/fake_usb
     $ cp /var/tmp/squeeze.squashfs.xz /tmp/fake_usb/
-    $ qemu-system-arm -kernel ~/linux.git/arch/arm/boot/zImage  \
+    $ qemu-system-arm -kernel ~/linux-3.5/arch/arm/boot/zImage  \
         -m 512 -M versatilepb \
         -append "boot=fastboot root=LABEL=USBStickie rfsfile=/squeeze.squashfs.xz noquiet nosplash toram" \
         -usbdevice disk:format=raw:/var/tmp/usb.img
