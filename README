@@ -39,6 +39,8 @@
                  root=LABEL=USBStickie \
                  rfsfile=/squeeze.squashfs.xz \
                  noquiet nosplash toram" \
-        -usb \
-        -usbdevice disk:format=raw:/var/tmp/usb.img \
         -initrd /var/tmp/initrd-3.5.0-ct.cpio.gz
+        -usb \
+        -device usb-ehci,id=ehci \
+        -device usb-storage,bus=ehci.0,drive=my_usb_disk \
+        -drive id=my_usb_disk,if=none,format=raw,file=/var/tmp/usb.img
