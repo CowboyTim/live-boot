@@ -15,7 +15,7 @@
     $ cp <live-boot>/kernel-config-3.5-arm-versatile .config
     $ CROSS_COMPILE=/usr/bin/arm-linux-gnueabi-
     $ ARCH=arm
-    $ make -j10 zImage
+    $ make -j10 all
     $ make INSTALL_MOD_PATH=/tmp/abc -j10 modules_install
 
 3. make the squashfs/initrd image
