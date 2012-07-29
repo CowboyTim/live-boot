@@ -51,10 +51,10 @@ depmod  -b $tmpdir -a $kernelversion
 echo "making modules list"
 mkdir $tmpdir/conf
 cat >> $tmpdir/conf/modules <<EOconfmodules
+xhci-hcd
+ehci-hcd
 uhci-hcd
 ohci-hcd
-ehci-hcd
-xhci-hcd
 libata
 sg
 scsi_mod
