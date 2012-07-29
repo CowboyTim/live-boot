@@ -51,7 +51,13 @@ depmod  -b $tmpdir -a $kernelversion
 echo "making modules list"
 mkdir $tmpdir/conf
 cat >> $tmpdir/conf/modules <<EOconfmodules
+uhci-hcd
+ohci-hcd
+ehci-hcd
+xhci-hcd
+libata
 sg
+scsi_mod
 sd_mod
 sr_mod
 squashfs
@@ -59,6 +65,8 @@ loop
 usbhid
 hid
 usb_storage
+vfat
+romfs
 EOconfmodules
 
 echo "copying fastboot and fastboot_init"
