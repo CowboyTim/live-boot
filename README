@@ -35,5 +35,9 @@
     $ cp /var/tmp/squeeze.squashfs.xz /tmp/fake_usb/
     $ qemu-system-arm -kernel ~/linux-3.5/arch/arm/boot/zImage  \
         -m 512 -M versatilepb \
-        -append "boot=fastboot root=LABEL=USBStickie rfsfile=/squeeze.squashfs.xz noquiet nosplash toram" \
-        -usbdevice disk:format=raw:/var/tmp/usb.img
+        -append "boot=fastboot \
+                 root=LABEL=USBStickie \
+                 rfsfile=/squeeze.squashfs.xz \
+                 noquiet nosplash toram" \
+        -usbdevice disk:format=raw:/var/tmp/usb.img \
+        -initrd /var/tmp/initrd-3.5.0-ct.cpio.gz
