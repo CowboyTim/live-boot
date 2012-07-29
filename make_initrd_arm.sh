@@ -23,7 +23,8 @@ unsquashfs -i -f -d $tmpdir $squashfile \
     /sbin/blkid \
     /sbin/udevd \
     /sbin/udevadm \
-    /sbin/{lsmod,rmmod,modprobe} \
+    /sbin/{lsmod,rmmod,insmod,modprobe} \
+    /bin/{lsmod,rmmod,kmod} \
     /lib/libc.so.6 \
     /lib/libc-*.so \
     /lib/ld-linux.so.3 \
