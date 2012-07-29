@@ -216,7 +216,7 @@ mountroot() {
 
     if [ ! -z "$ROOT" ]; then
         i=0
-        while [ "$i" -lt 10 ]; do
+        while [ "$i" -lt 1 ]; do
             if [ -b "$ROOT" ] ; then
                 rootfstype=$(get_fstype $ROOT)
                 mount -t $rootfstype $ROOT $mountpoint
