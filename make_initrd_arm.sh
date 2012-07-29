@@ -48,6 +48,19 @@ kernelversion=$(basename $(ls $moddir/lib/modules/|grep '\-ct'))
 cp -a $moddir/lib/modules/*-ct $tmpdir/lib/modules
 depmod  -b $tmpdir -a $kernelversion
 
+echo "making modules list"
+mkdir $tmpdir/conf
+cat >> $tmpdir/conf/modules <<EOconfmodules
+sg
+sd_mod
+sr_mod
+squashfs
+loop
+usbhid
+hid
+usb_storage
+EOconfmodules
+
 echo "copying fastboot and fastboot_init"
 cp $here/fastboot $tmpdir/
 cp $here/fastboot_init $tmpdir/init
