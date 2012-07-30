@@ -67,6 +67,11 @@ hid
 usb_storage
 vfat
 romfs
+sdio_uart
+sdhci
+ushc
+mmci
+mmc_block
 EOconfmodules
 
 echo "copying fastboot and fastboot_init"
