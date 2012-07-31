@@ -20,11 +20,28 @@ echo "unsquashfs busybox stuff to $tmpdir"
 unsquashfs -i -f -d $tmpdir $squashfile \
     /usr/lib/klibc/bin \
     /bin/busybox \
+    /bin/mount \
     /sbin/blkid \
     /sbin/udevd \
     /sbin/udevadm \
+    /sbin/mkfs.ext{2,3,4} \
+    /sbin/mkfs.vfat \
+    /sbin/mkdosfs \
+    /sbin/fsck.vfat \
+    /sbin/dosfsck \
+    /sbin/fdisk \
     /sbin/{lsmod,rmmod,insmod,modprobe} \
     /bin/{lsmod,rmmod,kmod} \
+    /lib/libselinux.so.1 \
+    /lib/libsepol.so.1 \
+    /lib/libext2fs.so.2 \
+    /lib/libext2fs.so.2.4 \
+    /lib/libcom_err.so.2 \
+    /lib/libcom_err.so.2.1 \
+    /lib/libpthread.so.0 \
+    /lib/libpthread-2.11.3.so \
+    /lib/libe2p.so.2 \
+    /lib/libe2p.so.2.3 \
     /lib/libc.so.6 \
     /lib/libc-*.so \
     /lib/ld-linux.so.3 \
@@ -66,6 +83,8 @@ usbhid
 hid
 usb_storage
 vfat
+ext2
+ext3
 romfs
 sdio_uart
 sdhci
@@ -82,10 +101,10 @@ echo "making the cpio"
 targetinitrd=$tmpscratchdir/initrd-$kernelversion.cpio.gz
 (
     cd $tmpdir
-    dd if=/dev/zero of=./empty_ext2_fs bs=1M count=32
-    mkfs.ext2 -O dir_index -F -F -L cow ./empty_ext2_fs
-    tune2fs -c -1 -i -1 ./empty_ext2_fs
-    gzip -9 ./empty_ext2_fs
+    #dd if=/dev/zero of=./empty_ext2_fs bs=1M count=32
+    #mkfs.ext2 -O dir_index -F -F -L cow ./empty_ext2_fs
+    #tune2fs -c -1 -i -1 ./empty_ext2_fs
+    #gzip -9 ./empty_ext2_fs
     find . |cpio -ov -H newc|gzip -c -9 > $targetinitrd
 )
 
