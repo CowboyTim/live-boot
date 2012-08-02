@@ -130,9 +130,9 @@ setup_unionfs() {
 
     mkdir -p /cow
     cowdevice="tmpfs"
-    cow_mountopt="rw,noatime,mode=755,exec"
+    cow_mountopt="rw,noatime,nodiratime,mode=755,exec"
 
-    cow_fstype=''
+    cow_fstype="-t tmpfs"
     if [ ! -z $root_persistent ]; then
         if [ $root_persistence_type = 'loop' ]; then
             if [ -z $homecow ]; then
@@ -145,6 +145,7 @@ setup_unionfs() {
                     gunzip -c /empty_ext2_fs.gz > $lo_file
                 fi
                 cowdevice=$(setup_loop $lo_file)
+                cow_fstype=""
                 cow_mountopt="rw,noatime,nodiratime,exec"
             fi
         else 
@@ -152,17 +153,16 @@ setup_unionfs() {
             cc="/dev/disk/by-label/$root_persistence_entity"
             if [ -b "$cc" ]; then
                 cowdevice="${cc}"
+                cow_fstype=""
                 cow_mountopt="rw,noatime,nodiratime,exec"
             else
                 echo "Unable to find the cow persistent medium $root_persistence_entity"
             fi
         fi
-    else
-        cow_fstype=" -t tmpfs"
     fi
 
-    echo "Mounting a cow fs to /cow"
-    mount $cow_fstype -o ${cow_mountopt} ${cowdevice} /cow \
+    echo "Mounting a cow fs ${cow_fstype} -o ${cow_mountopt} ${cowdevice} to /cow"
+    mount ${cow_fstype} -o ${cow_mountopt} ${cowdevice} /cow \
         || panic "Can not mount $cowdevice on /cow"
 
     echo "Mounting the aufs on $rootmnt"
