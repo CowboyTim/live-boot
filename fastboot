@@ -11,22 +11,6 @@ root_persistence_entity=".root_cow_loop.ext2"
 root_persistence_type="loop"
 home_persistence_entity="home-rw"
 
-if [ ! -x "/bin/fstype" ]; then
-    # klibc not in path -> not in initramfs
-    export PATH="${PATH}:/usr/lib/klibc/bin"
-fi
-
-get_fstype() {
-    local FSTYPE
-    local FSSIZE
-    eval $(fstype < $1)
-    if [ "$FSTYPE" != "unknown" ]; then
-        echo $FSTYPE
-        return 0
-    fi
-    /lib/udev/vol_id -t $1 2>/dev/null
-}
-
 parse_cmdline() {
     for x in $(cat /proc/cmdline); do
         case $x in
@@ -112,7 +96,7 @@ setup_unionfs() {
             if [ -b "$homecow" ]; then
                 echo "$home_persistence_entity is a block device, proceeding"
                 mkdir -p $homemount
-                mount -t $(get_fstype "$homecow") -o rw,noatime,nodiratime "$homecow" $homemount
+                mount -o rw,noatime,nodiratime "$homecow" $homemount
                 break
             fi
             sleep 1
@@ -135,13 +119,9 @@ setup_unionfs() {
 
     mkdir -p "${croot}"
     backdev=$(setup_loop "$image")
-    fstype=$(get_fstype "${backdev}")
-    if [ "${fstype}" = "unknown" ]; then
-        panic "Unknown file system type on ${backdev} (${image})"
-    fi
     mkdir -p "${croot}/rofs_mount"
     echo "Mounting rofs $image to $croot/rofs_mount"
-    mount -t "${fstype}" -o ro,noatime "${backdev}" \
+    mount -o ro,noatime "${backdev}" \
         "${croot}/rofs_mount" \
         || panic "Can not mount $backdev ($image) on ${croot}/rofs_mount"
     rofsstring="${croot}/rofs_mount=rr:${rofsstring}"
@@ -150,9 +130,9 @@ setup_unionfs() {
 
     mkdir -p /cow
     cowdevice="tmpfs"
-    cow_fstype="tmpfs"
     cow_mountopt="rw,noatime,mode=755,exec"
 
+    cow_fstype=''
     if [ ! -z $root_persistent ]; then
         if [ $root_persistence_type = 'loop' ]; then
             if [ -z $homecow ]; then
@@ -165,7 +145,6 @@ setup_unionfs() {
                     gunzip -c /empty_ext2_fs.gz > $lo_file
                 fi
                 cowdevice=$(setup_loop $lo_file)
-                cow_fstype=$(get_fstype $cowdevice)
                 cow_mountopt="rw,noatime,nodiratime,exec"
             fi
         else 
@@ -173,16 +152,17 @@ setup_unionfs() {
             cc="/dev/disk/by-label/$root_persistence_entity"
             if [ -b "$cc" ]; then
                 cowdevice="${cc}"
-                cow_fstype=$(get_fstype "$cowdevice")
                 cow_mountopt="rw,noatime,nodiratime,exec"
             else
                 echo "Unable to find the cow persistent medium $root_persistence_entity"
             fi
         fi
+    else
+        cow_fstype=" -t tmpfs"
     fi
 
-    echo "Mounting a cow fs $cow_fstype to /cow"
-    mount -t ${cow_fstype} -o ${cow_mountopt} ${cowdevice} /cow \
+    echo "Mounting a cow fs to /cow"
+    mount $cow_fstype -o ${cow_mountopt} ${cowdevice} /cow \
         || panic "Can not mount $cowdevice on /cow"
 
     echo "Mounting the aufs on $rootmnt"
@@ -216,16 +196,19 @@ mountroot() {
 
     if [ ! -z "$ROOT" ]; then
         i=0
+        echo "udevadm trigger+settle called for $ROOT"
+        udevadm trigger
+        udevadm settle
         while [ "$i" -lt 1 ]; do
             if [ -b "$ROOT" ] ; then
-                rootfstype=$(get_fstype $ROOT)
-                mount -t $rootfstype $ROOT $mountpoint
+                echo "Mounting $ROOT on $mountpoint"
+                mount $ROOT $mountpoint
                 livefs_root=$mountpoint
                 break
             else
                 homecow="/dev/disk/by-label/$home_persistence_entity"
                 if [ -b "$homecow" ] ; then
-                    mount -t $(get_fstype "$homecow") -o ro,noatime,nodiratime "$homecow" $mountpoint
+                    mount -o ro,noatime,nodiratime "$homecow" $mountpoint
                     livefs_root=$mountpoint
                     break   
                 fi
