@@ -32,6 +32,7 @@ unsquashfs -i -f -d $tmpdir $squashfile \
     /sbin/fdisk \
     /sbin/{lsmod,rmmod,insmod,modprobe} \
     /bin/{lsmod,rmmod,kmod} \
+    /lib/klibc-*.so \
     /lib/libselinux.so.1 \
     /lib/libsepol.so.1 \
     /lib/libext2fs.so.2 \
@@ -62,12 +63,13 @@ unsquashfs -i -f -d $tmpdir $squashfile \
 echo "taking the kernel modules from $moddir"
 mkdir -p $tmpdir/lib/modules/
 kernelversion=$(basename $(ls $moddir/lib/modules/|grep '\-ct'))
-cp -a $moddir/lib/modules/*-ct $tmpdir/lib/modules
+cp -a $moddir/lib/modules/*-ct* $tmpdir/lib/modules
 depmod  -b $tmpdir -a $kernelversion
 
 echo "making modules list"
 mkdir $tmpdir/conf
 cat >> $tmpdir/conf/modules <<EOconfmodules
+aufs
 xhci-hcd
 ehci-hcd
 uhci-hcd
