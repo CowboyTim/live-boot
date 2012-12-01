@@ -8,3 +8,4 @@ defmonitor on
 defscrollback 1000
 altscreen on
 vbell off
+termcapinfo xterm* ti@:te@
