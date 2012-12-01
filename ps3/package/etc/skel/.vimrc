@@ -5,7 +5,7 @@ set tabstop=4
 set guioptions-=m
 set guioptions-=T
 set guioptions-=L
-set guifont=monospace\ 8
+set guifont=terminus\ 8
 set hidden
 set incsearch
 set hlsearch
@@ -13,7 +13,8 @@ set laststatus=2
 set ruler
 set smarttab
 set sw=4
-set tw=79
+set tw=72
+set mouse=a             " hold shift to copy xterm
 set ttymouse=xterm2
 syntax on
  
@@ -27,3 +28,4 @@ nmap <S-Insert> <MiddleMouse>
 
 set nofsync
 set swapsync=
+
