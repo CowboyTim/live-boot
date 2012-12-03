@@ -1,6 +1,11 @@
 1. install needed packages
 --------------------------
 
+    $ sudo echo "deb http://www.emdebian.org/debian/ squeeze main" \
+        >> /etc/apt/sources.list.d/emdebian.list
+    $ sudo apt-get update
+    $ sudo apt-get install emdebian-archive-keyring
+    $ sudo apt-get update
     $ sudo apt-get install fakeroot fakechroot qemu binfmt-support qemu-user \
         qemu-user-static xz-utils squashfs-tools \
         binutils-arm-linux-gnueabi \
