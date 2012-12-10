@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # apt-get install fakeroot fakechroot qemu binfmt-support qemu-user \
-#    qemu-user-static xz-utils squashfs-tools
+#    qemu-user-static xz-utils squashfs-tools debootstrap
 
 timezone_area="Europe"
 timezone_city="Brussels"
@@ -25,7 +25,7 @@ export LANG=C
 
 renice -n +20 -p $$
 
-qemu-debootstrap --arch=$arch --foreign squeeze --no-check-gpg $tmpdir $debootstrapurl/debian
+qemu-debootstrap --arch=$arch squeeze --no-check-gpg $tmpdir $debootstrapurl/debian
 
 cp $srcloc/install_packages.sh $tmpdir/
 mkdir -p $tmpdir/media/cdrom
