@@ -238,3 +238,6 @@ mountroot() {
 
     echo "FASTBOOT's mountroot done"
 }
+
+# actually execute
+mountroot

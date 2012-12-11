@@ -139,7 +139,6 @@ udevdpid=$!
 
 # mount the root
 . /fastboot
-mountroot
 
 # Stop udevd, we'll miss a few events while we run init, but we catch up
 kill $udevdpid
