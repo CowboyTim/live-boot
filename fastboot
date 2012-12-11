@@ -18,7 +18,7 @@ parse_cmdline() {
             rootpersistent)
                 export root_persistent="Yes";;
             rootpersistenttype=*)
-                export root_persistent_type="${x#rootpersistenttype=}";;
+                export root_persistence_type="${x#rootpersistenttype=}";;
             rootpersistententity=*)
                 export root_persistence_entity="${x#rootpersistententity=}";;
             homepersistent)
