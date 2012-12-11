@@ -111,27 +111,17 @@ setup_unionfs() {
     # of these away before it runs anyway.  No, we're not, put them in / since
     # move-mounting them into / breaks mono and some other apps.
 
-    croot="/"
-
-    # Let's just mount the read-only file systems first
-    rofsstring=""
-    rofslist=""
-
-    mkdir -p "${croot}"
+    # Let's just mount the base (source) file systems first: loop device,
+    # usually read-only, however, it's possible it's not.
+    ro_mount="/rofs_mount"
     backdev=$(setup_loop "$image")
-    mkdir -p "${croot}/rofs_mount"
-    echo "Mounting rofs $image to $croot/rofs_mount"
-    mount -o ro,noatime "${backdev}" \
-        "${croot}/rofs_mount" \
-        || panic "Can not mount $backdev ($image) on ${croot}/rofs_mount"
-    rofsstring="${croot}/rofs_mount=rr:${rofsstring}"
-    rofslist="${croot}/rofs_mount ${rofslist}"
-    rofsstring=${rofsstring%:}
+    echo "Mounting rofs $image to ${ro_mount}"
+    mkdir -p "$ro_mount"
+    mount -o ro,noatime "${backdev}" "${ro_mount}" \
+        || panic "Can not mount $backdev ($image) on ${ro_mount}"
 
-    mkdir -p /cow
     cowdevice="tmpfs"
     cow_mountopt="rw,noatime,nodiratime,mode=755,exec"
-
     cow_fstype="-t tmpfs"
     if [ ! -z $root_persistent ]; then
         if [ $root_persistence_type = 'loop' ]; then
@@ -162,11 +152,12 @@ setup_unionfs() {
     fi
 
     echo "Mounting a cow fs ${cow_fstype} -o ${cow_mountopt} ${cowdevice} to /cow"
+    mkdir -p /cow
     mount ${cow_fstype} -o ${cow_mountopt} ${cowdevice} /cow \
         || panic "Can not mount $cowdevice on /cow"
 
     echo "Mounting the aufs on $rootmnt"
-    mount -t aufs -o exec,noatime,nodiratime,dirs=/cow=rw:$rofsstring aufs $rootmnt \
+    mount -t aufs -o exec,noatime,nodiratime,dirs=/cow=rw:${ro_mount}=rr aufs $rootmnt \
         || panic "aufs mount failed"
 
     if [ ! -z $homecow ]; then
@@ -175,7 +166,7 @@ setup_unionfs() {
     fi
 
     # show all the rofs
-    for d in $rofslist; do
+    for d in $ro_mount; do
         mkdir -p "$rootmnt/mnt/${d##*/}"
         mount -o move $d "${rootmnt}/mnt/${d##*/}"
     done
