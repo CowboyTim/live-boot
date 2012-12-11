@@ -126,7 +126,9 @@ load_modules()
 load_modules
 
 # Start the udev daemon to process events
-/sbin/udevd --resolve-names=never &
+udevd=/sbin/udevd
+[ -x $udevd ] || udevd=/usr/bin/udevd
+$udevd --resolve-names=never &
 udevdpid=$!
 
 # Iterate sysfs and fire off everything; if we include a rule for it then
