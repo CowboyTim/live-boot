@@ -62,8 +62,8 @@ unsquashfs -i -f -d $tmpdir $squashfile \
 
 echo "taking the kernel modules from $moddir"
 mkdir -p $tmpdir/lib/modules/
-kernelversion=$(basename $(ls $moddir/lib/modules/|grep '\-ct'))
-cp -a $moddir/lib/modules/*-ct* $tmpdir/lib/modules
+kernelversion=$(basename $(ls $moddir/lib/modules/))
+cp -a $moddir/lib/modules/* $tmpdir/lib/modules
 depmod  -b $tmpdir -a $kernelversion
 
 echo "making modules list"
