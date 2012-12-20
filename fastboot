@@ -174,11 +174,13 @@ setup_unionfs() {
         mkdir -p $rootmnt/mnt/cow
         mount -o move /cow $rootmnt/mnt/cow
 
-        mkdir -p $rootmnt/mnt/$(basename $livefs_root)
-        mount -o move $livefs_root $rootmnt/mnt/$(basename $livefs_root)
     else
         mount -o move $ro_mount $rootmnt
     fi
+    mkdir -p $rootmnt/mnt/$(basename $livefs_root)
+    mount -o move $livefs_root $rootmnt/mnt/$(basename $livefs_root)
+    mkdir -p $rootmnt/mnt/$mountpoint
+    mount -o move $mountpoint $rootmnt/mnt/$mountpoint
 
     if [ ! -z $homecow ]; then
         mkdir -p $rootmnt/home
@@ -228,8 +230,8 @@ mountroot() {
         . $mountpoint/etc/fastboot.conf
     fi
 
-    if [ ! -z "$home_persistent" -o ! -z "$root_persistent" ]; then
-        echo "Making new root with aufs in $rootmnt"
+    if [ ! -z "$home_persistent" -o ! -z "$root_persistent" -o "$loop_mount_rw" == 'rw' ]; then
+        echo "Start mounting new root in $rootmnt"
         setup_unionfs "$livefs_root" "$rootmnt"
     else
         mount -o move $livefs_root $rootmnt
