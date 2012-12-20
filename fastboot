@@ -10,7 +10,7 @@ mkdir -p $mountpoint
 root_persistence_entity=".root_cow_loop.ext2"
 root_persistence_type="loop"
 home_persistence_entity="home-rw"
-loop_mount_rw="rw"
+loop_mount_rw="rw,nodiratime"
 
 parse_cmdline() {
     for x in $(cat /proc/cmdline); do
