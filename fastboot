@@ -230,7 +230,7 @@ mountroot() {
         . $mountpoint/etc/fastboot.conf
     fi
 
-    if [ ! -z "$home_persistent" -o ! -z "$root_persistent" -o "$loop_mount_rw" == 'rw' ]; then
+    if [ ! -z "$home_persistent" -o ! -z "$root_persistent" -o "$loop_mount_rw" == 'rw,nodiratime' ]; then
         echo "Start mounting new root in $rootmnt"
         setup_unionfs "$livefs_root" "$rootmnt"
     else
