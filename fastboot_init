@@ -63,7 +63,7 @@ export rootmnt=/root
 [ -d $rootmnt ] || mkdir -m 0700 $rootmnt
 
 # Export relevant variables
-export init=/bin/bash
+export init=/sbin/init
 
 # Parse command line options
 for x in $(cat /proc/cmdline); do
@@ -158,18 +158,12 @@ udevdpid=$!
 # Stop udevd, we'll miss a few events while we run init, but we catch up
 kill $udevdpid
 
-[ -d $rootmnt/dev  ] || mkdir $rootmnt/dev
-[ -d $rootmnt/sys  ] || mkdir $rootmnt/sys
-[ -d $rootmnt/proc ] || mkdir $rootmnt/proc
-[ -d $rootmnt/tmp  ] || mkdir $rootmnt/tmp
-[ -d $rootmnt/run  ] || mkdir $rootmnt/run
-
-# init
 [ ! -z $console ] && panic "console requested"
 
 # move all mounts to $rootmnt, no need to do /sys, /proc, /dev*. That's done by
 # switch_root itself
 for m in tmp run; do
+    [ -d $rootmnt/$m  ] || mkdir $rootmnt/$m
     mount -n -o move /$m  ${rootmnt}/$m
 done
 
