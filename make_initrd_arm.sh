@@ -29,7 +29,9 @@ unsquashfs -i -f -d $tmpdir $squashfile \
     /sbin/mkdosfs \
     /sbin/fsck.vfat \
     /sbin/dosfsck \
+    /sbin/switch_root \
     /sbin/fdisk \
+    /usr/sbin/chroot \
     /sbin/{lsmod,rmmod,insmod,modprobe} \
     /bin/{lsmod,rmmod,kmod} \
     /lib/klibc-*.so \
