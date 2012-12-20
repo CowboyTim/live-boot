@@ -10,7 +10,7 @@ mkdir -p $mountpoint
 root_persistence_entity=".root_cow_loop.ext2"
 root_persistence_type="loop"
 home_persistence_entity="home-rw"
-loop_mount_rw="rw,nodiratime"
+loop_mount_rw="rw"
 
 parse_cmdline() {
     for x in $(cat /proc/cmdline); do
@@ -230,7 +230,7 @@ mountroot() {
         . $mountpoint/etc/fastboot.conf
     fi
 
-    if [ ! -z "$home_persistent" -o ! -z "$root_persistent" -o "$loop_mount_rw" == 'rw,nodiratime' ]; then
+    if [ ! -z "$home_persistent" -o ! -z "$root_persistent" -o "$loop_mount_rw" == 'rw' ]; then
         echo "Start mounting new root in $rootmnt"
         setup_unionfs "$livefs_root" "$rootmnt"
     else
