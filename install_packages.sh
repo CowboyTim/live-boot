@@ -55,5 +55,6 @@ EOc
 
 aptitude -y --allow-untrusted install desktop
 aptitude -y --allow-untrusted install busybox libklibc klibc-utils
+aptitude -y --allow-untrusted install wireless-tools wpasupplicant bluez
 apt-get clean
 apt-get autoclean
