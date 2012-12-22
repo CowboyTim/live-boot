@@ -237,6 +237,11 @@ mountroot() {
         mount -o move $livefs_root $rootmnt
     fi
 
+    extra_src=$rootmnt/mnt/$mountpoint
+    if [ -d $extra_src/etc/wifi ]; then
+        cp -r $extra_src/etc/wifi "$rootmnt/etc/"
+    fi
+
     echo "FASTBOOT's mountroot done"
 }
 
