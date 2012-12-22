@@ -71,7 +71,7 @@ depmod  -b $tmpdir -a $kernelversion
 echo "making modules list"
 mkdir $tmpdir/conf
 cat >> $tmpdir/conf/modules <<EOconfmodules
-dhd
+dhd firmware_path=/etc/wifi/bcm4330_apsta.bin nvram_path=/etc/wifi/nvram_net.txt
 Si4709_driver
 scsi_wait_scan
 EOconfmodules
