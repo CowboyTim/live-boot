@@ -13,8 +13,10 @@ EOh
 chmod +x /usr/sbin/policy-rc.d
 cat >> /etc/apt/sources.list.d/extra.list <<Eol
 deb $baseurl/debian squeeze main contrib non-free
-#deb http://security.debian.org/ squeeze/updates main contrib non-free
-#deb-src http://security.debian.org/ squeeze/updates main contrib non-free
+deb http://ftp.debian.org/debian squeeze main contrib non-free
+deb http://security.debian.org/ squeeze/updates main contrib non-free
+deb-src http://security.debian.org/ squeeze/updates main contrib non-free
+deb http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
 Eol
 cat > /etc/apt/sources.list <<Eoe
 Eoe
