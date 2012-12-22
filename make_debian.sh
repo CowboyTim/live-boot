@@ -8,6 +8,7 @@ timezone_city="Brussels"
 username="tim"
 password="xxx"
 wireless_essid=""
+wireless_psk=""
 hostname="wihiie"
 compresswith="xz"
 what="ps3"
@@ -61,6 +62,21 @@ iface lo inet loopback
 auto eth0
 iface eth0 inet dhcp
     metric 50
+
+auto wlan0
+iface wlan0 inet dhcp
+wpa-driver wext
+wpa-ssid $wireless_essid
+wpa-psk $wireless_psk
+# if your SSID is hidden, change value to 2
+wpa-ap-scan 2
+# type WPA for WPA1, RSN for WPA2
+wpa-proto WPA
+# type CCMP for AES, TKIP for TKIP
+wpa-pairwise CCMP
+wpa-group CCMP
+# type WPA-PSK for shared key (most common), WPA-EAP for enterprise radius server
+wpa-key-mgmt WPA-PSK
 EOnetwork
 
 cat >> $tmpdir/etc/hosts <<EOhosts
