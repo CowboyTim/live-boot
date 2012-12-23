@@ -38,7 +38,7 @@ rm $tmpdir/install_packages.sh
 cp -a $srcloc/$what/package/etc/{skel,sysctl.d,init.d,X11,udev,kboot.*} $tmpdir/etc/
 chroot $tmpdir /bin/bash <<EOpost
 userdel tim
-useradd tim -g users -s /bin/bash -m -u 1000 -G audio,fuse,adm,cdrom,sudo,bluetooth -f -1
+useradd tim -g users -s /bin/bash -m -u 1000 -G video,audio,fuse,adm,cdrom,sudo,bluetooth -f -1
 passwd -e tim <<Eop
 $password
 $password
