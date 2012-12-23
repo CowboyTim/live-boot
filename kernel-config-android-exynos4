@@ -666,7 +666,7 @@ CONFIG_ALIGNMENT_TRAP=y
 # CONFIG_USE_OF is not set
 CONFIG_ZBOOT_ROM_TEXT=0
 CONFIG_ZBOOT_ROM_BSS=0
-CONFIG_CMDLINE="noquiet verbose nogui  fbcon=font:VGA8x8 rfsfile=my.img root=LABEL=mysdcard init=/bin/bash console"
+CONFIG_CMDLINE="noquiet verbose nogui  fbcon=font:VGA8x8 rfsfile=my.img root=LABEL=mysdcard init=/sbin/init"
 # CONFIG_CMDLINE_FROM_BOOTLOADER is not set
 # CONFIG_CMDLINE_EXTEND is not set
 CONFIG_CMDLINE_FORCE=y
