@@ -162,9 +162,11 @@ kill $udevdpid
 
 # move all mounts to $rootmnt, no need to do /sys, /proc, /dev*. That's done by
 # switch_root itself
-for m in tmp run; do
-    [ -d $rootmnt/$m  ] || mkdir $rootmnt/$m
-    mount -n -o move /$m  ${rootmnt}/$m
+for m in tmp run cgroup; do
+    if [ -d /$m ]; then
+        [ -d $rootmnt/$m  ] || mkdir $rootmnt/$m
+        mount -n -o move /$m  ${rootmnt}/$m
+    fi
 done
 
 echo "Really running: exec run-init ${rootmnt} ${init} $@"
