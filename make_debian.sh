@@ -65,23 +65,26 @@ iface eth0 inet dhcp
 
 auto wlan0
 iface wlan0 inet dhcp
-wpa-driver wext
 wpa-ssid $wireless_essid
 wpa-psk $wireless_psk
-# if your SSID is hidden, change value to 2
-wpa-ap-scan 2
-# type WPA for WPA1, RSN for WPA2
-wpa-proto WPA
-# type CCMP for AES, TKIP for TKIP
-wpa-pairwise CCMP
-wpa-group CCMP
-# type WPA-PSK for shared key (most common), WPA-EAP for enterprise radius server
+wpa-ap-scan 1
+wpa-scan-ssid 1
 wpa-key-mgmt WPA-PSK
+wpa-pairwise TKIP CCMP
+wpa-group TKIP
+wpa-proto RSN
 EOnetwork
+
+wpa_passphrase "$wireless_essid" "$wireless_psk" >> $tmpdir/etc/wpa_supplicant.conf
 
 cat >> $tmpdir/etc/hosts <<EOhosts
 127.0.1.1     $hostname
 EOhosts
+
+cat >> $tmpdir/etc/inittab <<EOinittab
+# sgs2
+T0:1235:respawn:/sbin/getty -L ttyGS0 115200 vt100
+EOinittab
 
 cat > $tmpdir/etc/hostname <<EOhosts
 $hostname
