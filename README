@@ -9,7 +9,8 @@
     $ sudo apt-get install fakeroot fakechroot qemu binfmt-support qemu-user \
         qemu-user-static xz-utils squashfs-tools \
         binutils-arm-linux-gnueabi \
-        gcc-4.4-arm-linux-gnueabi 
+        gcc-4.4-arm-linux-gnueabi \
+        make
 
 2. make a kernel
 ----------------
