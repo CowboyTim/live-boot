@@ -1,9 +1,0 @@
-Package: playfreevoplay
-Essential: no
-Priority: required
-Section: base
-Maintainer: Tim Aerts <aardbeiplantje@gmail.com>
-Architecture: amd64
-Version: 1.0
-Depends: x11-xserver-utils, freevo, udev, python, openmsx, python-gobject, python-dbus, dbus, mplayer, bluez
-Description: Tim's Freevo config
