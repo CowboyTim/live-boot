@@ -10,11 +10,22 @@
         qemu-user-static xz-utils squashfs-tools \
         binutils-arm-linux-gnueabi \
         gcc-4.4-arm-linux-gnueabi \
-        make
+        make heimdall
 
-2. make a kernel
-----------------
-    
+3. make the squashfs root image
+---------------------------------
+
+This needs to be done as root sadly enough. This will also take a while. The
+result will be a squashfs 4 file that is XZ compressed and will represent the
+root filesystem.
+
+    $ sudo bash make_debian.sh /tmp/squeeze.squashfs.xz
+
+2. make a kernel/initrd
+-----------------------
+
+For qemu:
+   
     $ wget http://www.kernel.org/pub/linux/kernel/v3.0/linux-3.5.tar.bz2 -O - \
         |tar xvjf -
     $ cd linux-3.5
@@ -23,22 +34,28 @@
     $ ARCH=arm
     $ make -j10 all
     $ make INSTALL_MOD_PATH=/tmp/abc -j10 modules_install
+    $ bash <live-boot>/make_initrd_arm.sh /tmp/squeeze.squashfs.xz /tmp/abc
 
-3. make the squashfs/initrd image
----------------------------------
+For SGS2, you need to download the correct kernel from samsung's opensource
+website and extract it.
 
-    $ sudo bash make_debian.sh /tmp/squeeze.squashfs.xz
-    $ make_initrd_arm.sh /var/tmp/squeeze.squashfs.xz /tmp/abc
-    $ cp -a /tmp/squeeze.squashfs.xz /var/tmp/
-    
+    # mkdir ~/somedir && cd ~/somedir
+    # unzip ~/GT-I9100_ICS_Opensource_Update8.zip
+    # tar xvzf Kernel.tar.gz
+    # cp <live-boot>/kernel-condig-android-exynos4 .config
+    # bash <live-boot>build_android_kernel.sh ~/somedir /tmp/squeeze.squashfs.xz
 
 4. run a test
 -------------
+
+When using qemu to test e.g. the versatile kernel config, use the following to
+run a test:
+
     $ dd if=/dev/zero of=/var/tmp/usb.img bs=1M count=1024
     $ mkfs.vfat /var/tmp/usb.img
     $ mkdir -p /tmp/fake_usb
     $ sudo mount -o loop,rw,umask=0000 /var/tmp/usb.img /tmp/fake_usb
-    $ cp /var/tmp/squeeze.squashfs.xz /tmp/fake_usb/
+    $ cp /tmp/squeeze.squashfs.xz /tmp/fake_usb/
     $ qemu-system-arm -kernel ~/linux-3.5/arch/arm/boot/zImage  \
         -m 512 -M versatilepb \
         -append "boot=fastboot \
@@ -50,3 +67,29 @@
         -device usb-ehci,id=ehci \
         -device usb-storage,bus=ehci.0,drive=my_usb_disk \
         -drive id=my_usb_disk,if=none,format=raw,file=/var/tmp/usb.img
+
+5. testing the real one on SGS2
+-------------------------------
+
+While the qemu kernel serves debugging the OS and the initrd, it's more fun to
+run it on a real device - a samsung galaxy S2 in this case.
+
+    a. make the squashfs writeable by making a copy
+        $ dd if=/dev/zero of=/tmp/somebigfile bs=1M count=4000
+        # mkdir -p /tmp/mnTO /tmp/mnFROM
+        # mount -o loop /tmp/somebigfile /tmp/mnTO
+        # mount -o loop /tmp/squeeze.squashfs.xz /tmp/mnFROM
+        # cp -a /tmp/mnFROM/* /tmp/mnTO/
+        # umount /tmp/mnTO
+        # umount /tmp/mnFROM
+    b. copy that file to an SD card and insert it in SGS2
+        - make sure the SD card is labelled 'mysdcard'
+        - make sure the file on it is called 'my.img'
+    c. flash the kernel to the sgs2
+        - turn on USB Debugging
+        - reboot
+        - press 'down' + 'power' + 'home' to get the bootloader menu
+        - press 'up' when in the bootloader menu
+        - attach usb cable
+        - flash:
+            $ heimdall flash --kernel ~/somedir/arch/arm/boot/zImage
