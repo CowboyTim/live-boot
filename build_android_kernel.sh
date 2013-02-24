@@ -14,6 +14,11 @@ if [ -z "$root_fs_file" ]; then
     root_fs_file=~/data/squeeze.1355172793.squashfs.xz
 fi
 
+if [ ! -e "$root_fs_file" -o ! -d $kernel_src_location ]; then
+    echo "usage: $0 [<kernel src>] [<root_fs_file>]"
+    exit 1
+fi
+
 export CROSS_COMPILE=/usr/bin/arm-linux-gnueabi-
 make_args="ARCH=arm INSTALL_MOD_PATH=$tmpdir -j10 "
 here=$(readlink -f -- "${0%/*}")
