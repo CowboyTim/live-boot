@@ -19,8 +19,9 @@ debootstrapurl="file:///media/cdrom"
 tmp=/var/tmp
 datestr=`date +%s`
 tmpdir=$tmp/squeeze.$datestr
-srcloc=$(readlink -f -- "${0%/*}") 
+srcloc=$(dirname $(readlink -f "${0%/*}"))
 
+echo "Using $srcloc"
 echo "Using $tmpdir"
 export LANG=C
 
