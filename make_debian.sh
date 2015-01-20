@@ -12,13 +12,14 @@ wireless_psk=""
 hostname="wihiie"
 compresswith="xz"
 what="common"
-arch="armel"
+arch="armhf"
 baseurl="http://ftp.be.debian.org/"
+debiandistro="wheezy"
 debootstrapurl="file:///media/cdrom"
 
 tmp=/var/tmp
 datestr=`date +%s`
-tmpdir=$tmp/squeeze.$datestr
+tmpdir=$tmp/osimage.$datestr
 srcloc=$(dirname $(readlink -f "${0%/*}"))
 
 echo "Using $srcloc"
@@ -27,7 +28,7 @@ export LANG=C
 
 renice -n +20 -p $$
 
-qemu-debootstrap --arch=$arch squeeze --no-check-gpg $tmpdir $debootstrapurl/debian
+qemu-debootstrap --arch=$arch $debiandistro --no-check-gpg $tmpdir $debootstrapurl/debian
 
 cp $srcloc/install_packages.sh $tmpdir/
 mkdir -p $tmpdir/media/cdrom
