@@ -43,7 +43,7 @@ website and extract it.
     # unzip ~/GT-I9100_ICS_Opensource_Update8.zip
     # tar xvzf Kernel.tar.gz
     # cp <live-boot>/kernel-condig-android-exynos4 .config
-    # bash <live-boot>build_android_kernel.sh ~/somedir /tmp/squeeze.squashfs.xz
+    # bash <live-boot>/build_android_kernel.sh ~/somedir /tmp/squeeze.squashfs.xz
 
 4. run a test
 -------------
