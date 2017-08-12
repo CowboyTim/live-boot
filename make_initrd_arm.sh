@@ -8,6 +8,9 @@ if [ -d /mnt/rootfs/var/tmp ]; then
     tmpscratchdir=/mnt/rootfs/var/tmp
 fi
 here=$(readlink -f -- "${0%/*}") 
+if [ ! -d $here ]; then
+    here=./
+fi
 
 export PATH=$PATH:/usr/sbin/:/sbin/
 
