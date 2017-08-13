@@ -37,6 +37,7 @@ For qemu:
 
 The new linux kernel has all of these too:
 
+    $ git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git linux.git
     $ cd linux.git
     $ git checkout v4.12
     $ cp <live-boot>/kernel-config-4.12-android-exynos4 .config
@@ -104,3 +105,5 @@ run it on a real device - a samsung galaxy S2 in this case.
         - attach usb cable
         - flash:
             $ heimdall flash --kernel ~/somedir/arch/arm/boot/zImage
+          or
+            $ heimdall flash --kernel ~/linux.git/arch/arm/boot/zImage
