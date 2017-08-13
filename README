@@ -11,7 +11,8 @@
         binutils-arm-linux-gnueabi \
         gcc-7-arm-linux-gnueabi \
         gcc-arm-linux-gnueabi \
-        make heimdall-flash
+        make heimdall-flash \
+        android-tools-mkbootimg
     $ sudo mount debian-7.8.0-armhf-DVD-1.iso /media/cdrom
 
 3. make the squashfs root image
@@ -33,7 +34,7 @@ For qemu:
     $ cd linux-3.5
     $ cp <live-boot>/kernel-config-3.5-arm-versatile .config
     $ make -j10 all ARCH=arm CROSS_COMPILE=/usr/bin/arm-linux-gnueabi-
-    $ make INSTALL_MOD_PATH=/tmp/abc -j10 modules_install
+    $ make INSTALL_MOD_PATH=/tmp/abc ARCH=arm CROSS_COMPILE=/usr/bin/arm-linux-gnueabi- -j10 modules_install
 
 The new linux kernel has all of these too:
 
@@ -42,11 +43,15 @@ The new linux kernel has all of these too:
     $ git checkout v4.12
     $ cp <live-boot>/kernel-config-4.12-android-exynos4 .config
     $ make -j10 all ARCH=arm CROSS_COMPILE=/usr/bin/arm-linux-gnueabi-
-    $ make INSTALL_MOD_PATH=/tmp/abc -j10 modules_install
+    $ make INSTALL_MOD_PATH=/tmp/abc ARCH=arm CROSS_COMPILE=/usr/bin/arm-linux-gnueabi- -j10 modules_install
 
 After that, build the initrd:
 
     $ bash <live-boot>/make_initrd_arm.sh /tmp/squeeze.squashfs.xz /tmp/abc
+    $ mkbootimg \
+        --kernel ~/linux.git/arch/arm/boot/zImage \
+        --ramdisk /var/tmp/initrd-4.12.0-ct.cpio.gz \
+        --output /var/tmp/boot.img
 
 For SGS2, you need to download the correct kernel from samsung's opensource
 website and extract it.
