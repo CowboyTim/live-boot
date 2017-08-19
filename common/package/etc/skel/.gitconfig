@@ -17,3 +17,6 @@
     untracked = cyan
 [gc]
 	auto = 0
+[user]
+	name = CowboyTim
+	email = CowboyTim@users.noreply.github.com
