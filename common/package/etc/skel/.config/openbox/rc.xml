@@ -155,6 +155,30 @@
   </dock>
   <keyboard>
     <chainQuitKey>C-g</chainQuitKey>
+    <keybind key="W-Right">
+      <action name="Resize"/>
+    </keybind>
+    <keybind key="W-A-Right">
+      <action name="Move"/>
+    </keybind>
+    <keybind key="W-Up">
+      <action name="Resize"/>
+    </keybind>
+    <keybind key="W-A-Up">
+      <action name="Move"/>
+    </keybind>
+    <keybind key="W-Left">
+      <action name="Resize"/>
+    </keybind>
+    <keybind key="W-A-Left">
+      <action name="Move"/>
+    </keybind>
+    <keybind key="W-Down">
+      <action name="Resize"/>
+    </keybind>
+    <keybind key="W-A-Down">
+      <action name="Move"/>
+    </keybind>
     <!-- Keybindings for desktop switching -->
     <keybind key="W-l">
       <action name="ShowMenu">
@@ -311,8 +335,7 @@
     <keybind key="F8">
       <action name="Execute">
         <execute>bash -c "
-            #wmctrl -a pentadactyl
-            wmctrl -a vimperator
+            wmctrl -a firefox
             if [ $? == 1 ]; then
                 exec firefox
             fi"

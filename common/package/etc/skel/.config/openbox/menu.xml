@@ -12,16 +12,6 @@
   <item label="firefox">
     <action name="Execute"><execute>firefox</execute></action>
   </item>
-  <item label="emesene">
-    <action name="Execute"><execute>emesene</execute></action>
-  </item>
-  <!-- This requires the presence of the 'menu' package to work -->
-<!--
-  <menu id="Debian" />
-  <separator />
-  <menu id="client-list-menu" />
-  <separator />
--->
   <item label="openbox preferences">
     <action name="Execute"><execute>obconf</execute></action>
   </item>
