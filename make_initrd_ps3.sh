@@ -52,6 +52,7 @@ EOmodules
         -v -k \
         -d $tmpinitramfs \
         -o $tmptargetinitrd \
+        -c gzip \
         $kernelversion || exit 1
 
     mkdir -p $tmpdir/initrd.hacks
