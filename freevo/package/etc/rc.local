@@ -1,7 +1,0 @@
-python /etc/yaams.py -d
-LD_LIBRARY_PATH=/usr/lib/nvidia /usr/bin/nvidia-xconfig \
-    --use-display-device=DFP \
-    --probe-all-gpus \
-    --dynamic-twinview \
-    --force-generate
-exit 0
